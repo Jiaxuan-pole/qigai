@@ -17,6 +17,10 @@ export function streetPosition(actorId, district) {
   return { district, x: district === 'camp' ? { xuan: 800, fan: 1060, ma: 1320 }[actorId] ?? 800 : { xuan: 480, fan: 605, ma: 775 }[actorId] ?? 480, y: district === 'camp' ? 436 : 427, facing: 1 };
 }
 
+export function fishingPosition(actorId) {
+  return { district: 'river', x: { xuan: 480, fan: 650, ma: 820 }[actorId] ?? 480, y: 366, facing: 1 };
+}
+
 export function syncStreetPositions(positions, actors) {
   return Object.fromEntries(Object.entries(actors).map(([id, actor]) => [id, positions[id]?.district === actor.location ? positions[id] : streetPosition(id, actor.location)]));
 }

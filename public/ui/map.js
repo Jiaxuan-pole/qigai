@@ -3,7 +3,7 @@ import { px, sprite, skyline, moodOf } from './pixel.js';
 import { streetSprite } from './street-people.js';
 import { $, esc } from './core.js';
 import { settledActionPoses, actionPoseFor, itemPoseFor, actionFrame, walkFrame, easedProgress, sceneTick, changedTurn } from './animation.js';
-import { StreetJourney, neighbors, streetPosition, syncStreetPositions, walkStreetPosition } from './street.js';
+import { StreetJourney, neighbors, streetPosition, fishingPosition, syncStreetPositions, walkStreetPosition } from './street.js';
 import { drawStreet, streetPose, STREET_NAMES } from './street-art.js';
 import { CAMP_SPOTS, campSpotsFor, renderCampStreet } from './camp-art.js';
 import { sleepSurfaceFor, furnitureRect } from '../game/furniture.js';
@@ -271,11 +271,18 @@ function loop() {
       const next = walkStreetPosition(positionFor(), { x: M.streetDir, y: M.streetVertical }, elapsed * 0.24 * (M.streetSprint ? 1.9 : 1));
       const { edge, ...position } = next;
       M.streetPositions[M.selectedActor] = position;
+      if (M.actions[M.selectedActor] === 'fish') delete M.actions[M.selectedActor];
       delete M.actorPose[M.selectedActor]; delete M.itemAnimations[M.selectedActor];
       M.sleeping = M.sleeping.filter(id => id !== M.selectedActor);
       if (M.streetEdge !== next.edge) { M.streetEdge = next.edge; refreshStreetUI(); }
     }
     stepStreetTravel(now);
+    for (const [id, action] of Object.entries(M.actions)) {
+      if (action === 'fish' && streetState.actors[id]?.location === 'river' && streetState.actors[id]?.life === 'active' &&
+          !(id === M.selectedActor && (walking() || M.streetTravel || M.journey?.transitionName))) {
+        M.streetPositions[id] = fishingPosition(id);
+      }
+    }
     const overrides = streetOverrides(now, reduced);
     if (M.streetDistrict === 'camp') {
       if (M.hotspotLayoutWidth !== $('street')?.clientWidth) layoutCampHotspots($('streetOverlay'));
@@ -676,7 +683,7 @@ function updateStreetOverlay(state, shopsMeta, events) {
   const shopX = { convenience: 162, recycle_shop: 209, lottery_kiosk: 809, tavern: 483, pharmacy: 364, clinic: 600, bathhouse: 830, art_hardware: 829, coffee_shop: 576, furniture_store: 480 };
   const objects = (STREET_OBJECTS[district] || []).filter((object) => object.id !== 'bins' || ['market', 'station', 'recycle'].includes(district));
   const pointStyle = (x, y) => `left:${x / 960 * 100}%;top:${y / 540 * 100}%`;
-  const spotPoints = { breakfast: [394, 300], water: [192, 300], wall: [595, 270], studio: [500, 300], fishing: [460, 290], cardhall: [490, 300] };
+  const spotPoints = { breakfast: [394, 300], water: [192, 300], wall: [595, 270], studio: [500, 300], fishing: [480, 246], cardhall: [490, 300] };
   const actors = Object.entries(state.actors).filter(([, actor]) => actor.location === district && ['active', 'downed'].includes(actor.life));
   const streetEvents = events.filter(event => event.district === district);
   root.innerHTML = [

@@ -8,6 +8,7 @@ import { drawConflictNpc, drawStreetNpc } from './npc-art.js';
 import { drawCafeScene } from './coffee-art.js';
 import { drawCardhallScene } from './cardhall-art.js';
 import { drawFurnitureStoreScene } from './furniture-store-art.js';
+import { fishingPosition } from './street.js';
 
 export const STREET_NAMES = {
   camp: '旧桥营地', market: '老街早夜市', recycle: '电子回收巷',
@@ -30,7 +31,7 @@ const RESIDENTS = {
   station: [['clerk', 282, 329], ['vendor', 621, 331]],
   cinema: [['student', 439, 329], ['clerk', 877, 330]],
   service: [['volunteer', 168, 328], ['clerk', 660, 330]],
-  river: [['student', 258, 338], ['elder', 640, 338]],
+  river: [['student', 258, 338], ['elder', 906, 338]],
 };
 
 function lamp(c, x, night) {
@@ -58,12 +59,6 @@ function river(c, tick) {
   for (let i = 0; i < 10; i++) { px(c, i * 106, 335, 8, 55, '#5e7371'); px(c, i * 106, 338, 106, 5, '#819793'); }
   for (let i = 0; i < 4; i++) { px(c, 110 + i * 235, 294, 6, 54, '#30454b'); px(c, 100 + i * 235, 291, 26, 5, '#d3c49f'); }
   prop(c, 40, 'reeds', tick); prop(c, 852, 'reeds', tick);
-  px(c, 432, 323, 150, 11, '#584c3f'); px(c, 438, 326, 138, 5, '#a08a62');
-  for (let i = 0; i < 8; i++) px(c, 443 + i * 17, 326, 2, 8, '#584c3f');
-  px(c, 450, 333, 7, 46, '#5f5547'); px(c, 559, 333, 7, 46, '#5f5547');
-  px(c, 445, 355, 20, 3, '#a8a071'); px(c, 556, 354, 16, 3, '#a8a071');
-  px(c, 457, 315, 2, 15, '#bec7b1'); px(c, 459, 313, 38, 2, '#bec7b1');
-  px(c, 495, 315 + tick % 3, 2, 24, '#b7c7c5');
 }
 
 export function streetPose(actor, moving, action, override, now, reduced) {
@@ -103,7 +98,14 @@ export function drawStreet(c, state, district, actorId, x, moving, now, reduced,
   if (district === 'river') {
     px(c, 530, 375, 430, 38, '#587c83'); px(c, 530, 375, 430, 5, '#a9aa86');
     for (let i = 0; i < 8; i++) px(c, 540 + i * 51, 388 + i % 2 * 12, 25, 2, '#87aaa8');
-    px(c, 420, 404, 112, 11, '#7b6b51'); px(c, 432, 415, 8, 26, '#594f43'); px(c, 513, 415, 8, 26, '#594f43');
+    for (const id of ['xuan', 'fan', 'ma']) {
+      const { x, y } = fishingPosition(id);
+      px(c, x - 34, y - 16, 68, 52, '#584c3f');
+      px(c, x - 31, y - 13, 62, 46, '#9d835c');
+      for (let row = 0; row < 6; row++) px(c, x - 31, y - 12 + row * 8, 62, 2, '#705b42');
+      px(c, x - 28, y + 36, 7, 12, '#594f43'); px(c, x + 21, y + 36, 7, 12, '#594f43');
+      px(c, x - 22, y - 20, 44, 5, '#c0a071');
+    }
   }
   for (const [i, [kind, residentX, residentY]] of (RESIDENTS[district] || []).entries()) {
     drawStreetNpc(c, { kind }, residentX, residentY, reduced ? 0 : Math.floor(now / 700), { pose: 'stand', facing: i ? -1 : 1, scale: 1 });
@@ -137,9 +139,9 @@ export function drawStreet(c, state, district, actorId, x, moving, now, reduced,
   for (const [id, actor] of Object.entries(state.actors).sort(([a], [b]) => (positions[a]?.y || 427) - (positions[b]?.y || 427))) {
     if (actor.location !== district || !['active', 'downed'].includes(actor.life)) continue;
     const selected = id === actorId;
-    const position = positions[id];
-    const personX = position?.x ?? (selected ? x : id === 'xuan' ? 316 : id === 'fan' ? 605 : 775);
     const pose = streetPose(actor, selected && moving, actions[id], overrides[id], now, reduced);
+    const position = district === 'river' && pose.startsWith('fish') ? fishingPosition(id) : positions[id];
+    const personX = position?.x ?? (selected ? x : id === 'xuan' ? 316 : id === 'fan' ? 605 : 775);
     poses[id] = pose;
     const personY = position ? position.y - 76 : district === 'river' && pose.startsWith('fish') ? 335 : 351;
     streetSprite(c, personX - 24, personY, id, 2, pose, position?.facing ?? 1);
