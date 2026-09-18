@@ -7,7 +7,7 @@ const { actionPoseFor, settledActionPoses, actionFrame, walkFrame, easedProgress
 test('settled action ids select their actual visible pose', () => {
   const cases = {
     bins: 'work', scavenge: 'work', beg: 'beg', phonestall: 'stall', shellgame: 'stall',
-    repair: 'repair', repair_item: 'repair', sketch: 'sketch', graffiti: 'sketch',
+    repair: 'repair', repair_item: 'repair', sketch: 'sketch', graffiti: 'paint',
     wash: 'wash', bath: 'wash', laundry: 'wash', rest: 'rest', warm: 'rest',
     kitchen: 'carry', carry: 'carry', run: 'carry', freecards: 'sit',
   };

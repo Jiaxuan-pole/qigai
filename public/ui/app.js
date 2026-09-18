@@ -28,13 +28,19 @@ import { resolvePendingFishing } from './fishing-flow.js';
 import { resumeCasino } from './casino.js';
 import { bindPlannerWindow } from './planner-window.js';
 import { pendingWorkGame, showPendingWorkGame, forfeitPendingWorkGames } from './work-game-flow.js';
+import { startLiveClock, encounteredEvent } from './live-clock.js';
+import { showCombat } from './combat.js';
+import { showQuickItems } from './quick-items.js';
+import { configureTasks, renderTaskStrip, showTasks } from './tasks.js';
 
 let busy = false;
 let planningRequest = null;
+let liveClock = null;
 
 function phaseDialog() {
   if (UI.night) return;
   const s = UI.state;
+  if (s.pending?.combat) { void showCombat(); return; }
   if (pendingWorkGame()) { showPendingWorkGame(); return; }
   if (s.pending?.fishingQte?.length || s.pending?.riverFight) { void resolvePendingFishing().then(phaseDialog); return; }
   if (s.pending?.casino && s.pending.casino.phase !== 'settled') { resumeCasino(); return; }
@@ -52,6 +58,7 @@ function render() {
   const focusActor = focused?.dataset?.actor;
   const focusAction = focused?.dataset?.action;
   renderAll();
+  renderTaskStrip();
   bindGame();
   if (pane && !$('plannerOverlay').hidden) {
     pane.scrollTop = scrollTop;
@@ -62,17 +69,25 @@ function render() {
 }
 
 function bindGame() {
-  document.querySelectorAll('[data-actor].char-card').forEach((el) => { el.onclick = () => chooseHour(el.dataset.actor, UI.sel.hour); el.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); chooseHour(el.dataset.actor, UI.sel.hour); } }; });
+  document.querySelectorAll('[data-actor].char-card').forEach((el) => { el.onclick = () => selectActor(el.dataset.actor); el.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectActor(el.dataset.actor); } }; });
   document.querySelectorAll('[data-hour]').forEach((b) => { b.onclick = () => chooseHour(b.dataset.actor, Number(b.dataset.hour), true); });
-  document.querySelectorAll('[data-action]').forEach((b) => { b.onclick = () => { UI.sel.action = b.dataset.action; const a = ACTIONS[UI.sel.action]; if (a.zone !== 'pick') UI.sel.zone = UI.sel.zone && a.zone === UI.sel.zone ? UI.sel.zone : UI.sel.zone; render(); }; });
+  document.querySelectorAll('[data-action]').forEach((b) => { b.onclick = () => { UI.sel.action = b.dataset.action; UI.sel.duration = undefined; render(); }; });
+  const durationPick = $('durationPick'); if (durationPick) durationPick.onchange = () => { UI.sel.duration = Number(durationPick.value); render(); };
   const zonePick = $('zonePick'); if (zonePick) zonePick.onchange = () => { UI.sel.zone = zonePick.value; UI.sel.targets = []; render(); };
   const clearZone = $('clearZone'); if (clearZone) clearZone.onclick = () => { UI.sel.zone = null; render(); };
   document.querySelectorAll('[data-npc]').forEach((cb) => { cb.onchange = () => { const set = new Set(UI.sel.targets); if (cb.checked) set.add(cb.dataset.npc); else set.delete(cb.dataset.npc); UI.sel.targets = [...set].slice(0, 3); if (UI.sel.targets.length >= 3) render(); }; });
   document.querySelectorAll('[data-openshop]').forEach((b) => { b.onclick = () => { const zone = b.dataset.openshop; const shop = UI.data.shops.find((sh) => sh.district === zone && UI.state.day >= sh.unlockDay); if (shop) showShop(shop.id, UI.sel.actor, 'plan'); }; });
   const carePick = $('carePick'); if (carePick) carePick.onchange = () => { const opts = careOptions(UI.state, UI.sel.actor, UI.sel.hour); const choice = carePick.value === '' ? null : opts[Number(carePick.value)]; apply(setCare(UI.state, UI.sel.actor, UI.sel.hour, choice)); };
-  const sleepBtn = document.querySelector('[data-sleep-hour]'); if (sleepBtn) sleepBtn.onclick = () => { UI.sel.hour = Number(sleepBtn.dataset.sleepHour); UI.sel.action = 'sleep'; UI.sel.zone = null; UI.sel.cart = []; UI.sel.targets = []; assignNow(); };
+  const sleepBtn = document.querySelector('[data-sleep-hour]'); if (sleepBtn) sleepBtn.onclick = () => { UI.sel.hour = Number(sleepBtn.dataset.sleepHour); UI.sel.action = 'sleep'; UI.sel.duration = 1; UI.sel.zone = null; UI.sel.cart = []; UI.sel.targets = []; assignNow(); };
   const coffeeBtn = document.querySelector('[data-view-coffee]'); if (coffeeBtn) coffeeBtn.onclick = () => showInventory(UI.sel.actor);
   const assignBtn = $('assignBtn'); if (assignBtn) assignBtn.onclick = () => assignNow();
+}
+
+function selectActor(id) {
+  if (busy || UI.state.pending?.combat) return;
+  const alreadySelected = UI.sel.actor === id;
+  chooseHour(id, UI.state.hour);
+  if (alreadySelected && !modalOpen()) showQuickItems(id, showInventory, () => { setDrawerExpanded(true); render(); });
 }
 
 function chooseHour(id, _hour, openPlanner = false) {
@@ -90,6 +105,7 @@ function chooseHour(id, _hour, openPlanner = false) {
   UI.sel.hour = s.hour;
   const index = s.phase === 'tail' ? s.hour - DAY_END_HOUR : s.hour < DAY_END_HOUR ? planIndex(s.hour) : null;
   const t = index === null ? null : s.plan[id][index];
+  UI.sel.duration = undefined;
   UI.sel.action = t?.id || UI.sel.action;
   if (t && t.zone && ACTIONS[t.id].zone === 'pick') UI.sel.zone = t.zone;
   UI.sel.cart = t?.cart || [];
@@ -104,7 +120,7 @@ function assignNow(skipRisk = false) {
   const s = UI.state;
   const a = ACTIONS[UI.sel.action];
   if (!a) return;
-  const opts = { zone: UI.sel.zone, cart: UI.sel.cart, targets: UI.sel.targets, destination: UI.sel.destination };
+  const opts = { zone: UI.sel.zone, cart: UI.sel.cart, targets: UI.sel.targets, destination: UI.sel.destination, duration: UI.sel.duration || 1 };
   if (a.rescue) { opts.target = $('partner')?.value; opts.participants = [UI.sel.actor, opts.target]; }
   else if (a.min === 2) opts.participants = [UI.sel.actor, $('partner')?.value];
   else if (a.min === 3) opts.participants = [...IDS];
@@ -117,34 +133,35 @@ function assignNow(skipRisk = false) {
     return;
   }
   const r = assign(s, UI.sel.actor, UI.sel.hour, UI.sel.action, opts);
-  if (apply(r)) toast(`已安排：${NAMES[UI.sel.actor]}${String(UI.sel.hour).padStart(2, '0')}:00「${a.name}」${opts.zone && a.zone === 'pick' ? '·' + zoneName(opts.zone) : ''}。`);
+  if (apply(r)) { setDrawerExpanded(false); toast(`已安排：${NAMES[UI.sel.actor]}「${a.name}」连续${opts.duration}小时，至${String(UI.sel.hour + opts.duration).padStart(2, '0')}:00。`); }
 }
 
-async function advance(force = false) {
+async function advance(force = false, automatic = false) {
   cancelItemWishes();
   planningRequest?.abort();
-  if (UI.night) { toast('先结束这一晚，再安排明天。'); return; }
-  if (busy) return;
+  if (UI.night) { toast('先结束这一晚，再安排明天。'); return false; }
+  if (busy) return false;
   const s = UI.state;
-  if (s.phase !== 'planning' && s.phase !== 'tail') { phaseDialog(); return; }
-  if (pendingWorkGame()) { showPendingWorkGame(); return; }
-  if (s.pending?.fishingQte?.length || s.pending?.riverFight) { await resolvePendingFishing(); phaseDialog(); return; }
-  if (s.pending?.casino && s.pending.casino.phase !== 'settled') { resumeCasino(); return; }
-  if (s.pending && s.pending.beg.length) { showBegSession(0); return; }
-  if (s.pending && s.pending.bins.length) { showBinBoard(0); return; }
+  if (s.pending?.combat) { void showCombat(); return false; }
+  if (s.phase !== 'planning' && s.phase !== 'tail') { phaseDialog(); return false; }
+  if (pendingWorkGame()) { showPendingWorkGame(); return false; }
+  if (s.pending?.fishingQte?.length || s.pending?.riverFight) { await resolvePendingFishing(); phaseDialog(); return false; }
+  if (s.pending?.casino && s.pending.casino.phase !== 'settled') { resumeCasino(); return false; }
+  if (s.pending && s.pending.beg.length) { showBegSession(0); return false; }
+  if (s.pending && s.pending.bins.length) { showBinBoard(0); return false; }
   const currentIndex = s.phase === 'tail' ? s.hour - DAY_END_HOUR : planIndex(s.hour);
   const survivalTick = s.phase === 'tail' || [9, 13, 17, 21].includes(s.hour);
   const doomed = survivalTick ? alive(s).filter((id) => { const p = s.actors[id], t = s.plan[id][currentIndex]; return p.life === 'downed' && p.deadline <= s.turn + 1 && !['aid', 'rescue'].includes(t?.id) && !IDS.some((x) => s.plan[x][currentIndex]?.id === 'rescue' && s.plan[x][currentIndex]?.target === id); }) : [];
   if (doomed.length && !force) {
     showModal('继续后，将有人死亡', `<p>${doomed.map((x) => NAMES[x]).join('、')}处在最后一个救援回合，却没有得到救援安排。继续结算会造成永久死亡。</p><div class="modalbuttons"><button id="backRescue" class="primary">回去安排救援</button><button id="confirmDeath">确认仍然推进</button></div>`);
-    $('backRescue').onclick = () => closeModal();
-    $('confirmDeath').onclick = () => { closeModal(); advance(true); };
-    return;
+    $('backRescue').onclick = () => { closeModal(); liveClock?.restart(); };
+    $('confirmDeath').onclick = () => { closeModal(); void advance(true).then((advanced) => { if (advanced) liveClock?.restart(); }); };
+    return false;
   }
   const settledHour = s.hour, settledDay = s.day;
   const controlledActorId = UI.sel.actor;
   const result = settle(s, { controlledActorId });
-  if (result.error) { toast(result.error + (result.error.includes('体力不足') ? ' 睡1小时恢复20；便利店速溶4杯或咖啡店现制2杯补20（混饮累计）。' : '')); if (result.at) { UI.errAt = result.at; UI.sel.actor = result.at.actorId; UI.sel.hour = result.at.hour; } render(); return; }
+  if (result.error) { liveClock?.pause(); toast(result.error + (result.error.includes('体力不足') ? ' 睡1小时恢复20；便利店速溶4杯或咖啡店现制2杯补20（混饮累计）。' : '')); if (result.at) { UI.errAt = result.at; UI.sel.actor = result.at.actorId; UI.sel.hour = result.at.hour; } render(); return false; }
   setDrawerExpanded(false);
   busy = true;
   UI.state = result.state; save();
@@ -175,8 +192,8 @@ async function advance(force = false) {
   }
   bindGame();
   await openPending();
-  if (UI.state.phase === 'meeting') { showMeeting(); return; }
-  if (UI.state.phase === 'ending' || UI.state.phase === 'gameover') { showEnding(); return; }
+  if (UI.state.phase === 'meeting') { showMeeting(); return true; }
+  if (UI.state.phase === 'ending' || UI.state.phase === 'gameover') { showEnding(); return true; }
   if (result.night) {
     showNight(result.night, result.events);
     audioScene(UI.state, result, 'night');
@@ -189,17 +206,21 @@ async function advance(force = false) {
       if (UI.state.phase === 'planning') { await eveningTalk(); await waitModal(); }
     }
   } else {
-    const shown = showResults(result.events, `第${settledDay}天${settledHour}:00 · 小时${UI.state.hourTick}`);
+    const shown = !automatic && showResults(result.events, `第${settledDay}天${settledHour}:00 · 小时${UI.state.hourTick}`);
     if (shown) await waitModal(); else toast('回合' + UI.state.turn + '已共同结算。' + (result.events[0] || ''));
+    const encounter = automatic && encounteredEvent(s, UI.state, controlledActorId);
+    if (encounter && UI.state.phase === 'planning') { showEvent(encounter.uid); await waitModal(); }
   }
   maybeStartTutorial(UI.state);
   if (UI.state.phase === 'tail') { toast('救援尾声：只处理救援。'); }
   phaseDialog();
   render();
+  return true;
 }
 
 // 待处理交互（路人对话等）：逐个弹出，处理完才继续。
 async function openPending() {
+  if (UI.state.pending?.combat) await showCombat();
   while (pendingWorkGame()) {
     showPendingWorkGame();
     await waitModal();
@@ -320,12 +341,23 @@ async function boot() {
   UI.data = await loadData();
   await fetchAiStatus();
   UI.render = render;
+  configureTasks({
+    onPlan: ({ actorId, actionId, zone }) => {
+      chooseHour(actorId, UI.state.hour);
+      UI.sel.action = actionId; UI.sel.zone = zone; UI.sel.duration = undefined;
+      setDrawerExpanded(true); render();
+    },
+    onNpcs: showNpcs,
+    onInventory: showInventory,
+    onEvent: showEvent,
+  });
   bindPlannerWindow();
   new MutationObserver(() => { if (!modalOpen()) queueItemWishes(() => !busy && !planningRequest); }).observe($('modalOverlay'), { attributes: true, attributeFilter: ['class'] });
   UI.exportSave = exportSave;
   UI.goTitle = goTitle;
   initMap({
-    onActorSelect: (id) => chooseHour(id, UI.sel.hour),
+    onActorSelect: selectActor,
+    onActorUse: (id) => { if (busy || modalOpen()) return; chooseHour(id, UI.state.hour); showQuickItems(id, showInventory, () => { setDrawerExpanded(true); render(); }); },
     onTravel: (actorId, district) => {
       if (busy || UI.night || modalOpen()) return false;
       const result = travelTo(UI.state, actorId, district);
@@ -345,7 +377,7 @@ async function boot() {
       if (spot === 'bins' || spot === 'bottles') { UI.sel.zone = district; UI.sel.action = spot; setDrawerExpanded(true); render(); return; }
       if (spot === 'fishing') { UI.sel.zone = 'river'; UI.sel.action = 'fish'; setDrawerExpanded(true); render(); return; }
       if (spot === 'cardhall') { UI.sel.zone = 'cardhall'; UI.sel.action = 'casino'; setDrawerExpanded(true); render(); return; }
-      if (spot === 'board') return showWishes();
+      if (spot === 'board' || spot === 'tasks') return showTasks();
       UI.sel.zone = district;
       UI.sel.action = spot === 'water' ? 'wash' : spot === 'wall' ? 'graffiti' : spot === 'breakfast' ? 'kitchen' : UI.sel.action;
       if (spot === 'breakfast' || spot === 'studio') { setDrawerExpanded(true); render(); return showNpcs(district); }
@@ -359,6 +391,7 @@ async function boot() {
   $('btnImport').onclick = importSave;
   $('btnHelp').onclick = showHelp;
   initAudio();
+  liveClock = startLiveClock(() => advance(false, true), () => busy || planningRequest || Boolean(UI.state?.pending?.combat) || Boolean(pendingWorkGame()));
   $('btnSaves').onclick = () => openSavedGames(enterGame);
   $('btnAiPlan').onclick = arrangeTeammates;
   $('planToggle').onclick = (event) => { event.stopPropagation(); setDrawerExpanded($('planToggle').getAttribute('aria-expanded') !== 'true'); };
@@ -371,7 +404,7 @@ async function boot() {
   });
   $('btnTitle').onclick = goTitle;
   $('btnAdvance').onclick = () => advance();
-  document.querySelectorAll('[data-open]').forEach((b) => { b.onclick = () => { if (UI.night && ['map', 'events', 'camp'].includes(b.dataset.open)) return toast('今晚留在营地，物件就在街景里。'); return ({ camp: showCamp, chapters: showChapters, help: showHelp, system: showSystem, map: showMapList, events: showEvents, inventory: showInventory, wishes: showWishes, health: showHealth, logs: () => showModal('街头记事', UI.state.log.map((x) => `<div class="logitem">${esc(x)}</div>`).join(''), { wide: true }) }[b.dataset.open])(); }; });
+  document.querySelectorAll('[data-open]').forEach((b) => { b.onclick = () => { if (UI.night && ['map', 'events', 'camp'].includes(b.dataset.open)) return toast('今晚留在营地，物件就在街景里。'); return ({ tasks: showTasks, camp: showCamp, chapters: showChapters, help: showHelp, system: showSystem, map: showMapList, events: showEvents, inventory: showInventory, wishes: showWishes, health: showHealth, logs: () => showModal('街头记事', UI.state.log.map((x) => `<div class="logitem">${esc(x)}</div>`).join(''), { wide: true }) }[b.dataset.open])(); }; });
   $('modalClose').onclick = () => closeModal();
   $('modalOverlay').onclick = (e) => { if (e.target === $('modalOverlay')) closeModal(); };
   document.addEventListener('keydown', (e) => {

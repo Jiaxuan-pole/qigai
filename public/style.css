@@ -258,9 +258,9 @@ select{display:block;width:100%;min-height:42px;margin-top:4px;background:#26353
 .tut-card{position:absolute;width:min(360px,calc(100vw - 32px));background:#0c1319;border:1px solid var(--gold);box-shadow:4px 4px 0 var(--shadow);padding:12px 14px;pointer-events:auto;font-size:15px;line-height:1.6}
 .tut-card h4{margin:0 0 6px;font-size:16px;color:var(--gold)}
 .tut-card p{margin:0 0 10px;color:var(--paper)}
-.tut-foot{display:flex;align-items:center;gap:10px}
-.tut-dots{display:flex;gap:4px;margin-right:auto}.tut-dots i{width:6px;height:6px;background:#3e4c53;display:block}.tut-dots i.on{background:var(--gold)}
-.tut-card button{min-height:36px;padding:4px 12px;font-size:14px}
+.tut-foot{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:10px}
+.tut-dots{display:flex;flex-wrap:wrap;gap:4px;min-width:0}.tut-dots i{width:6px;height:6px;background:#3e4c53;display:block}.tut-dots i.on{background:var(--gold)}
+.tut-card button{min-height:36px;padding:4px 12px;font-size:14px;white-space:nowrap}
 .tut-card.bottom{left:16px!important;right:16px;bottom:16px;top:auto!important;width:auto}
 
 /* 声音按钮：宽度固定，切换档位时文字变化不抖动。 */

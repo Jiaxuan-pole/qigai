@@ -10,6 +10,7 @@ import { assertCasinoReplay } from './casino-replay.js';
 import { normalizeWorkGames, validateWorkGames } from './work-games-save.js';
 import { beginDayReport, normalizeDayReport, validateDayReport } from './day-report.js';
 import { FURNITURE_SLOTS, validateFurnitureState } from './furniture.js';
+import { validateCombat } from './combat.js';
 
 export const SAVE_KEY = 'jinwan-shui-naer-v3';
 
@@ -39,6 +40,7 @@ export function normalizeSave(input) {
   }
   if (s.pending && !Object.hasOwn(s.pending, 'riverFight')) s.pending.riverFight = null;
   s.pending ??= {};
+  if (!Object.hasOwn(s.pending, 'combat')) s.pending.combat = null;
   if (!Object.hasOwn(s.pending, 'fishingQte')) s.pending.fishingQte = [];
   if (!Object.hasOwn(s.pending, 'casino')) s.pending.casino = null;
   if (!Object.hasOwn(s, 'casinoVenue')) s.casinoVenue = freshCasinoVenue();
@@ -219,6 +221,8 @@ export function validateSave(s) {
     }
     const workGames = validateWorkGames(s);
     if (!workGames.ok) return workGames;
+    const combat = validateCombat(s);
+    if (!combat.ok) return combat;
     if (!validateDayReport(s)) return { ok: false, reason: '每日报告无效' };
     const riverFight = s.pending?.riverFight;
     if (riverFight !== undefined && riverFight !== null && (

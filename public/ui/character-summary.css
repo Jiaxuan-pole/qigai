@@ -1,0 +1,28 @@
+.character-shell { position: relative; min-width: 0; align-self: start; }
+.character-shell .char-card { padding: 12px; }
+.character-shell .char-head { padding-right: 36px; gap: 8px; }
+.character-shell .char-head > div { min-width: 0; }
+.character-shell .portrait { width: 32px; height: 38px; }
+.character-shell .char-name { font-size: 16px; }
+.character-shell .badge { font-size: 11px; padding: 0 4px; overflow-wrap: anywhere; }
+.char-compact-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.char-summary-stat { display: flex; justify-content: space-between; align-items: baseline; gap: 4px; font-size: 11px; color: var(--muted); }
+.char-summary-stat b { color: var(--ink); font: 700 12px ui-monospace, Menlo, monospace; }
+.char-summary-stat.bad, .char-summary-stat.bad b, .char-warning { color: var(--bad); }
+.char-warning { margin-top: 8px; font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+.char-details { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 8px; }
+.char-details[hidden] { display: none; }
+.character-shell .char-details .role { display: block; }
+.char-expand { position: absolute; top: 8px; right: 4px; display: grid; place-items: center; width: 44px; min-height: 44px; padding: 0; background: transparent; border-color: transparent; }
+.char-expand:hover { background: var(--panel2); border-color: var(--line); }
+.char-chevron { display: block; width: 8px; height: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-2px) rotate(45deg); }
+.char-expand[aria-expanded="true"] .char-chevron { transform: translateY(2px) rotate(225deg); }
+@media (max-width: 700px) {
+  .character-shell .char-card { padding: 8px; }
+  .character-shell .char-head { padding-right: 0; gap: 4px; }
+  .character-shell .badge { padding: 0 2px; font-size: 10px; }
+  .char-compact-stats { grid-template-columns: 1fr; gap: 0; padding-right: 36px; }
+  .char-summary-stat { font-size: 10px; gap: 2px; line-height: 1.7; }
+  .char-expand { top: 52px; right: 0; }
+  .character-shell .char-details .stat { grid-template-columns: 24px minmax(0, 1fr) 24px; gap: 4px; }
+}

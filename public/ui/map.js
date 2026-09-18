@@ -2,8 +2,8 @@
 import { px, sprite, skyline, moodOf } from './pixel.js';
 import { streetSprite } from './street-people.js';
 import { $, esc } from './core.js';
-import { settledActionPoses, actionFrame, walkFrame, easedProgress, sceneTick, changedTurn } from './animation.js';
-import { StreetJourney, neighbors, walkStep } from './street.js';
+import { settledActionPoses, actionPoseFor, itemPoseFor, actionFrame, walkFrame, easedProgress, sceneTick, changedTurn } from './animation.js';
+import { StreetJourney, neighbors, streetPosition, syncStreetPositions, walkStreetPosition } from './street.js';
 import { drawStreet, streetPose, STREET_NAMES } from './street-art.js';
 import { CAMP_SPOTS, campSpotsFor, renderCampStreet } from './camp-art.js';
 import { sleepSurfaceFor, furnitureRect } from '../game/furniture.js';
@@ -18,8 +18,37 @@ const SPOT_POS = { breakfast: [416, 262], water: [724, 168], wall: [566, 452], c
 const OFFSET = { xuan: -34, fan: 0, ma: 34 };
 const NAMES = { xuan: '轩哥', fan: '凡哥', ma: '马哥' };
 
-const M = { canvas: null, c: null, pos: {}, actions: {}, sleeping: [], anim: null, handlers: {}, tick: 0, raf: 0, state: null, selDistrict: null, mode: 'overview', streetDistrict: null, streetX: 480, streetDir: 0, streetSprint: false, streetMoveAt: 0, streetEdge: null, streetTravel: null, route: null, selectedActor: 'xuan', journey: null, shops: [], districts: [], events: [], nightDay: null, campHotspots: CAMP_SPOTS, actorPose: {} };
+const M = { canvas: null, c: null, pos: {}, actions: {}, sleeping: [], anim: null, handlers: {}, tick: 0, raf: 0, state: null, selDistrict: null, mode: 'overview', streetDistrict: null, streetPositions: {}, streetDir: 0, streetVertical: 0, streetKeys: new Set(), streetSprint: false, streetMoveAt: 0, streetEdge: null, streetTravel: null, route: null, selectedActor: 'xuan', journey: null, shops: [], districts: [], events: [], nightDay: null, campHotspots: CAMP_SPOTS, actorPose: {}, itemAnimations: {} };
 const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const directionForKey = (key) => ({ ArrowLeft: 'left', a: 'left', A: 'left', ArrowRight: 'right', d: 'right', D: 'right', ArrowUp: 'up', w: 'up', W: 'up', ArrowDown: 'down', s: 'down', S: 'down' })[key];
+const positionFor = (id = M.selectedActor) => M.streetPositions[id] || streetPosition(id, M.state?.actors[id]?.location || M.streetDistrict || 'camp');
+const walking = () => Boolean(M.streetDir || M.streetVertical);
+const campCamera = () => M.streetDistrict === 'camp' ? Math.max(0, Math.min(640, (positionFor().district === 'camp' ? positionFor().x : 800) - 480)) : 0;
+
+function placeStreetActor(actorId, district, x, y) {
+  const previous = positionFor(actorId);
+  const base = previous.district === district ? previous : streetPosition(actorId, district);
+  M.streetPositions[actorId] = { ...base, x, y: y ?? base.y, facing: x === base.x ? base.facing : Math.sign(x - base.x) };
+}
+
+function streetOverrides(now, reduced) {
+  const overrides = { ...M.actorPose };
+  for (const [id, animation] of Object.entries(M.itemAnimations)) {
+    if (now >= animation.until) delete M.itemAnimations[id];
+    else overrides[id] = actionFrame(animation.pose, now - animation.start, reduced);
+  }
+  return overrides;
+}
+
+export function playItemAnimation(actorId, itemId) {
+  const pose = itemPoseFor(itemId);
+  if (!pose || M.state?.actors[actorId]?.life !== 'active') return false;
+  const start = performance.now();
+  M.itemAnimations[actorId] = { pose, start, until: start + 3000 };
+  M.sleeping = M.sleeping.filter(id => id !== actorId);
+  if (actorId === M.selectedActor) stopStreetWalking();
+  return true;
+}
 
 export function initMap(handlers) {
   M.canvas = $('map');
@@ -33,17 +62,17 @@ export function initMap(handlers) {
   $('overviewMode')?.addEventListener?.('click', () => setMapMode('overview'));
   $('streetMode')?.addEventListener?.('click', () => setMapMode('street'));
   $('streetDistrict')?.addEventListener?.('change', (e) => viewStreet(e.target.value));
-  const walking = (direction) => (e) => { e.preventDefault(); setStreetDirection(direction, e.shiftKey); };
-  for (const [id, direction] of [['walkLeft', -1], ['walkRight', 1]]) {
+  const startWalking = (x, y) => (e) => { e.preventDefault(); if (!interactionBlocked()) setStreetDirection(x, y, e.shiftKey); };
+  for (const [id, x, y] of [['walkLeft', -1, 0], ['walkRight', 1, 0], ['walkUp', 0, -1], ['walkDown', 0, 1]]) {
     const button = $(id);
-    button?.addEventListener?.('pointerdown', walking(direction));
+    button?.addEventListener?.('pointerdown', startWalking(x, y));
     button?.addEventListener?.('pointerup', stopStreetWalking);
     button?.addEventListener?.('pointercancel', stopStreetWalking);
     button?.addEventListener?.('pointerleave', stopStreetWalking);
   }
   if (typeof window !== 'undefined' && window.addEventListener) {
     window.addEventListener('keydown', onStreetKey);
-    window.addEventListener('keyup', (e) => { if (e.key === 'Shift') M.streetSprint = false; if (['ArrowLeft', 'ArrowRight', 'a', 'A', 'd', 'D'].includes(e.key)) stopStreetWalking(); });
+    window.addEventListener('keyup', (e) => { if (e.key === 'Shift') M.streetSprint = false; const direction = directionForKey(e.key); if (direction) { M.streetKeys.delete(direction); updateKeyboardDirection(); } });
     window.addEventListener('blur', stopStreetWalking);
   }
   if ($('streetControls')?.addEventListener) setMapMode('street');
@@ -53,25 +82,33 @@ export function initMap(handlers) {
 function onStreetKey(e) {
   if (!M.state || e.altKey || e.ctrlKey || e.metaKey || e.target?.closest?.('input,textarea,select,[contenteditable],.modal,.tut-root') || interactionBlocked()) return;
   if (e.key === 'm' || e.key === 'M') { e.preventDefault(); setMapMode(M.mode === 'street' ? 'overview' : 'street'); return; }
-  if (M.mode !== 'street' || e.repeat && M.streetDir) return;
+  if (M.mode !== 'street') return;
   if (e.key === 'Shift') { M.streetSprint = true; return; }
-  const direction = ['ArrowLeft', 'a', 'A'].includes(e.key) ? -1 : ['ArrowRight', 'd', 'D'].includes(e.key) ? 1 : 0;
+  const direction = directionForKey(e.key);
   if (!direction) return;
-  e.preventDefault(); setStreetDirection(direction, e.shiftKey);
+  e.preventDefault(); M.streetKeys.add(direction); M.streetSprint = e.shiftKey; updateKeyboardDirection();
+}
+
+function updateKeyboardDirection() {
+  const keys = M.streetKeys;
+  setStreetDirection(Number(keys.has('right')) - Number(keys.has('left')), Number(keys.has('down')) - Number(keys.has('up')), M.streetSprint);
 }
 
 function interactionBlocked() {
   return Boolean(document.querySelector?.('#modalOverlay.open,.tut-root,.intro,.fishing-qte-overlay,#plannerOverlay:not([hidden])'));
 }
 
-function setStreetDirection(direction, sprint = false) {
-  M.streetDir = direction;
+function setStreetDirection(x, y, sprint = false) {
+  if (!walking()) M.streetMoveAt = performance.now();
+  M.streetDir = x;
+  M.streetVertical = y;
   M.streetSprint = sprint;
-  M.streetMoveAt = performance.now();
 }
 
 function stopStreetWalking() {
   M.streetDir = 0;
+  M.streetVertical = 0;
+  M.streetKeys.clear();
   M.streetSprint = false;
   M.streetMoveAt = 0;
 }
@@ -93,7 +130,6 @@ export function viewStreet(district) {
   if (!DISTRICT_POS[district]) return;
   if (M.nightDay !== null && district !== 'camp') return;
   M.streetDistrict = district;
-  M.streetX = district === 'camp' ? 800 : 480;
   M.streetEdge = null;
   setMapMode('street');
   if (M.state) updateStreetOverlay(M.state, M.shops, M.events);
@@ -127,7 +163,7 @@ function refreshStreetUI() {
   const select = $('streetDistrict');
   if (select && select.value !== M.streetDistrict) select.value = M.streetDistrict;
   const status = $('streetStatus');
-  if (status) status.textContent = M.nightDay !== null ? `第${M.nightDay}夜 · 营地散步 · 今夜不出街` : here ? `${STREET_NAMES[M.streetDistrict]} · ${NAMES[M.selectedActor]}在此 · 左右键或触屏行走` : `${STREET_NAMES[M.streetDistrict]} · 仅查看，${NAMES[M.selectedActor]}在${STREET_NAMES[actor?.location] || '别处'}`;
+  if (status) status.textContent = M.nightDay !== null ? `第${M.nightDay}夜 · 营地散步 · 今夜不出街` : here ? `${STREET_NAMES[M.streetDistrict]} · ${NAMES[M.selectedActor]}在此` : `${STREET_NAMES[M.streetDistrict]} · 仅查看，${NAMES[M.selectedActor]}在${STREET_NAMES[actor?.location] || '别处'}`;
   const exits = $('streetExits');
   if (!exits) return;
   exits.replaceChildren();
@@ -169,7 +205,7 @@ function announceStreetArrival(district) {
 export function routeFor(state, actorId, district) {
   const actor = state?.actors?.[actorId];
   if (!actor || actor.life !== 'active') return { error: '角色当前不能移动。' };
-  if (state.pendingMorning || state.pending?.bins?.length || state.pending?.beg?.length || state.pending?.cards || state.pending?.casino || state.pending?.fishingQte?.length || state.pending?.riverFight || state.pending?.workGames?.length || state.phase && state.phase !== 'planning') return { error: '先处理当前待办互动。' };
+  if (state.pendingMorning || state.pending?.bins?.length || state.pending?.beg?.length || state.pending?.cards || state.pending?.casino || state.pending?.fishingQte?.length || state.pending?.riverFight || state.pending?.combat || state.pending?.workGames?.length || state.phase && state.phase !== 'planning') return { error: '先处理当前待办互动。' };
   if (M.nightDay !== null) return { error: '夜里不能离开营地。' };
   if (!DISTRICT_POS[district]) return { error: '没有这条街。' };
   if (actor.location === district) return { steps: [], cost: 0 };
@@ -204,7 +240,6 @@ async function startRoute(district) {
       if (!moved) return false;
       if (route.cancelled || M.route !== route || M.selectedActor !== route.actorId) return false;
       M.streetDistrict = next;
-      M.streetX = next === 'camp' ? 800 : 480;
       M.streetEdge = null;
       setMapMode('street');
       updateStreetOverlay(M.state, M.shops, M.events);
@@ -230,18 +265,21 @@ function loop() {
     if (interactionBlocked()) stopStreetWalking();
     const streetState = streetRenderState();
     const here = streetState.actors[M.selectedActor]?.location === M.streetDistrict;
-    if (here && M.streetDir && !M.journey?.transitionName) {
+    if (here && walking() && !M.journey?.transitionName && !M.streetTravel && streetState.actors[M.selectedActor]?.life === 'active') {
       const elapsed = Math.min(50, Math.max(0, now - (M.streetMoveAt || now)));
       M.streetMoveAt = now;
-      const next = walkStep(M.streetX, M.streetDir, elapsed * 0.24 * (M.streetSprint ? 1.9 : 1), M.streetDistrict === 'camp' ? 1600 : 960, M.streetDistrict === 'camp' ? 116 : 80);
-      M.streetX = next.x;
-      if (M.streetDir) { delete M.actorPose[M.selectedActor]; delete M.actions[M.selectedActor]; }
+      const next = walkStreetPosition(positionFor(), { x: M.streetDir, y: M.streetVertical }, elapsed * 0.24 * (M.streetSprint ? 1.9 : 1));
+      const { edge, ...position } = next;
+      M.streetPositions[M.selectedActor] = position;
+      delete M.actorPose[M.selectedActor]; delete M.itemAnimations[M.selectedActor];
+      M.sleeping = M.sleeping.filter(id => id !== M.selectedActor);
       if (M.streetEdge !== next.edge) { M.streetEdge = next.edge; refreshStreetUI(); }
     }
     stepStreetTravel(now);
+    const overrides = streetOverrides(now, reduced);
     if (M.streetDistrict === 'camp') {
       if (M.hotspotLayoutWidth !== $('street')?.clientWidth) layoutCampHotspots($('streetOverlay'));
-      const camera = Math.max(0, Math.min(640, M.streetX - 480));
+      const camera = campCamera();
       M.streetC.setTransform(1, 0, 0, 1, 0, 0);
       M.streetC.clearRect(0, 0, 960, 540);
       M.streetC.save(); M.streetC.translate(-camera, 0);
@@ -250,21 +288,25 @@ function loop() {
       const sleepers = M.nightDay === null ? M.sleeping.filter((id) => streetState.actors[id]?.location === 'camp') : [];
       const surfaces = Object.fromEntries(sleepers.map((id) => [id, sleepSurfaceFor(streetState, id)]));
       drawSleepers(M.streetC, surfaces, { now, reduced });
-      for (const [id, actor] of Object.entries(streetState.actors)) {
+      for (const [id, actor] of Object.entries(streetState.actors).sort(([a], [b]) => positionFor(a).y - positionFor(b).y)) {
         if (actor.location !== 'camp' || !['active', 'downed'].includes(actor.life)) continue;
         if (surfaces[id]?.anchor) { poses[id] = 'sleep'; continue; }
         const selected = id === M.selectedActor;
-        const personX = selected ? M.streetX : { xuan: 420, fan: 1060, ma: 1320 }[id];
-        const pose = streetPose(actor, selected && Boolean(M.streetDir || M.streetTravel), M.actions[id], M.actorPose[id], now, reduced);
+        const position = positionFor(id);
+        const pose = streetPose(actor, selected && Boolean(walking() || M.streetTravel), M.actions[id], overrides[id], now, reduced);
         poses[id] = pose;
-        streetSprite(M.streetC, personX - 36, 322, id, 3, pose);
+        streetSprite(M.streetC, position.x - 36, position.y - 114, id, 3, pose, position.facing);
       }
       drawFloorBubble(M.streetC, surfaces, M.selectedActor);
       $('street').dataset.poses = JSON.stringify(poses);
       M.streetC.restore();
-    } else $('street').dataset.poses = JSON.stringify(drawStreet(M.streetC, streetState, M.streetDistrict, M.selectedActor, M.streetX, here && (M.streetDir !== 0 || M.streetTravel) && !M.streetEdge, now, reduced, M.actions, M.actorPose));
+    } else $('street').dataset.poses = JSON.stringify(drawStreet(M.streetC, streetState, M.streetDistrict, M.selectedActor, positionFor().x, here && (walking() || M.streetTravel), now, reduced, M.actions, overrides, M.streetPositions));
+    const positions = Object.fromEntries(Object.entries(M.streetPositions).filter(([id]) => streetState.actors[id]?.location === M.streetDistrict && ['active', 'downed'].includes(streetState.actors[id]?.life)));
+    $('street').dataset.positions = JSON.stringify(positions);
+    $('street').dataset.camera = String(campCamera());
+    layoutActorHotspots(positions);
     if (M.streetDistrict === 'camp') {
-      const camera = Math.max(0, Math.min(640, M.streetX - 480));
+      const camera = campCamera();
       for (const button of $('streetOverlay')?.querySelectorAll('[data-world-x]') || []) {
         const x = Number(button.dataset.worldX) - camera;
         button.style.left = `${x / 960 * 100}%`;
@@ -309,16 +351,16 @@ function streetRenderState() {
 function finishStreetTravel(travel, snap = false) {
   if (M.streetTravel !== travel) return;
   clearTimeout(travel.timer);
-  if (snap) M.streetX = travel.toX;
+  if (snap) placeStreetActor(travel.actorId, travel.district, travel.toX, travel.toY);
   M.streetTravel = null;
   travel.resolve();
 }
 
-function walkStreetSegment(district, fromX, toX, duration = 500) {
-  if (reducedMotion() || document.hidden) { M.streetX = toX; return Promise.resolve(); }
+function walkStreetSegment(district, fromX, toX, duration = 500, toY = positionFor().y) {
+  if (reducedMotion() || document.hidden) { placeStreetActor(M.selectedActor, district, toX, toY); return Promise.resolve(); }
   if (M.streetTravel) finishStreetTravel(M.streetTravel, true);
   return new Promise((resolve) => {
-    const travel = { actorId: M.selectedActor, district, fromX, toX, duration, start: performance.now(), resolve, timer: null };
+    const travel = { actorId: M.selectedActor, district, fromX, toX, fromY: positionFor().y, toY, duration, start: performance.now(), resolve, timer: null };
     travel.timer = setTimeout(() => finishStreetTravel(travel, true), duration + 100);
     M.streetTravel = travel;
   });
@@ -328,7 +370,7 @@ function stepStreetTravel(now) {
   const travel = M.streetTravel;
   if (!travel) return;
   const progress = easedProgress(now, travel.start, travel.duration);
-  M.streetX = travel.fromX + (travel.toX - travel.fromX) * progress;
+  placeStreetActor(travel.actorId, travel.district, travel.fromX + (travel.toX - travel.fromX) * progress, travel.fromY + (travel.toY - travel.fromY) * progress);
   if (progress >= 1) finishStreetTravel(travel, true);
 }
 
@@ -336,6 +378,7 @@ function stepStreetTravel(now) {
 export function animateMoves(state, moves, executed = {}) {
   if (M.anim) finishAnimation(M.anim, false);
   M.state = state;
+  M.streetPositions = syncStreetPositions(M.streetPositions, state.actors);
   M.actions = settledActionPoses(state, executed);
   M.sleeping = Object.entries(executed).filter(([id, task]) => task?.id === 'sleep' && state.actors[id]?.location === 'camp').map(([id]) => id);
   for (const id of Object.keys(state.actors)) M.pos[id] = anchor(state.actors[id].location, id);
@@ -357,15 +400,15 @@ async function afterScheduledMove(moves) {
   const selected = moves.find((move) => move.actorId === M.selectedActor && move.from !== move.to);
   if (!selected || M.mode !== 'street' || M.nightDay !== null) return;
   M.streetDistrict = selected.from;
-  M.streetX = selected.from === 'camp' ? 800 : 480;
+  placeStreetActor(M.selectedActor, selected.from, selected.from === 'camp' ? 800 : 480);
   M.streetEdge = null;
   updateStreetOverlay(M.state, M.shops, M.events);
   const left = DISTRICT_POS[selected.to][0] < DISTRICT_POS[selected.from][0];
   const exitX = left ? (selected.from === 'camp' ? 116 : 80) : (selected.from === 'camp' ? 1484 : 880);
-  await walkStreetSegment(selected.from, M.streetX, exitX, 520);
+  await walkStreetSegment(selected.from, positionFor().x, exitX, 520);
   M.streetDistrict = selected.to;
   const entryX = left ? (selected.to === 'camp' ? 1400 : 820) : (selected.to === 'camp' ? 200 : 140);
-  M.streetX = entryX;
+  placeStreetActor(M.selectedActor, selected.to, entryX);
   M.streetEdge = null;
   stopStreetWalking();
   updateStreetOverlay(M.state, M.shops, M.events);
@@ -517,6 +560,7 @@ export function drawDistrict(c, id, state) {
 function render(state, now, reduced) {
   const c = M.c;
   const poses = {};
+  const overrides = streetOverrides(now, reduced);
   c.setTransform(1, 0, 0, 1, 0, 0);
   const wx = state.weatherKind;
   px(c, 0, 0, 960, 540, wx === 'coldwave' || wx === 'cold' ? '#26343a' : '#2e3f46');
@@ -532,10 +576,11 @@ function render(state, now, reduced) {
     const [x, y] = M.pos[id];
     const walking = M.anim && M.anim.walkers.some((w) => w.id === id && w.seg < w.points.length - 1);
     const idle = !reduced && Math.floor(now / 7800 + ['xuan', 'fan', 'ma'].indexOf(id) * 2) % 3 === 0 && now % 7800 < 480 ? 'idle1' : 'stand';
-    const pose = walking ? walkFrame(now) : p.life === 'downed' ? 'sit' : M.actions[id] ? actionFrame(M.actions[id], now, reduced) : idle;
+    const pose = walking ? walkFrame(now) : p.life === 'downed' ? 'sit' : overrides[id] || (M.actions[id] ? actionFrame(M.actions[id], now, reduced) : idle);
     poses[id] = pose;
     // 小人 24×38，按 1.5 倍画：脚底落在原来的地面线上，名字仍居中。
-    sprite(c, x - 14, y - 35, id, 1.5, pose);
+    if (/^(smoke|drink|sip|eat|paint)/.test(pose)) streetSprite(c, x - 14, y - 35, id, 1.5, pose, positionFor(id).facing);
+    else sprite(c, x - 14, y - 35, id, 1.5, pose);
     if (!walking && p.life === 'active') moodBubble(c, x + 18, y - 52, moodOf(p));
     c.fillStyle = p.life === 'downed' ? '#e57e6b' : '#e6dfcc'; c.font = 'bold 12px sans-serif'; c.textAlign = 'center';
     c.fillText(NAMES[id] + (p.life === 'downed' ? ' 濒死' : ''), x + 4, y - 30);
@@ -547,25 +592,30 @@ function render(state, now, reduced) {
 }
 
 export function setMapState(state, executed) {
+  if (M.state?.seed !== state.seed) { M.streetPositions = {}; M.itemAnimations = {}; M.actorPose = {}; }
   if (changedTurn(M.state, state)) {
     if (M.anim) finishAnimation(M.anim, false);
     if (!executed) { M.actions = {}; M.sleeping = []; }
   }
   M.state = state;
+  M.streetPositions = syncStreetPositions(M.streetPositions, state.actors);
   M.journey?.setState(state, M.selectedActor);
   if (executed) { M.actions = settledActionPoses(state, executed); M.sleeping = Object.entries(executed).filter(([id, task]) => task?.id === 'sleep' && state.actors[id]?.location === 'camp').map(([id]) => id); }
+  for (const [id, busy] of Object.entries(state.busy || {})) if (busy?.task && state.actors[id]?.life === 'active') M.actions[id] = actionPoseFor(busy.task.id);
   for (const id of Object.keys(state.actors)) if (!M.anim) M.pos[id] = anchor(state.actors[id].location, id);
 }
 
 // 覆盖层按钮：街区、店铺、热点事件。真实按钮，键盘可达。
 export function updateOverlay(state, sel, shopsMeta, districtsMeta, events) {
   const selectionChanged = M.lastSelectedActor !== sel.actor;
+  if (selectionChanged) { stopStreetWalking(); if (M.streetTravel) finishStreetTravel(M.streetTravel, true); }
+  M.streetPositions = syncStreetPositions(M.streetPositions, state.actors);
   if (M.route && M.route.actorId !== sel.actor) M.route.cancelled = true;
   M.selectedActor = sel.actor;
   M.lastSelectedActor = sel.actor;
   M.journey?.setState(state, sel.actor);
   M.shops = shopsMeta; M.districts = districtsMeta; M.events = events;
-  if (selectionChanged || !M.streetDistrict) { M.streetDistrict = M.nightDay !== null ? 'camp' : state.actors[sel.actor]?.location || 'camp'; M.streetX = M.streetDistrict === 'camp' ? 800 : 480; M.streetEdge = null; }
+  if (selectionChanged || !M.streetDistrict) { M.streetDistrict = M.nightDay !== null ? 'camp' : state.actors[sel.actor]?.location || 'camp'; M.streetEdge = null; }
   const streetSelect = $('streetDistrict');
   if (streetSelect) streetSelect.innerHTML = districtsMeta.map((d) => `<option value="${d.id}" ${d.id === M.streetDistrict ? 'selected' : ''}>${esc(d.name)} · 查看</option>`).join('');
   const ov = $('mapOverlay');
@@ -625,21 +675,57 @@ function updateStreetOverlay(state, shopsMeta, events) {
   const campSpots = district === 'camp' ? [...campSpotsFor(state), { id: 'parcel', name: '家具包裹', x: 650, y: 410 }, ...furnitureSpots].filter((spot) => spot.id !== 'tv' || state.items.some((item) => item.itemId === 'tv' && (item.container === 'camp' || item.kept))) : [];
   const shopX = { convenience: 162, recycle_shop: 209, lottery_kiosk: 809, tavern: 483, pharmacy: 364, clinic: 600, bathhouse: 830, art_hardware: 829, coffee_shop: 576, furniture_store: 480 };
   const objects = (STREET_OBJECTS[district] || []).filter((object) => object.id !== 'bins' || ['market', 'station', 'recycle'].includes(district));
-  root.innerHTML = `${shops.map((shop, i) => `<button class="street-hot" style="left:${((shopX[shop.id] ?? 160 + i * 280) / 960 * 100).toFixed(1)}%" data-shop="${shop.id}">${esc(shop.name)}${shop.closed ? ' · 关' : ''}</button>`).join('')}${district === 'camp' ? campSpots.map((spot) => `<button class="street-hot spot" data-world-x="${Number(spot.x)}" data-row="${spot.row === 'upper' ? 1 : 0}" data-spot="${esc(spot.id)}">${esc(spot.name)}</button>`).join('') : spots.filter((spot) => spot[2] === district).map((spot, i) => `<button class="street-hot spot" style="left:${54 + i * 18}%" data-spot="${spot[0]}">${esc(spot[1])}</button>`).join('')}${objects.filter((object) => district !== 'camp').map((object) => `<button class="street-hot spot" style="left:${(object.x / 960 * 100).toFixed(1)}%;top:${object.id === 'bins' ? 61 : object.id === 'passersby' ? 78 : 90}%" data-spot="${object.id}" data-object-x="${object.x}">${esc(object.name)}</button>`).join('')}${events.filter((event, i) => event.district === district).map((event, i) => `<button class="street-hot event" style="left:${20 + i * 25}%;top:9%" data-event="${event.uid}">${esc(event.title)}</button>`).join('')}`;
+  const pointStyle = (x, y) => `left:${x / 960 * 100}%;top:${y / 540 * 100}%`;
+  const spotPoints = { breakfast: [394, 300], water: [192, 300], wall: [595, 270], studio: [500, 300], fishing: [460, 290], cardhall: [490, 300] };
+  const actors = Object.entries(state.actors).filter(([, actor]) => actor.location === district && ['active', 'downed'].includes(actor.life));
+  const streetEvents = events.filter(event => event.district === district);
+  root.innerHTML = [
+    ...shops.map((shop, i) => `<button class="street-hot" style="${pointStyle(shopX[shop.id] ?? 160 + i * 280, 290 + i % 2 * 28)}" data-shop="${shop.id}">${esc(shop.name)}${shop.closed ? ' · 关' : ''}</button>`),
+    ...(district === 'camp' ? campSpots.map(spot => `<button class="street-hot spot" data-world-x="${Number(spot.x)}" data-world-y="${Number(spot.y)}" data-row="${spot.row === 'upper' ? 1 : 0}" data-spot="${esc(spot.id)}">${esc(spot.name)}</button>`) : spots.filter(spot => spot[2] === district).map(spot => `<button class="street-hot spot" style="${pointStyle(...(spotPoints[spot[0]] || [500, 370]))}" data-spot="${spot[0]}">${esc(spot[1])}</button>`)),
+    ...objects.filter(() => district !== 'camp').map(object => `<button class="street-hot spot" style="${pointStyle(object.x, object.id === 'bins' ? object.y - 70 : object.y + 24)}" data-spot="${object.id}" data-object-x="${object.x}" data-object-y="${object.y}">${esc(object.name)}</button>`),
+    ...(!['camp', 'cafe', 'cardhall', 'furniture'].includes(district) ? [`<button class="street-hot spot" style="${pointStyle(104, 240)}" data-spot="tasks" data-object-x="104" data-object-y="398">街头告示</button>`] : []),
+    ...streetEvents.map((event, i) => `<button class="street-hot event" style="${pointStyle(190 + i % 3 * 270, 180 + i % 3 * 60)}" data-event="${event.uid}" data-event-x="${190 + i % 3 * 270}" data-event-y="${420 + i % 3 * 32}">${esc(event.title)}</button>`),
+    ...actors.map(([id]) => `<button type="button" class="street-actor" data-street-actor="${id}" aria-label="${NAMES[id]}，随身物品" title="${NAMES[id]} · 随身物品"><span class="sr-only">${NAMES[id]}</span></button>`),
+  ].join('');
   if (district === 'camp') layoutCampHotspots(root);
   root.querySelectorAll('[data-shop]').forEach((button) => { button.onclick = () => M.handlers.onShop(button.dataset.shop); });
   root.querySelectorAll('[data-spot]').forEach((button) => { button.onclick = async () => {
     const id = button.dataset.spot;
     const actorId = M.selectedActor;
-    if (district === 'camp' && ['bed', 'table', 'furniture', 'parcel', 'storage'].includes(id) && state.actors[actorId]?.location === 'camp') {
+    if (state.actors[actorId]?.location === district && (button.dataset.objectX || district === 'camp' && ['bed', 'table', 'furniture', 'parcel', 'storage'].includes(id))) {
       if (M.streetTravel || interactionBlocked()) return;
-      const destination = Math.max(116, Math.min(1484, Number(button.dataset.worldX)));
-      await walkStreetSegment('camp', M.streetX, destination, Math.min(850, Math.max(180, Math.abs(destination - M.streetX) * 1.2)));
+      const target = walkStreetPosition({ ...positionFor(), x: Number(button.dataset.objectX || button.dataset.worldX), y: Number(button.dataset.objectY || button.dataset.worldY) + 24 }, { x: 0, y: 0 }, 0);
+      await walkStreetSegment(district, positionFor().x, target.x, Math.min(850, Math.max(180, Math.hypot(target.x - positionFor().x, target.y - positionFor().y) * 1.2)), target.y);
       if (M.selectedActor !== actorId || M.streetDistrict !== district) return;
     }
     M.handlers.onSpot(id, district);
   }; });
-  root.querySelectorAll('[data-event]').forEach((button) => { button.onclick = () => M.handlers.onEvent(button.dataset.event); });
+  root.querySelectorAll('[data-event]').forEach((button) => { button.onclick = async () => {
+    const actorId = M.selectedActor;
+    if (state.actors[actorId]?.location === district && state.actors[actorId]?.life === 'active') {
+      if (M.streetTravel || interactionBlocked()) return;
+      const target = walkStreetPosition({ ...positionFor(), x: Number(button.dataset.eventX), y: Number(button.dataset.eventY) }, { x: 0, y: 0 }, 0);
+      await walkStreetSegment(district, positionFor().x, target.x, 420, target.y);
+      if (M.selectedActor !== actorId || M.streetDistrict !== district) return;
+    }
+    M.handlers.onEvent(button.dataset.event);
+  }; });
+  root.querySelectorAll('[data-street-actor]').forEach((button) => { button.onclick = () => { if (!interactionBlocked()) M.handlers.onActorUse?.(button.dataset.streetActor); }; });
+  layoutActorHotspots(M.streetPositions);
+}
+
+function layoutActorHotspots(positions) {
+  const camp = M.streetDistrict === 'camp', camera = campCamera(), width = camp ? 72 : 48, height = camp ? 114 : 76;
+  for (const button of $('streetOverlay')?.querySelectorAll('[data-street-actor]') || []) {
+    const position = positions[button.dataset.streetActor];
+    if (!position) { button.hidden = true; continue; }
+    const x = position.x - camera;
+    button.hidden = x < width / 2 || x > 960 - width / 2;
+    button.style.left = `${(x - width / 2) / 960 * 100}%`;
+    button.style.top = `${(position.y - height) / 540 * 100}%`;
+    button.style.width = `${width / 960 * 100}%`;
+    button.style.height = `${height / 540 * 100}%`;
+  }
 }
 
 function layoutCampHotspots(root) {

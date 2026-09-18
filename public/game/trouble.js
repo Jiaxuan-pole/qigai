@@ -78,20 +78,25 @@ function fight(state, opts, events) {
   const { kind, actorId, allies, key } = opts;
   const mine = fightPower(state, actorId, allies);
   const theirs = between(roll(state, key, 'them') , [0, 100]) / 100 * ((kind === 'chengguan' ? C.chengguanPower : C.thugPower)[1] - (kind === 'chengguan' ? C.chengguanPower : C.thugPower)[0]) + (kind === 'chengguan' ? C.chengguanPower : C.thugPower)[0];
-  const margin = theirs - mine;
   const win = roll(state, key, 'win') < mine / (mine + theirs);
+  return applyFightOutcome(state, { ...opts, mine, theirs, win }, events);
+}
+
+export function applyFightOutcome(state, opts, events = []) {
+  const { kind, actorId, allies = [], key, mine, theirs, win } = opts;
+  const margin = theirs - mine;
   const p = state.actors[actorId];
   const n = NAMES(state, actorId);
   const result = { outcome: win ? 'win' : 'lose', injuries: {}, cash: 0, items: [], mind: 0, text: '' };
   if (win) {
-    const scratch = roll(state, key, 'scratch') < C.winScratch;
+    const scratch = opts.scratch ?? roll(state, key, 'scratch') < C.winScratch;
     result.injuries[actorId] = applyInjury(state, actorId, scratch ? 'light' : 'none', key, events);
     p.mind = clamp(p.mind + C.winMind); result.mind = C.winMind;
     if (kind === 'thugs') { state.flags.thugRespect = state.day + C.respectDays; result.text = `${n}${allies.length ? '和' + allies.map((id) => NAMES(state, id)).join('、') : ''}把两个混混打跑了${scratch ? '，' + INJURY_TEXT.light(n) : ''}。这片十天内他们不会再来。精神+${C.winMind}。`; }
     else result.text = `${n}挣开了，人没被带走${scratch ? '，' + INJURY_TEXT.light(n) : ''}。什么也没捞着，摊也没了。`;
     return result;
   }
-  const severity = margin >= C.margin.heavy ? 'heavy' : margin >= C.margin.medium ? 'medium' : 'light';
+  const severity = opts.severity || (margin >= C.margin.heavy ? 'heavy' : margin >= C.margin.medium ? 'medium' : 'light');
   result.injuries[actorId] = applyInjury(state, actorId, severity, key, events);
   p.mind = clamp(p.mind - C.loseMind); result.mind = -C.loseMind;
   const hurt = INJURY_TEXT[severity](n) + `：健康-${result.injuries[actorId].health}`;

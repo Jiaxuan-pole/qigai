@@ -22,6 +22,7 @@ export const FILES = {
     coffee_sip: 'coffee-sip.ogg', cook_sizzle: null, charcoal_ignite: null, meal: 'meal.ogg',
     work_sort: 'work-sort.ogg', work_rotate: 'work-rotate.ogg', work_camera: 'work-camera.ogg', work_cut: 'work-cut.ogg', work_handoff: 'work-handoff.ogg', work_success: 'work-success.ogg', work_miss: 'work-miss.ogg', cups_shuffle: 'cups-shuffle.ogg',
     parcel_arrive: 'parcel-arrive.ogg', parcel_open: 'parcel-open.ogg', furniture_place: 'furniture-place.ogg', furniture_move: 'furniture-move.ogg', sleep_ground: 'sleep-ground.ogg', sleep_bed: 'sleep-bed.ogg',
+    combat_swing: 'cloth.ogg', combat_hit: 'combat-hit.ogg', combat_block: 'combat-block.ogg', combat_flee: 'combat-flee.ogg', combat_win: 'work-success.ogg', combat_lose: 'work-miss.ogg',
   },
 };
 // 能合成的名字（文件缺失或格式不支持时兜底）。

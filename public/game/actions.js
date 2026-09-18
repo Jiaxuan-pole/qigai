@@ -65,3 +65,14 @@ export const BINS_ZONES = ['market', 'station', 'recycle'];
 export function actionList() {
   return Object.values(ACTIONS).filter((a) => !a.eventOnly);
 }
+
+const REPEATABLE = new Set(['scavenge', 'beg', 'bottles', 'fish', 'soup', 'bins', 'repair', 'run', 'carry', 'rest', 'sleep', 'warm', 'wash', 'joke', 'sketch', 'freecards']);
+const DEFAULT_DURATION = { scavenge: 2, bottles: 2, fish: 2, repair: 2, run: 2, carry: 2, rest: 2, sleep: 2, warm: 2 };
+
+export function actionDuration(actionId) {
+  const action = Object.hasOwn(ACTIONS, actionId) ? ACTIONS[actionId] : null;
+  if (!action) return null;
+  const max = REPEATABLE.has(actionId) ? Math.min(action.limit || Infinity, actionId === 'sleep' ? 8 : 4) : 1;
+  const defaultHours = DEFAULT_DURATION[actionId] || 1;
+  return { defaultHours, default: defaultHours, options: Array.from({ length: max }, (_, i) => i + 1) };
+}

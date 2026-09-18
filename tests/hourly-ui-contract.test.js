@@ -110,6 +110,98 @@ test('体力与咖啡额度合计不足时给可达补给入口，足够时不�
   }
 });
 
+test('行动显示独立时长选择和总消耗，连续计划显示结束时间', async () => {
+  await loadData();
+  const state = fresh(184);
+  state.pendingMorning = null;
+  const cells = Object.fromEntries(['drawer', 'schedule', 'planFocus', 'btnAdvance', 'planStatus'].map(id => [id, { innerHTML: '', textContent: '', style: {} }]));
+  const before = globalThis.document;
+  globalThis.document = { getElementById: id => cells[id] };
+  UI.state = state; UI.data = await loadData();
+  Object.assign(UI.sel, { actor: 'xuan', hour: 6, action: 'sleep', zone: null, duration: 3, cart: [], targets: [] });
+  try {
+    renderDrawer(state);
+    assert.match(cells.drawer.innerHTML, /id="durationPick"/);
+    assert.match(cells.drawer.innerHTML, /06:00.*09:00/);
+    assert.match(cells.drawer.innerHTML, /精神/);
+    const result = assign(state, 'xuan', 6, 'sleep', { duration: 3 });
+    assert.equal(result.error, undefined);
+    renderSchedule(result.state);
+    assert.match(cells.schedule.innerHTML, /连续3小时/);
+    assert.match(cells.schedule.innerHTML, /09:00/);
+    assert.match(cells.schedule.innerHTML, /基础精神\+0/);
+  } finally { globalThis.document = before; UI.sel.duration = undefined; }
+});
+
+test('行动抽屉使用引擎预估显示工资加成后的完整收支', async () => {
+  await loadData();
+  const state = fresh(185);
+  state.pendingMorning = null;
+  state.flags.trialPassed = true;
+  state.actors.xuan.energy = 100;
+  const drawer = { innerHTML: '' };
+  const before = globalThis.document;
+  globalThis.document = { getElementById: (id) => id === 'drawer' ? drawer : null };
+  UI.state = state; UI.data = await loadData();
+  Object.assign(UI.sel, { actor: 'xuan', hour: 6, action: 'repair', zone: null, duration: 2, cart: [], targets: [] });
+  try {
+    renderDrawer(state);
+    assert.match(drawer.innerHTML, /预计变化：精神 \+0（待结算 -2）·体力 -40·现金 \+60/);
+    assert.match(drawer.innerHTML, /每小时基础耗材：<b>零件1<\/b>/);
+  } finally { globalThis.document = before; UI.sel.duration = undefined; }
+});
+
+test('行动抽屉使用引擎预估显示睡眠实际恢复', async () => {
+  await loadData();
+  const state = fresh(186);
+  state.pendingMorning = null;
+  state.actors.xuan.energy = 10;
+  const drawer = { innerHTML: '' };
+  const before = globalThis.document;
+  globalThis.document = { getElementById: (id) => id === 'drawer' ? drawer : null };
+  UI.state = state; UI.data = await loadData();
+  Object.assign(UI.sel, { actor: 'xuan', hour: 6, action: 'sleep', zone: null, duration: 3, cart: [], targets: [] });
+  try {
+    renderDrawer(state);
+    assert.match(drawer.innerHTML, /预计变化：精神 \+0·体力 \+60·现金 \+0/);
+  } finally { globalThis.document = before; UI.sel.duration = undefined; }
+});
+
+test('行动抽屉将资源不足的部分预估标为未完整执行', async () => {
+  await loadData();
+  const state = fresh(187);
+  state.pendingMorning = null;
+  state.actors.xuan.energy = 100;
+  state.parts = 1;
+  const drawer = { innerHTML: '' };
+  const before = globalThis.document;
+  globalThis.document = { getElementById: (id) => id === 'drawer' ? drawer : null };
+  UI.state = state; UI.data = await loadData();
+  Object.assign(UI.sel, { actor: 'xuan', hour: 6, action: 'repair', zone: null, duration: 2, cart: [], targets: [] });
+  try {
+    renderDrawer(state);
+    assert.match(drawer.innerHTML, /仅完成1\/2小时：精神 \+0（待结算 -1）·体力 -20·现金 \+26/);
+    assert.match(drawer.innerHTML, /后续未执行：零件不足/);
+    assert.doesNotMatch(drawer.innerHTML, /预计变化：精神 \+0（待结算 -1）·体力 -20·现金 \+26/);
+  } finally { globalThis.document = before; UI.sel.duration = undefined; }
+});
+
+test('行动抽屉重绘时保留当前乞讨方式供预估和安排使用', async () => {
+  await loadData();
+  const state = fresh(188);
+  state.pendingMorning = null;
+  const drawer = { innerHTML: '', querySelector: (selector) => selector === '#begStyle' ? { value: 'sign' } : null };
+  const before = globalThis.document;
+  globalThis.document = { getElementById: (id) => id === 'drawer' ? drawer : null };
+  UI.state = state; UI.data = await loadData();
+  Object.assign(UI.sel, { actor: 'xuan', hour: 6, action: 'beg', zone: 'market', duration: 1, cart: [], targets: [] });
+  try {
+    renderDrawer(state);
+    assert.match(drawer.innerHTML, /预计变化：/);
+    assert.match(drawer.innerHTML, /option value="sign" selected/);
+  } finally { globalThis.document = before; UI.sel.duration = undefined; }
+});
+
 test('夜间库存可看但咖啡使用入口被禁用', async () => {
   await loadData();
   const state = fresh(85);
@@ -127,7 +219,7 @@ test('夜间库存可看但咖啡使用入口被禁用', async () => {
     assert.match(modalContent.innerHTML, /结束夜间活动后可在清晨使用物品/);
     UI.night = null;
     showInventory('xuan');
-    assert.match(modalContent.innerHTML, /data-use="[^"]+" data-actor="xuan"\s*>使用/);
+    assert.match(modalContent.innerHTML, /data-use="[^"]+" data-actor="xuan"\s*>轩哥使用/);
   } finally {
     UI.night = null;
     globalThis.document = priorDocument;

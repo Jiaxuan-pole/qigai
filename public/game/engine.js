@@ -3,7 +3,11 @@
 import { getData, indexById } from './data.js';
 import { rng } from './rng.js';
 import { clamp, foodReserve } from './rules.js';
-import { ACTIONS, BEG_ZONES, BINS_ZONES, OUT_ZONES, REPAIR_ZONES } from './actions.js';
+import { ACTIONS, BEG_ZONES, BINS_ZONES, OUT_ZONES, REPAIR_ZONES, actionDuration } from './actions.js';
+import { assignDuration } from './schedule.js';
+export { actionDuration };
+export { actionEstimate } from './schedule.js';
+export { itemUsage } from './item-usage.js';
 import { makeItem, accessibleItems, consumeUse, effectiveFood, findItem, FOOD_VALUE, isFood, foodFresh, itemDef } from './items.js';
 import { freshStock, validateCart, executeCart, shopClosedReason, shopDef, shopsInDistrict } from './shop.js';
 import { fulfillWish, activeWishes, respondWish } from './wishes.js';
@@ -39,7 +43,7 @@ export const IDS = ['xuan', 'fan', 'ma'];
 export const NAMES = { xuan: '轩哥', fan: '凡哥', ma: '马哥' };
 export const SLOTS = ['清晨', '日间', '午后', '晚间'];
 export const copy = (s) => JSON.parse(JSON.stringify(s));
-const pendingWorkError = (s) => s.pending?.workGames?.length ? { state: s, error: '先完成手头小游戏' } : null;
+const pendingWorkError = (s) => s.pending?.combat ? { state: s, error: '先完成当前战斗并确认结果' } : s.pending?.workGames?.length ? { state: s, error: '先完成手头小游戏' } : null;
 
 function finishImmediateIncome(input, state, actorId, controlledActorId, variant, sourceUid, label) {
   const basePay = state.cash - input.cash;
@@ -76,7 +80,7 @@ export function fresh(seed = 260916) {
     names: NAMES,
     cash: 72, parts: 2, battery: 3, wood: 2, cloth: 4, art: 0, footage: 0, vouchers: 1,
     camp: { rain: 1, beds: 0, floorSheets: 2, furnitureVersion: 1, placements: [], parcels: [], parcelSeq: 0, dirt: 10, bedPriority: ['xuan', 'fan', 'ma'], facilities: [null, null] },
-    cardboard: 0, loans: [], pending: { bins: [], beg: [], cards: null, fishingQte: [], riverFight: null, workGames: [] }, workGameCompleted: [], films: [],
+    cardboard: 0, loans: [], pending: { bins: [], beg: [], cards: null, fishingQte: [], riverFight: null, workGames: [], combat: null }, workGameCompleted: [], films: [],
     actors: { xuan: actorFrom(actors.xuan.initial, 'active', 'xuan'), fan: actorFrom(actors.fan.initial, 'active', 'fan'), ma: actorFrom(actors.ma.initial, 'unrecruited', 'ma') },
     items: [], itemSeq: 0, ticketSeq: 0, wishes: [], wishSeq: 0, diseaseSeq: 0,
     shops: freshStock(), relations: {}, events: [], eventSeq: 0, eventCooldown: {}, recentTemplates: [], seenTemplates: {},
@@ -147,11 +151,15 @@ export function cancelAt(s, id, hour) {
   else s.plan[id][index] = null;
 }
 
-// 排程一格。opts: participants, target, zone, cart, destination, targets, eventUid, pay, extraCost, costOverride
+// duration 连续安排独立小时；旧存档的 hours/busy 仍保持一次性任务语义。
 export function assign(input, id, hour, actionId, opts = {}) {
+  if (pendingWorkError(input)) return pendingWorkError(input);
   if (input.phase === 'tail') { if (!['aid', 'rescue', 'wait', 'rest'].includes(actionId)) return { error: '尾声回合只处理救援：可选联系救助、陪同送援、等待或休息。', state: input }; }
   else if (input.phase !== 'planning') return { error: '当前需先处理剧情、相遇或结算画面。', state: input };
   if (!IDS.includes(id) || !Number.isInteger(hour) || hour < input.hour || (input.phase === 'tail' ? hour < 22 || hour > 23 : hour < 6 || hour > 21) || !Object.hasOwn(ACTIONS, actionId)) return { error: '无效角色、行动或已完成小时。', state: input };
+  const duration = opts.duration === undefined ? 1 : opts.duration;
+  if (!Number.isInteger(duration) || !actionDuration(actionId).options.includes(duration)) return { error: '请选择这项行动支持的整数小时时长。', state: input };
+  if (duration > 1) return assignDuration(input, id, hour, actionId, opts);
   if (input.busy?.[id] && hour < input.hour + input.busy[id].remainingHours) return { error: '角色正在执行任务，不能覆盖。', state: input };
   const slot = input.phase === 'tail' ? 3 : slotOfHour(hour), index = input.phase === 'tail' ? hour - 22 : planIndex(hour);
   const a = ACTIONS[actionId];

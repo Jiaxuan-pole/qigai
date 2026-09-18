@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="/ui/camp-night.css">
 <link rel="stylesheet" href="/ui/saves.css">
 <link rel="stylesheet" href="/ui/work-games.css">
+<link rel="stylesheet" href="/ui/life.css">
 <link rel="preload" as="image" href="/art/title-wide-20260918.png" media="(min-width:701px)">
 <link rel="preload" as="image" href="/art/title-portrait-20260918.png" media="(max-width:700px)">
 </head>
@@ -40,7 +41,7 @@
     <div class="topstats">
       <div class="stat-chip"><small>日</small><b id="tDay"></b></div>
       <div class="stat-chip"><small>回合</small><b id="tTurn"></b></div>
-      <div class="stat-chip"><small>时间</small><b id="tSlot"></b></div>
+      <div class="stat-chip clock-chip"><small id="clockStatus">时间流逝</small><b id="tSlot"></b><button id="clockToggle" type="button" aria-label="暂停时间" title="暂停时间">Ⅱ</button></div>
       <div class="stat-chip"><small>天气</small><b id="tWeather"></b></div>
       <div class="stat-chip gold"><small>公共现金</small><b id="tCash"></b></div>
       <div class="stat-chip"><small>有效食物</small><b id="tFood"></b></div>
@@ -56,6 +57,7 @@
   </header>
 
   <div class="chapterline" id="chapterLine"></div>
+  <div id="taskStrip" class="task-strip" aria-label="当前任务"></div>
 
   <main class="workspace">
     <aside class="characters" id="characters" aria-label="三名主角"></aside>
@@ -69,6 +71,7 @@
           <button id="streetMode" type="button" aria-pressed="false">街道</button>
           <button data-open="map">地图列表</button>
           <button data-open="events">热点 <b id="eventCount">0</b></button>
+          <button data-open="tasks">任务</button>
         </div>
       </div>
       <div class="map-wrap" id="mapWrap">
@@ -78,7 +81,7 @@
         <div id="streetOverlay" class="street-overlay"></div>
         <div id="streetTransition" class="street-transition" aria-live="polite"></div>
       </div>
-      <div id="streetControls" class="street-controls" hidden><label>查看街区 <select id="streetDistrict"></select></label><span id="streetStatus"></span><div class="street-walk"><button id="walkLeft" type="button" aria-label="向左走">← 左行</button><button id="walkRight" type="button" aria-label="向右走">右行 →</button></div><div id="streetExits" class="street-exits"></div></div>
+      <div id="streetControls" class="street-controls" hidden><label>查看街区 <select id="streetDistrict"></select></label><span id="streetStatus"></span><div class="street-walk"><button id="walkLeft" type="button" aria-label="向左走" title="向左走">←</button><button id="walkUp" type="button" aria-label="向上走" title="向上走">↑</button><button id="walkDown" type="button" aria-label="向下走" title="向下走">↓</button><button id="walkRight" type="button" aria-label="向右走" title="向右走">→</button></div><div id="streetExits" class="street-exits"></div></div>
       <div class="quote"><b id="speaker"></b><span id="quote"></span></div>
     </section>
 
@@ -104,7 +107,7 @@
       <div class="plan-footer">
         <div id="planStatus" class="plan-status"></div>
         <div class="plan-actions">
-          <button id="btnAdvance" class="primary">开始行动</button><small>开始后时间推进1小时</small>
+          <button id="btnAdvance" class="primary" title="立即完成当前一小时">开始行动</button>
         </div>
       </div>
     </section>

@@ -15,7 +15,17 @@ test('新增 cue 都能解析到存在的短素材或合成实现', async () => 
   assert.equal(Object.keys(FILES.sfx).length >= names.length, true);
 });
 
-test('作用域取消、静音、隐藏能阻止迟到解码播放并停止已发声节点', async () => {
+test('格斗 cue 使用本地短音素材', async () => {
+  const { readFile } = await import('node:fs/promises');
+  for (const name of ['combat_swing', 'combat_hit', 'combat_block', 'combat_flee', 'combat_win', 'combat_lose']) {
+    const source = resolveSource('sfx', name);
+    assert.ok(source?.file, `${name} 缺少声音文件`);
+    const data = await readFile(new URL(`../public${source.file}`, import.meta.url));
+    assert.equal(data.subarray(0, 4).toString(), 'OggS', `${name} 不是 Ogg 音频`);
+  }
+});
+
+for (const [sound, scope] of [['parcel_open', 'furniture'], ['combat_hit', 'combat']]) test(`${scope} 作用域取消、静音、隐藏能阻止迟到解码播放并停止已发声节点`, async () => {
   const old = { window: globalThis.window, document: globalThis.document, fetch: globalThis.fetch, localStorage: globalThis.localStorage };
   const listeners = new Map();
   const starts = [];
@@ -34,28 +44,28 @@ test('作用域取消、静音、隐藏能阻止迟到解码播放并停止已�
   globalThis.document = { hidden: false, addEventListener(type, fn) { listeners.set(type, fn); }, getElementById() { return null; }, createElement() { return { canPlayType: () => 'probably' }; } };
   globalThis.fetch = async () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(4) });
   try {
-    const { initAudio } = await import(`../public/ui/audio.js?feature-lifecycle=${Date.now()}`);
+    const { initAudio } = await import(`../public/ui/audio.js?feature-lifecycle=${scope}`);
     initAudio(); listeners.get('pointerdown')();
-    const first = window.jwsnAudio.play('parcel_open', { scope: 'furniture' });
+    const first = window.jwsnAudio.play(sound, { scope });
     for (let i = 0; i < 5 && !pending.length; i++) await new Promise((resolve) => setImmediate(resolve));
     assert.ok(pending.length >= 1);
-    window.jwsnAudio.cancelScope('furniture');
+    window.jwsnAudio.cancelScope(scope);
     pending.at(-1)({ duration: 0.2 });
     await first;
     assert.equal(starts.length, 0);
-    const second = window.jwsnAudio.play('parcel_open', { scope: 'furniture' });
+    const second = window.jwsnAudio.play(sound, { scope });
     await second;
     assert.equal(starts.length, 1);
-    window.jwsnAudio.cancelScope('furniture');
+    window.jwsnAudio.cancelScope(scope);
     assert.equal(starts[0].stopped, true);
     assert.equal(window.jwsnAudio.state.sfxActive, 0);
-    const third = window.jwsnAudio.play('parcel_open'); await third;
+    const third = window.jwsnAudio.play(sound); await third;
     window.jwsnAudio.mute(true);
     assert.equal(starts[1].stopped, true);
     assert.equal(window.jwsnAudio.state.sfxActive, 0);
     window.jwsnAudio.mute(false);
     document.hidden = true; listeners.get('visibilitychange')();
-    await window.jwsnAudio.play('parcel_open');
+    await window.jwsnAudio.play(sound);
     assert.equal(starts.length, 2);
   } finally { Object.assign(globalThis, old); }
 });

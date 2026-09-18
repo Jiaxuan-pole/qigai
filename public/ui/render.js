@@ -1,7 +1,7 @@
 // 主界面渲染：顶栏、人物卡、地图覆盖层、行动抽屉、排程、记事。
 import { $, esc, UI } from './core.js';
-import { ACTIONS, BEG_ZONES, BINS_ZONES, OUT_ZONES } from '../game/actions.js';
-import { available, energyCost, reserve, SLOTS, NAMES, IDS, alive, active, weather, careOptions, passersby, binsAvailable } from '../game/engine.js';
+import { ACTIONS, actionDuration, BEG_ZONES, BINS_ZONES, OUT_ZONES } from '../game/actions.js';
+import { actionEstimate, available, reserve, SLOTS, NAMES, IDS, alive, active, weather, careOptions, passersby, binsAvailable } from '../game/engine.js';
 import { wishSummary, activeWishes } from '../game/wishes.js';
 import { diseaseLabel } from '../game/health.js';
 import { forecast, chapterOf, dayNode, weatherOf } from '../game/story.js';
@@ -79,17 +79,34 @@ function card(s, id) {
   for (const d of p.diseases) cond.push(`<span class="chip ill">${esc(diseaseLabel(d))}</span>`);
   if (p.zeroTurns > 0 && !p.crisis) cond.push(`<span class="chip ill">精神0×${p.zeroTurns}</span>`);
   if (p.grief) cond.push('<span class="chip">哀伤</span>');
-  return `<div class="char-head"><canvas class="portrait" id="portrait-${id}" width="32" height="38" aria-hidden="true"></canvas><div><div class="char-name">${NAMES[id]}</div><div class="role">${ROLES[id]}</div><span class="badge ${p.life !== 'active' || p.crisis ? 'bad' : ''}">${life}</span></div></div>
+  const warning = p.diseases.length ? `${p.diseases.some(d => d.severity >= 60) ? '病情重度' : '患病'} · ${p.diseases.map(d => diseaseLabel(d)).join('、')}` : p.exposure.wound && !p.exposure.woundCovered ? '伤口未护理' : '';
+  return `<div class="char-head"><canvas class="portrait" id="portrait-${id}" width="32" height="38" aria-hidden="true"></canvas><div><div class="char-name">${NAMES[id]}</div><span class="badge ${p.life !== 'active' || p.crisis ? 'bad' : ''}">${life}</span></div></div>
+  <div class="char-compact-stats">${[['健康', 'health'], ['体力', 'energy'], ['精神', 'mind']].map(([label, k]) => `<span class="char-summary-stat ${p[k] < 30 ? 'bad' : ''}"><span>${label}</span><b>${p[k]}</b></span>`).join('')}</div>
+  ${warning ? `<div class="char-warning">${esc(warning)}</div>` : ''}
+  <div class="char-details" id="character-details-${id}"${UI.characterExpanded?.[id] ? '' : ' hidden'}>
+  <div class="role">${ROLES[id]}</div>
   <div class="stats">${[['健康', 'health'], ['饱食', 'food'], ['体力', 'energy'], ['精神', 'mind']].map(([label, k]) => `<div class="stat"><span>${label}</span><div class="track"><div class="fill ${p[k] < 30 ? 'low' : ''}" style="width:${p[k]}%"></div></div><span class="value">${p[k]}</span></div>`).join('')}</div>
   <div class="condrow">${cond.join('')}</div>
   ${p.life === 'active' && p.energy + (p.coffeeCredit || 0) < 20 ? '<p class="energy-hint">当前行动额度不足20：睡1小时恢复20；便利店速溶4杯或咖啡店现制2杯补20（混饮累计）。</p>' : ''}
   ${top ? `<div class="wishbubble">${esc(top.tpl.indirectLine)}<small>可能在想：${esc(top.tpl.name)} · 强度${Math.round(top.intensity)}${top.lastLoss ? ' · 上次生存结算精神-' + top.lastLoss : ''}${wishes.length > 1 ? ' · 另有' + (wishes.length - 1) + '项' : ''}</small></div>` : latent ? '<div class="wishbubble"><small>有个念头还没说出口</small></div>' : ''}
-  <div class="locline">现在在：${zoneName(p.location)}</div>`;
+  <div class="locline">现在在：${zoneName(p.location)}</div></div>`;
 }
 
-function renderCharacters(s) {
+export function renderCharacters(s) {
   const root = $('characters');
-  root.innerHTML = IDS.map((id) => `<div class="char-card ${UI.sel.actor === id ? 'selected' : ''} ${s.actors[id].life === 'dead' ? 'dead' : ''} ${s.actors[id].life === 'downed' ? 'downed' : ''}" style="--who:${COLORS[id]}" data-actor="${id}" tabindex="0" role="button">${card(s, id)}</div>`).join('');
+  UI.characterExpanded ||= {};
+  root.innerHTML = IDS.map((id) => `<div class="character-shell"><div class="char-card ${UI.sel.actor === id ? 'selected' : ''} ${s.actors[id].life === 'dead' ? 'dead' : ''} ${s.actors[id].life === 'downed' ? 'downed' : ''}" style="--who:${COLORS[id]}" data-actor="${id}" tabindex="0" role="button">${card(s, id)}</div>${s.actors[id].life !== 'unrecruited' ? `<button type="button" class="char-expand" data-character-toggle="${id}" aria-controls="character-details-${id}" aria-expanded="${Boolean(UI.characterExpanded[id])}" aria-label="${UI.characterExpanded[id] ? '收起' : '展开'}${NAMES[id]}的完整状态" title="${UI.characterExpanded[id] ? '收起' : '展开'}完整状态"><span aria-hidden="true" class="char-chevron"></span></button>` : ''}</div>`).join('');
+  root.querySelectorAll('[data-character-toggle]').forEach(button => {
+    button.onclick = () => {
+      const id = button.dataset.characterToggle;
+      const expanded = !UI.characterExpanded[id];
+      UI.characterExpanded[id] = expanded;
+      $('character-details-' + id).hidden = !expanded;
+      button.setAttribute('aria-expanded', String(expanded));
+      button.setAttribute('aria-label', `${expanded ? '收起' : '展开'}${NAMES[id]}的完整状态`);
+      button.title = `${expanded ? '收起' : '展开'}完整状态`;
+    };
+  });
   for (const id of IDS) if (s.actors[id].life !== 'unrecruited') portrait($('portrait-' + id), id, moodOf(s.actors[id]));
 }
 
@@ -123,6 +140,8 @@ function zoneOf(a, sel) {
 
 export function renderDrawer(s) {
   const root = $('drawer');
+  const selectedPartner = root.querySelector?.('#partner')?.value;
+  const selectedStyle = root.querySelector?.('#begStyle')?.value;
   const id = UI.sel.actor;
   const p = s.actors[id];
   const hour = s.hour;
@@ -142,20 +161,35 @@ export function renderDrawer(s) {
   const a = ACTIONS[UI.sel.action];
   const groups = {};
   for (const k of possible) { const g = actionGroup(ACTIONS[k]); (groups[g] = groups[g] || []).push(k); }
-  const list = Object.entries(groups).map(([g, ks]) => `<div class="section-tag" style="margin-top:6px">${g}</div>` + ks.map((k) => { const x = ACTIONS[k]; const sub = x.cash ? '收入' + x.cash : x.begging ? '路人' : x.gamble ? '博彩' : x.mind ? '精神+' + x.mind : x.rescue || x.aid ? '救命' : x.shopping ? '买东西' : '生活'; return `<button class="actionoption ${UI.sel.action === k ? 'active' : ''}" data-action="${k}"><span>${x.min || x.fixed ? '↔ ' : ''}${esc(x.name)}</span><small>${sub}</small></button>`; }).join('')).join('');
+  const list = Object.entries(groups).map(([g, ks]) => `<div class="section-tag" style="margin-top:6px">${g}</div>` + ks.map((k) => { const x = ACTIONS[k]; const timing = actionDuration(k); const hours = timing.defaultHours ?? timing.default; const mind = x.mind || 0; return `<button class="actionoption ${UI.sel.action === k ? 'active' : ''}" data-action="${k}"><span>${x.min || x.fixed ? '↔ ' : ''}${esc(x.name)}</span><small>${hours}小时 · 精神${mind > 0 ? '+' : ''}${mind}/小时</small></button>`; }).join('')).join('');
   let detail = '';
   if (a) {
+    const timing = actionDuration(a.id);
+    const durations = timing.options.filter(h => h + hour <= (s.phase === 'tail' ? 24 : DAY_END_HOUR));
+    if (!durations.includes(UI.sel.duration)) UI.sel.duration = durations.includes(timing.defaultHours ?? timing.default) ? (timing.defaultHours ?? timing.default) : durations[0] || 1;
+    const duration = UI.sel.duration;
+    const period = `${String(hour).padStart(2, '0')}:00 → ${String(hour + duration).padStart(2, '0')}:00`;
     const zone = zoneOf(a, UI.sel);
     const cost = a.cost ? Object.entries(a.cost).map(([k, v]) => ({ cash: '现金', parts: '零件', battery: '电量', wood: '木料', cloth: '布料' }[k]) + v).join('、') : '无';
     const limit = a.limit ? `本日已用${s.daily.orders[UI.sel.action] || 0}/${a.limit}` : '';
     let chooser = '';
-    if (a.rescue) { const targets = alive(s).filter((x) => s.actors[x].life === 'downed' && x !== id); chooser = `<label class="choice-label">救援目标<select id="partner">${targets.map((x) => `<option value="${x}">${NAMES[x]} · 剩${s.actors[x].deadline - s.turn}回合</option>`).join('') || '<option value="">当前无人濒死</option>'}</select></label>`; }
-    else if (a.min === 2) { const partners = active(s).filter((x) => x !== id); chooser = `<label class="choice-label">合作伙伴<select id="partner">${partners.map((x) => `<option value="${x}">${NAMES[x]}</option>`).join('') || '<option value="">没有可行动伙伴</option>'}</select></label>`; }
+    const planned = s.plan[id][index];
+    const plannedPartner = planned?.participants?.find((x) => x !== id);
+    let partner = selectedPartner || (a.rescue ? planned?.target : plannedPartner) || '';
+    if (a.rescue) {
+      const targets = alive(s).filter((x) => s.actors[x].life === 'downed' && x !== id);
+      partner ||= targets[0] || '';
+      chooser = `<label class="choice-label">救援目标<select id="partner">${targets.map((x) => `<option value="${x}" ${partner === x ? 'selected' : ''}>${NAMES[x]} · 剩${s.actors[x].deadline - s.turn}回合</option>`).join('') || '<option value="">当前无人濒死</option>'}</select></label>`;
+    } else if (a.min === 2) {
+      const partners = active(s).filter((x) => x !== id);
+      partner ||= partners[0] || '';
+      chooser = `<label class="choice-label">合作伙伴<select id="partner">${partners.map((x) => `<option value="${x}" ${partner === x ? 'selected' : ''}>${NAMES[x]}</option>`).join('') || '<option value="">没有可行动伙伴</option>'}</select></label>`;
+    }
     if (a.zone === 'pick') {
       const zones = a.begging ? BEG_ZONES : a.bins ? BINS_ZONES : OUT_ZONES.filter((z) => UI.data.shops.some((sh) => sh.district === z));
       chooser += `<label class="choice-label">去哪个街区<select id="zonePick">${zones.map((z) => `<option value="${z}" ${zone === z ? 'selected' : ''}>${zoneName(z)}</option>`).join('')}</select></label>`;
       if (a.begging && zone) {
-        const curStyle = s.plan[id][index]?.style || 'ask';
+        const curStyle = selectedStyle || planned?.style || 'ask';
         chooser += `<label class="choice-label">怎么讨<select id="begStyle"><option value="ask" ${curStyle === 'ask' ? 'selected' : ''}>开口求助（读人对话：选开场白再开口，被拒精神-1/上限2）</option><option value="sign" ${curStyle === 'sign' ? 'selected' : ''}>举纸板（被拒不伤精神，给得少1块）</option>${id === 'fan' ? `<option value="perform" ${curStyle === 'perform' ? 'selected' : ''}>速写换零钱（消耗1格纸笔，少被拒、多给4块）</option>` : ''}</select></label>`;
         const list2 = passersby(s, zone, slot);
         chooser += `<div class="choice-label">选最多3位路人（不选=自动挑没问过的）</div><div class="pick-list">${list2.map((n) => `<label><input type="checkbox" data-npc="${n.id}" ${UI.sel.targets.includes(n.id) ? 'checked' : ''} ${n.asked ? 'disabled' : ''}>${esc(n.name)}${n.regular ? '（熟人' + (n.trust ? '·信任' + n.trust : '') + '）' : n.job ? '·' + esc(n.job) : ''} · ${esc(n.mood.label)}${n.asked ? ' · 今天问过' : ''}</label>`).join('')}</div>`;
@@ -163,8 +197,20 @@ export function renderDrawer(s) {
       if (a.bins && zone) chooser += `<div class="choice-label">这里的桶</div><div class="pick-list">${binsAvailable(s, zone).map((b) => `<label>${esc(b.name)} ${b.used ? '· 今天翻过' : '· 可翻'}</label>`).join('')}</div>`;
       if (a.shopping && zone) chooser += `<div class="choice-label">采购清单</div><div class="pick-list">${UI.sel.cart.length ? UI.sel.cart.map((l) => `<label>${esc(UI.data.items.find((i) => i.id === l.itemId)?.name)} ×${l.qty}（${esc(shopDef(l.shopId).name)}）</label>`).join('') : '<label class="muted">到店再买也行，或点店铺先列清单</label>'}</div><button data-openshop="${zone}" style="margin-top:6px;width:100%">列采购单 / 看店</button>`;
     }
-    const cash0 = s.cash - (a.cost?.cash || 0) - UI.sel.cart.reduce((t, l) => t + UI.data.items.find((i) => i.id === l.itemId).price * l.qty, 0);
-    const budget = `<div class="budget"><span>执行地点：<b>${zone ? zoneName(zone) : '待选'}</b>${a.indoor ? '（室内）' : ''}</span><span>体力成本 <b>${energyCost(s, id, a)}</b>，基础体力 ${p.energy} + 咖啡额度 ${p.coffeeCredit || 0}${a.energyGain ? ' / 恢复 ' + a.energyGain : ''}</span><span>成本：<b>${cost}</b>；执行后现金约 <b>${cash0}</b>，饭钱保护 <b>${reserve(s)}</b></span>${limit ? `<span>${limit}</span>` : ''}</div>`;
+    const options = { zone, cart: UI.sel.cart, targets: UI.sel.targets, destination: UI.sel.destination, duration };
+    if (a.rescue) { options.target = partner; options.participants = [id, partner]; }
+    else if (a.min === 2) options.participants = [id, partner];
+    else if (a.min === 3) options.participants = [...IDS];
+    if (a.begging) options.style = selectedStyle || planned?.style || 'ask';
+    const estimate = actionEstimate(s, id, a.id, duration, options);
+    const signed = (value) => `${value >= 0 ? '+' : ''}${value}`;
+    const estimateValues = (value) => `精神 ${signed(value.mind)}${value.pendingMind ? `（待结算 ${signed(value.pendingMind)}）` : ''}·体力 ${signed(value.energy)}·现金 ${signed(value.cash)}`;
+    const estimateLine = estimate.error && estimate.completedHours === undefined
+      ? `<span class="bad">无法完整预估：${esc(estimate.error)}</span>`
+      : estimate.complete
+        ? `<span>预计变化：${estimateValues(estimate)}</span>`
+        : `<span class="bad">仅完成${estimate.completedHours}/${duration}小时：${estimateValues(estimate)}<br>后续未执行：${esc(estimate.error || '结算中断。')}</span>`;
+    const budget = `<label class="choice-label">持续时间<select id="durationPick">${durations.map(h => `<option value="${h}" ${duration === h ? 'selected' : ''}>${h}小时</option>`).join('')}</select></label><div class="budget"><span>时间：<b>${period}</b> · 连续${duration}小时</span><span>执行地点：<b>${zone ? zoneName(zone) : '待选'}</b>${a.indoor ? '（室内）' : ''}</span>${estimateLine}<span>每小时基础耗材：<b>${cost}</b></span><span>基础体力 ${p.energy} + 咖啡额度 ${p.coffeeCredit || 0}，饭钱保护 <b>${reserve(s)}</b></span><span class="muted small">随机事件与后续排程会改变实际结果。</span>${limit ? `<span>${limit}</span>` : ''}</div>`;
     const careOpts = s.phase === 'tail' ? [] : careOptions(s, id, hour);
     const careT = s.plan[id][index]?.care;
     const careBlock = p.diseases.length && s.phase !== 'tail' ? `<div class="choice-label">本小时护理（附在行动上）</div><select id="carePick"><option value="">不护理</option>${careOpts.map((o, i) => `<option value="${i}" ${careT && careT.itemUid === o.itemUid && careT.diseaseUid === o.diseaseUid ? 'selected' : ''}>${esc(diseaseLabel(p.diseases.find((d) => d.uid === o.diseaseUid)))} ← ${esc(UI.data.items.find((x) => x.id === o.itemId).name)}（${o.container === 'camp' ? '营地箱' : NAMES[o.container] + '的包'}）${o.support ? '·支持' : o.relief ? '·缓解' : ''}</option>`).join('')}</select>${careOpts.length ? '' : '<p class="muted small">手边没有够得着的匹配用品：用品要在他自己包里、营地箱或同小时同街区同伴包里。</p>'}` : '';
@@ -183,9 +229,11 @@ export function renderSchedule(s) {
     if (p.life === 'unrecruited') return '<div class="next-task empty"><b>尚未相遇</b><small>这里还空着一个位置</small></div>';
     const t = index === null ? null : currentTask(s, id);
     const a = t && ACTIONS[t.id];
+    let duration = 1;
+    if (t && index !== null) while (s.plan[id][index + duration]?.id === t.id && s.plan[id][index + duration]?.zone === t.zone) duration++;
     const title = p.life === 'dead' ? '已死亡' : a ? a.name + (t.zone && a.zone === 'pick' ? ' · ' + zoneName(t.zone) : '') : '等待安排';
     const note = p.life === 'dead' ? '遗物与回顾' : t?.group ? '与同伴一起行动' : t?.cart?.length ? '带采购清单' : p.life === 'downed' ? '需要救援' : '可点击更换';
-    const income = a?.cash ? `预计收入约 ¥${t?.pay ?? a.cash}` : a?.energyGain ? `预计恢复体力 ${a.energyGain}` : '按行动说明结算';
+    const income = a ? `连续${duration}小时 · 至${String(s.hour + duration).padStart(2, '0')}:00 · 基础精神${(a.mind || 0) >= 0 ? '+' : ''}${(a.mind || 0) * duration}` : '自由活动';
     const err = UI.errAt?.actorId === id && UI.errAt.hour === s.hour;
     return `<button class="next-task ${UI.sel.actor === id ? 'selected' : ''} ${err ? 'err' : ''}" style="--who:${COLORS[id]}" data-hour="${s.hour}" data-actor="${id}" ${p.life === 'dead' || !['planning', 'tail'].includes(s.phase) ? 'disabled' : ''}><b>${NAMES[id]}</b><span>${esc(title)}</span><small>基础体力${p.energy} + 咖啡额度${p.coffeeCredit || 0} · ${esc(note)}</small><small>${income}</small></button>`;
   }).join('');

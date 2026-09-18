@@ -4,7 +4,7 @@ import { actionFrame, walkFrame } from './animation.js';
 import { passersby } from '../game/npcs.js';
 import { drawDistrictStorefronts } from './storefront-art.js';
 import { drawStreetObjects } from './street-props.js';
-import { drawStreetNpc } from './npc-art.js';
+import { drawConflictNpc, drawStreetNpc } from './npc-art.js';
 import { drawCafeScene } from './coffee-art.js';
 import { drawCardhallScene } from './cardhall-art.js';
 import { drawFurnitureStoreScene } from './furniture-store-art.js';
@@ -22,6 +22,15 @@ const SCENES = {
   cinema: { sky: '#4b4550', wall: '#86756d', roof: '#665760', awning: '#c6a768', name: '旧影院' },
   service: { sky: '#3b5154', wall: '#869e9b', roof: '#4b6971', awning: '#9eae9e', name: '公共服务' },
   river: { sky: '#3a555d', wall: '#5e7776', roof: '#455d5d', awning: '#9caa84', name: '河堤' },
+};
+
+const RESIDENTS = {
+  market: [['clerk', 204, 324], ['vendor', 592, 323]],
+  recycle: [['worker', 212, 329], ['clerk', 736, 330]],
+  station: [['clerk', 282, 329], ['vendor', 621, 331]],
+  cinema: [['student', 439, 329], ['clerk', 877, 330]],
+  service: [['volunteer', 168, 328], ['clerk', 660, 330]],
+  river: [['student', 258, 338], ['elder', 640, 338]],
 };
 
 function lamp(c, x, night) {
@@ -65,7 +74,7 @@ export function streetPose(actor, moving, action, override, now, reduced) {
   return !reduced && now % 7800 < 480 ? 'idle1' : 'stand';
 }
 
-export function drawStreet(c, state, district, actorId, x, moving, now, reduced, actions = {}, overrides = {}) {
+export function drawStreet(c, state, district, actorId, x, moving, now, reduced, actions = {}, overrides = {}, positions = {}) {
   const scene = SCENES[district] || SCENES.camp;
   const night = state.slot === 3;
   const wet = ['rain', 'storm'].includes(state.weatherKind);
@@ -96,25 +105,46 @@ export function drawStreet(c, state, district, actorId, x, moving, now, reduced,
     for (let i = 0; i < 8; i++) px(c, 540 + i * 51, 388 + i % 2 * 12, 25, 2, '#87aaa8');
     px(c, 420, 404, 112, 11, '#7b6b51'); px(c, 432, 415, 8, 26, '#594f43'); px(c, 513, 415, 8, 26, '#594f43');
   }
-  drawStreetObjects(c, district, wet, reduced ? 0 : Math.floor(now / 220));
-  if (state.seed !== undefined && state.daily?.begged && state.relations) {
-    const people = passersby(state, district, state.slot);
-    for (let i = 0; i < people.length; i++) drawStreetNpc(c, people[i], [115, 815, 572, 367, 905, 70][i], 383 + (i % 2) * 3, reduced ? 0 : Math.floor(now / 350));
-  } else {
-    drawStreetNpc(c, { id: 'cleaner', job: '保洁阿姨' }, 115, 383);
-    drawStreetNpc(c, { id: 'rider', job: '外卖骑手' }, 815, 383);
+  for (const [i, [kind, residentX, residentY]] of (RESIDENTS[district] || []).entries()) {
+    drawStreetNpc(c, { kind }, residentX, residentY, reduced ? 0 : Math.floor(now / 700), { pose: 'stand', facing: i ? -1 : 1, scale: 1 });
   }
+  drawStreetObjects(c, district, wet, reduced ? 0 : Math.floor(now / 220));
+  const people = state.seed !== undefined && state.daily?.begged && state.relations
+    ? passersby(state, district, state.slot)
+    : [{ id: 'cleaner', job: '保洁阿姨' }, { id: 'rider', job: '外卖骑手' }, { id: 'commuter', job: '上班族' }, { id: 'elder', job: '退休大爷' }];
+  for (let i = 0; i < people.length; i++) {
+    const phase = reduced ? 0 : (now / 90 + i * 21) % 72;
+    const direction = phase < 36 ? 1 : -1;
+    const offset = reduced ? 0 : (phase < 36 ? phase : 72 - phase) - 18;
+    drawStreetNpc(c, people[i], [145, 800, 550, 350, 888, 65][i] + offset, 359 + i % 2 * 8, reduced ? 0 : Math.floor(now / 250) + i, { facing: direction, scale: 1.2 });
+  }
+  }
+  if (!['camp', 'cafe', 'cardhall', 'furniture'].includes(district)) {
+    px(c, 63, 299, 84, 82, '#141a1f'); px(c, 67, 303, 76, 74, '#705d49');
+    px(c, 73, 310, 30, 43, '#d7cbb1'); px(c, 108, 317, 28, 48, '#e6dfcc');
+    for (let i = 0; i < 4; i++) { px(c, 77, 318 + i * 7, 21, 2, '#5a4633'); px(c, 113, 325 + i * 7, 18, 2, '#5a4633'); }
+    px(c, 72, 381, 6, 32, '#5a4633'); px(c, 132, 381, 6, 32, '#5a4633');
+  }
+  const streetEvents = (state.events || []).filter(event => event.district === district && ['open', 'reserved', 'combat'].includes(event.status));
+  for (const [i, event] of streetEvents.entries()) {
+    if (!['street_thugs', 'chengguan_sweep'].includes(event.templateId)) continue;
+    const x = 190 + i % 3 * 270, y = 420 + i % 3 * 32 - 64;
+    const kind = event.templateId === 'street_thugs' ? 'thug' : 'chengguan';
+    drawConflictNpc(c, x - 39, y, kind, 'stand', 0, 1, 1.2);
+    drawConflictNpc(c, x + 13, y + 3, kind === 'thug' ? 'thug_hood' : kind, 'stand', 0, -1, 1.2);
   }
   const poses = {};
-  for (const [id, actor] of Object.entries(state.actors)) {
+  for (const [id, actor] of Object.entries(state.actors).sort(([a], [b]) => (positions[a]?.y || 427) - (positions[b]?.y || 427))) {
     if (actor.location !== district || !['active', 'downed'].includes(actor.life)) continue;
     const selected = id === actorId;
-    const personX = selected ? x : id === 'xuan' ? 316 : id === 'fan' ? 605 : 775;
+    const position = positions[id];
+    const personX = position?.x ?? (selected ? x : id === 'xuan' ? 316 : id === 'fan' ? 605 : 775);
     const pose = streetPose(actor, selected && moving, actions[id], overrides[id], now, reduced);
     poses[id] = pose;
-    streetSprite(c, personX - 24, district === 'river' && pose.startsWith('fish') ? 335 : 351, id, 2, pose);
+    const personY = position ? position.y - 76 : district === 'river' && pose.startsWith('fish') ? 335 : 351;
+    streetSprite(c, personX - 24, personY, id, 2, pose, position?.facing ?? 1);
     c.fillStyle = '#e6dfcc'; c.font = 'bold 13px sans-serif'; c.textAlign = 'center';
-    c.fillText({ xuan: '轩哥', fan: '凡哥', ma: '马哥' }[id], personX, 347);
+    c.fillText({ xuan: '轩哥', fan: '凡哥', ma: '马哥' }[id], personX, personY - 4);
   }
   if (district !== 'cafe' && wet) for (let i = 0; i < 48; i++) px(c, (i * 79 + (reduced ? 0 : Math.floor(now / 35))) % 960, (i * 41 + (reduced ? 0 : Math.floor(now / 24))) % 540, 2, 9, '#91aab2');
   if (district !== 'cafe' && night) { c.fillStyle = 'rgba(8,20,34,.20)'; c.fillRect(0, 0, 960, 540); }

@@ -63,6 +63,7 @@ function needsItem(s, actorId, itemId, zone) {
 }
 
 export function preflight(s) {
+  if (s.pending?.combat) return { error: '当前战斗尚未结束，先处理冲突后再推进。' };
   if (s.phase === 'tail') return preflightTail(s);
   if (s.phase !== 'planning') return { error: '请先处理当前剧情或结算画面。' };
   if (s.pendingMorning) return { error: '先处理今天的晨间节点。' };

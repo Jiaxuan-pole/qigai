@@ -23,6 +23,8 @@ import { DAY_END_HOUR, planIndex, slotOfHour } from '../game/clock.js';
 import { showCooking } from './cooking-modal.js';
 import { showFurniture } from './furniture-modal.js';
 import { isFurniture } from '../game/furniture.js';
+import { USABLE_ITEMS, usageLabel, useItemFromUI } from './quick-items.js';
+import { showCombat } from './combat.js';
 
 let begLast = null;
 let begVisibleNpc = null;
@@ -120,7 +122,7 @@ export function showTicket(uid, actorId) {
 export function showInventory(actorFocus = UI.sel.actor) {
   const s = UI.state;
   const containers = ['camp', ...IDS.filter((id) => s.actors[id].life !== 'unrecruited'), ...s.deaths.map((d) => 'relic:' + d.id)];
-  const USABLE = ['cigarette', 'cigarette_regular', 'cigarette_premium', 'butts', 'beer', 'beer_bottle', 'spirit', 'baijiu', 'vodka', 'tea', 'coffee', 'espresso', 'americano', 'latte', 'cappuccino', 'mocha', 'cold_brew', 'soda', 'wipes', 'symptom_relief', 'rehydration', 'clean_clothes', 'underwear', 'socks', 'bread', 'meal', 'hot_soup', 'fish_common_cooked', 'fish_rare_cooked', 'meal_hot', 'bread_toasted', 'hot_soup_heated'];
+  const USABLE = USABLE_ITEMS;
   let body = `<p>公共现金 ¥${s.cash} · 瓶罐${s.bottles || 0} 零件${s.parts} 电量${s.battery}/5 木料${s.wood} 布料${s.cloth} · 救助券${s.vouchers} · 有效食物 ${s.effectiveFood} 份（正餐30/面包18/热汤26折算）</p><p class="small">谁能碰到什么：自己的包随时可用；营地箱要人在营地；交接要两人同地。瓶罐在老周回收铺按 1 元/个卖。</p><section><h3>家具与快递包裹</h3><p>密封包裹 ${s.camp.parcels.filter((p) => p.status === 'sealed').length} 件 · 营地箱家具 ${s.items.filter((item) => item.container === 'camp' && isFurniture(item.itemId)).length} 件</p><button id="inventoryFurniture" type="button">查看包裹与家具摆放</button></section>${UI.night ? '<p class="risk-note">这一晚的休息已结算，结束夜间活动后可在清晨使用物品。</p>' : ''}`;
   for (const c of containers) {
     const items = groupItems(s, c);
@@ -132,7 +134,7 @@ export function showInventory(actorFocus = UI.sel.actor) {
       const canUse = USABLE.includes(g.itemId);
       let ops = '';
       if (def.category === 'lottery') ops += g.uids.map((u, i) => `<button data-ticket="${u}">刮票${g.uids.length > 1 ? i + 1 : ''}</button>`).join('');
-      if (canUse && IDS.includes(c)) ops += `<button data-use="${g.uids[0]}" data-actor="${c}" ${UI.night ? 'disabled' : ''}>使用</button>`;
+      if (canUse && IDS.includes(c)) ops += `<button data-use="${g.uids[0]}" data-actor="${c}" ${UI.night ? 'disabled' : ''}>${NAMES[c]}使用</button><span class="personal-usage">${usageLabel(s, c, g.itemId)}</span>`;
       if (['fish_common', 'fish_rare'].includes(g.itemId) && IDS.includes(c)) ops += `<button data-sellfish="${g.uids[0]}" data-actor="${c}" ${s.actors[c].location !== 'market' ? 'disabled' : ''} title="带到老街便利店出售">卖鱼 ¥${g.itemId === 'fish_rare' ? 14 : 6}</button>`;
       if (['fish_common', 'fish_rare'].includes(g.itemId) && !c.startsWith('relic:')) ops += `<button data-cook-open="${c === 'camp' ? actorFocus : c}" ${UI.night ? 'disabled' : ''}>到篝火加工</button>`;
       if (g.itemId.startsWith('broken_')) ops += '<span class="small muted">给轩哥安排「修旧电器」</span>';
@@ -153,23 +155,7 @@ export function showInventory(actorFocus = UI.sel.actor) {
   root.querySelectorAll('[data-sellfish]').forEach((b) => { b.onclick = () => { if (apply(sellFish(UI.state, b.dataset.actor, b.dataset.sellfish, { controlledActorId: UI.sel.actor }))) { toast(UI.state.log[0]); closeModal(); if (!showPendingWorkGame()) showInventory(actorFocus); } }; });
   root.querySelectorAll('[data-cook-open]').forEach((b) => { b.onclick = () => showCooking(b.dataset.cookOpen); });
   root.querySelectorAll('[data-ticket]').forEach((b) => { b.onclick = () => showTicket(b.dataset.ticket, actorFocus); });
-  root.querySelectorAll('[data-use]').forEach((b) => { b.onclick = () => {
-    if (UI.night) return toast('这一晚的休息已结算，结束夜间活动后可在清晨使用物品。');
-    const actorId = b.dataset.actor, uid = b.dataset.use;
-    const item = UI.state.items.find((x) => x.uid === uid);
-    const category = item && itemDef(item.itemId)?.category;
-    const coffee = item && (item.itemId === 'coffee' || ['espresso', 'americano', 'latte', 'cappuccino', 'mocha', 'cold_brew'].includes(item.itemId));
-    const cue = coffee ? 'coffee_sip' : category === 'food' ? 'meal' : null;
-    const result = useItem(UI.state, actorId, uid);
-    if (result.requiresConfirmation) {
-      const { risk, nextCups } = result.coffeeRisk;
-      showModal('确认饮用咖啡', `<p>${NAMES[actorId]}今天将喝第${nextCups}杯。饮用当下有${Math.round(risk * 100)}%的游戏内死亡风险；确认后物品与结果立即写入存档，取消则保持原样。</p><div class="modalbuttons"><button id="confirmCoffeeRisk" class="danger">确认饮用</button><button id="cancelCoffeeRisk">取消</button></div>`);
-      $('confirmCoffeeRisk').onclick = () => { if (UI.night) return toast('先结束夜间活动。'); const before = UI.state; if (apply(useItem(before, actorId, uid, { confirmRisk: true }))) { if (UI.state.daily.coffeeCups[actorId] > before.daily.coffeeCups[actorId]) globalThis.window?.jwsnAudio?.play?.('coffee_sip', { scope: 'inventory' }); toast(UI.state.log[0]); showInventory(actorFocus); } };
-      $('cancelCoffeeRisk').onclick = () => showInventory(actorFocus);
-      return;
-    }
-    if (apply(result)) { if (cue && (coffee ? UI.state.daily.coffeeCups[actorId] > s.daily.coffeeCups[actorId] : !UI.state.items.some((x) => x.uid === uid))) globalThis.window?.jwsnAudio?.play?.(cue, { scope: 'inventory' }); toast(UI.state.log[0]); showInventory(actorFocus); }
-  }; });
+  root.querySelectorAll('[data-use]').forEach((b) => { b.onclick = () => useItemFromUI(b.dataset.actor, b.dataset.use, () => showInventory(actorFocus)); });
   root.querySelectorAll('[data-dispose]').forEach((b) => { b.onclick = () => { const choice = b.dataset.dispose; const holder = b.dataset.holder; if (choice === 'gift') { const here = REGULARS.filter((r) => r.district === s.actors[holder].location); if (!here.length) return toast('这里没有可回赠的熟人'); let npcId = here[0].id; if (here.length > 1) { const idx = Number(prompt('送给谁？输入编号：' + here.map((r, i) => (i + 1) + '=' + r.name).join('，'))); npcId = here[idx - 1]?.id; } if (!npcId) return; if (apply(salvageDispose(UI.state, b.dataset.uid, 'gift', { actorId: holder, npcId }))) { toast(UI.state.log[0]); showInventory(actorFocus); } return; } if (apply(salvageDispose(UI.state, b.dataset.uid, choice, { actorId: holder, controlledActorId: UI.sel.actor }))) { toast(UI.state.log[0]); closeModal(); if (!showPendingWorkGame()) showInventory(actorFocus); } }; });
   root.querySelectorAll('[data-return]').forEach((b) => { b.onclick = () => { if (apply(returnLoanTo(UI.state, b.dataset.return, b.dataset.actor))) { toast(UI.state.log[0]); showInventory(actorFocus); } }; });
   root.querySelectorAll('[data-extend]').forEach((b) => { b.onclick = () => { if (apply(extendLoanOf(UI.state, b.dataset.extend))) { toast(UI.state.log[0]); showInventory(actorFocus); } }; });
@@ -267,7 +253,7 @@ export function eventCard(s, e) {
 }
 
 export function bindEventCards() {
-  $('modalContent').querySelectorAll('[data-evchoice]').forEach((b) => { b.onclick = () => { const uid = b.dataset.evuid; const sel = $('modalContent').querySelector('[data-evactor="' + uid + '"]'); const actor = sel ? sel.value : UI.sel.actor; const r = eventChoice(UI.state, uid, b.dataset.evchoice, actor); if (apply(r)) { closeModal(); toast(r.booked ? '已预约并占用本小时。' : ((r.events && r.events[0]) || '已处理。')); } }; });
+  $('modalContent').querySelectorAll('[data-evchoice]').forEach((b) => { b.onclick = () => { const uid = b.dataset.evuid; const sel = $('modalContent').querySelector('[data-evactor="' + uid + '"]'); const actor = sel ? sel.value : UI.sel.actor; const r = eventChoice(UI.state, uid, b.dataset.evchoice, actor); if (apply(r)) { closeModal(); if (UI.state.pending.combat) { void showCombat(); return; } toast(r.booked ? '已预约并占用本小时。' : ((r.events && r.events[0]) || '已处理。')); } }; });
 }
 
 export function showEvent(uid) {

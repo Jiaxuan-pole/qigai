@@ -51,3 +51,17 @@
 | `sleep-bed.ogg` | `kenney-rpg-audio/original/Audio/creak1.ogg` | `8a346186fd297254248cab8e8117060a52a5cf2a84f603153a762108550ea95e` |
 
 水花、游水、炭火点燃与烹煮的短反馈由 `public/ui/audio.js` 实时合成；这些不是下载音频，也未进行人工听感核验。
+
+## 格斗短音（2026-09-18）
+
+击中、格挡、撤离使用本次从 [Kenney Impact Sounds](https://kenney.nl/assets/impact-sounds) 官方下载的素材，作者 Kenney，[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)。原包 `License.txt` 明确允许个人、教育与商业项目使用，署名非强制。以下文件原样复制，仅改名，未转码、未裁切。下载包 SHA-256：`029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8`。
+
+[官方 ZIP](https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip)
+
+| 游戏文件 / cue | 原包文件 | 用途 | SHA-256 |
+| --- | --- | --- | --- |
+| `combat-hit.ogg` / `combat_hit` | `Audio/impactPunch_medium_000.ogg` | 拳击命中 | `486988aa2d6440ffc4c62a0e8ccf3c23673ba84424bd4723378d451b7255eb5c` |
+| `combat-block.ogg` / `combat_block` | `Audio/impactSoft_heavy_000.ogg` | 格挡的低沉接触声 | `49e7ca88743fca974bb8676ea138b751cfd8f9033b5e7af8736c2a215d6edbc1` |
+| `combat-flee.ogg` / `combat_flee` | `Audio/footstep_concrete_000.ogg` | 撤离脚步 | `d7267e183067757c92c169de2a379abea592cfca6b39bb2e8feea15221ad79fe` |
+
+`combat_swing` 复用 Kenney RPG Audio 的 `cloth.ogg`（`cloth1.ogg`），表现挥拳衣料运动；`combat_win`、`combat_lose` 复用上表已有 Interface Sounds 的 `work-success.ogg`、`work-miss.ogg`。六个 cue 共用现有 SFX 音量总线，静音、页面隐藏及战斗作用域取消均会停止发声。素材文件与原包字节一致；尚未人工试听。

@@ -4,7 +4,7 @@ import { streetSprite } from '../public/ui/street-people.js';
 import { sprite, portrait } from '../public/ui/pixel.js';
 import { actionFrame, actionPoseFor, walkFrame } from '../public/ui/animation.js';
 
-function draw(id, pose = 'stand', scale = 2, painter = streetSprite) {
+function draw(id, pose = 'stand', scale = 2, painter = streetSprite, facing = 1) {
   const rects = [];
   const stack = [];
   const c = {
@@ -15,7 +15,7 @@ function draw(id, pose = 'stand', scale = 2, painter = streetSprite) {
     scale(x, y) { this.sx *= x; this.sy *= y; },
     fillRect(x, y, w, h) { rects.push({ x: this.x + x * this.sx, y: this.y + y * this.sy, w: w * this.sx, h: h * this.sy, color: this.fillStyle }); },
   };
-  painter(c, 100, 50, id, scale, pose);
+  painter(c, 100, 50, id, scale, pose, facing);
   return rects;
 }
 
@@ -41,6 +41,39 @@ test('sprite keeps the old screen footprint and standing foot anchor', () => {
 test('walking changes the leg geometry on four frames', () => {
   const pants = ['#2c3138', '#20242a'];
   assert.equal(new Set([0, 1, 2, 3].map(f => signature(draw('xuan', `walk${f}`), pants))).size, 4);
+});
+
+test('combat gives every character nine distinct grounded poses with a visible punch and recoil', () => {
+  for (const id of ['xuan', 'fan', 'ma']) {
+    const poses = ['attack', 'defend', 'hit'].flatMap(action => [0, 1, 2].map(frame => `${action}${frame}`));
+    const frames = poses.map(pose => draw(id, pose));
+    assert.equal(new Set(frames.map(rects => JSON.stringify(rects))).size, 9, `${id} combat stages`);
+    const sole = { xuan: '#7b8081', fan: '#79562c', ma: '#737d83' }[id];
+    for (const [i, rects] of frames.entries()) {
+      assert.notDeepEqual(rects, draw(id), `${id}/${poses[i]} cannot be a standing fallback`);
+      assert.ok(rects.some(r => r.color === sole && r.y + r.h === 126), `${id}/${poses[i]} planted feet`);
+      assert.ok(rects.every(r => [r.x, r.y, r.w, r.h].every(Number.isInteger)), `${id}/${poses[i]} crisp pixels`);
+    }
+    const skin = id === 'xuan' ? '#ecc19a' : '#b98358';
+    const reach = pose => Math.max(...draw(id, pose).filter(r => r.color === skin).map(r => r.x + r.w));
+    assert.ok(reach('attack1') > reach('attack0') + 15, `${id} punch extends beyond windup`);
+    assert.ok(reach('attack1') > reach('attack2') + 8, `${id} fist retracts`);
+    const eyeX = pose => draw(id, pose).find(r => r.color === '#1c2026').x;
+    assert.ok(eyeX('hit1') < eyeX('hit0') - 4, `${id} head recoils away from incoming strike`);
+    assert.ok(eyeX('hit2') > eyeX('hit1'), `${id} recovers after hit`);
+    const guards = pose => draw(id, pose).filter(r => r.color === skin && r.w <= 10 && r.h <= 10 && r.y < 84);
+    assert.ok(guards('defend1').length >= 2, `${id} hands rise to guard the face`);
+  }
+});
+
+test('all combat stages mirror their actual geometry when facing left', () => {
+  for (const id of ['xuan', 'fan', 'ma']) for (const action of ['attack', 'defend', 'hit']) for (const frame of [0, 1, 2]) {
+    const right = draw(id, `${action}${frame}`), left = draw(id, `${action}${frame}`, 2, streetSprite, -1);
+    assert.equal(left.length, right.length);
+    for (let i = 0; i < right.length; i++) {
+      assert.deepEqual(left[i], { ...right[i], x: 248 - right[i].x, w: -right[i].w }, `${id}/${action}${frame} pixel ${i}`);
+    }
+  }
 });
 
 test('work and fishing change the torso and put tools beside hands', () => {

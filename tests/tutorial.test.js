@@ -50,6 +50,16 @@ test('前两章在需要时给出情境引导，看过的不会重复', () => {
   assert.equal(stageOf({ ...base, day: 9, items: [{ itemId: 'fishing_rod', container: 'ma' }] }, 'done'), 'fishing');
 });
 
+test('新增玩法引导覆盖长期任务、人物展开、时长成本、移动与物品动作', () => {
+  const first = stepsFor(1);
+  assert.ok(first.some(step => step.sel === '#taskStrip' && /长期/.test(step.text)));
+  assert.ok(first.some(step => /展开/.test(step.text) && /人物/.test(step.title)));
+  assert.ok(first.some(step => step.sel === '#durationPick' && /精神/.test(step.text)));
+  assert.ok(first.some(step => /左右.*朝向/.test(step.text)));
+  assert.ok(first.some(step => /抽烟.*喝酒.*动作/.test(step.text)));
+  assert.ok(stepsFor('combat').some(step => /防守.*撤离/.test(step.text)));
+});
+
 test('引导先提示地图栏按钮，再展开行动抽屉定位具体步骤', () => {
   const first = stepsFor(1);
   const buttonIndex = first.findIndex((step) => step.sel === '#planToggle');

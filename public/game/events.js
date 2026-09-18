@@ -7,6 +7,7 @@ import { makeItem } from './items.js';
 import { relation } from './npcs.js';
 import { pickFilm, canScreen, screenFilm } from './screening.js';
 import { resolveConfrontation, alliesAt, C as TROUBLE } from './trouble.js';
+import { beginCombat, combatPending } from './combat.js';
 
 const R = getData; // 缩写：规则与模板都从设计数据取
 
@@ -156,13 +157,13 @@ PACKS.street_thugs = { major: false, cond: (s) => s.day >= 5 && !((s.flags.thugR
   { id: 'pay', label: '给几块钱了事（5—10，会被记住）', kind: 'present', requires: (s) => (s.cash >= TROUBLE.payRange[1] ? null : '现金不足' + TROUBLE.payRange[1]), effect: confront('thugs', 'pay') },
   { id: 'talk', label: '说两句（轩哥讲道理／凡哥举相机／马哥报老陈）', kind: 'present', effect: confront('thugs', 'talk') },
   { id: 'run', label: '跑（体力-8、卫生-3，两成掉东西）', kind: 'present', effect: confront('thugs', 'run') },
-  { id: 'fight', label: '硬顶：打一架（看体力健康，有人同街区壮胆；输了受伤被搜身）', kind: 'present', effect: confront('thugs', 'fight') },
+  { id: 'fight', label: '当场反抗（攻击、防守或撤离；输了受伤被搜身）', kind: 'combat', combatKind: 'thugs' },
 ] };
 PACKS.chengguan_sweep = { major: false, cond: (s) => s.day >= 8, title: '城管清街', setup: '两辆电动车停在路口，穿制服的挨个摊子拍照：“都收了，别让我说第二遍。”', choices: [
   { id: 'leave', label: '收拾走人（瓶罐纸板被没收，没有就丢半格摊钱）', kind: 'present', effect: confront('chengguan', 'leave') },
   { id: 'fine', label: '交罚款保东西（20—40）', kind: 'present', requires: (s) => (s.cash >= TROUBLE.fineRange[1] ? null : '现金不足' + TROUBLE.fineRange[1]), effect: confront('chengguan', 'fine') },
   { id: 'reason', label: '讲理（王叔信任高或有队友在场更容易过）', kind: 'present', effect: confront('chengguan', 'reason') },
-  { id: 'fight', label: '硬顶（几乎赢不了：受伤、罚款、今天不能摆摊）', kind: 'present', effect: confront('chengguan', 'fight') },
+  { id: 'fight', label: '当场反抗（对方很强：受伤、罚款、今天不能摆摊）', kind: 'combat', combatKind: 'chengguan' },
 ] };
 
 // 霉运模板不做热点，结算时抽文案用。
@@ -288,6 +289,7 @@ export function directorTick(state, events) {
 
 // 玩家预约或即时处理一个选项。
 export function chooseEvent(state, uid, choiceId, actorId) {
+  if (combatPending(state)) return { error: '先处理眼前的战斗。' };
   const ev = state.events.find((e) => e.uid === uid);
   if (!ev || (ev.status !== 'open' && ev.status !== 'reserved')) return { error: '这个机会已经不在了' };
   const pack = PACKS[ev.templateId];
@@ -297,6 +299,12 @@ export function chooseEvent(state, uid, choiceId, actorId) {
   if (!p || p.life !== 'active') return { error: '需要一名可行动的人' };
   if (ev.cast && !ev.cast.includes(actorId)) return { error: '这件事只能由' + ev.cast.map((x) => state.names[x]).join('/') + '处理' };
   if (choice.requires) { const err = choice.requires(state, actorId); if (err) return { error: err }; }
+  if (choice.kind === 'combat') {
+    const r = beginCombat(state, { actorId, kind: choice.combatKind, eventUid: uid });
+    if (r.error) return { error: r.error };
+    Object.assign(state, r.state);
+    return { ok: true, events: r.events, combat: r.combat };
+  }
   if (choice.kind === 'instant') {
     const events = [];
     if (choice.effect) choice.effect(state, ev, actorId, events);
