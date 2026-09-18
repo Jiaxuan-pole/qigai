@@ -22,7 +22,7 @@ export const STEPS = {
     { sel: '#btnAdvance', openDrawer: true, title: '执行当前安排', text: '想直接看到这一小时的结果，也可以按开始行动。剩余安排会继续保留。' },
     { sel: '#mapWrap', closeDrawer: true, title: '走进街道', text: '方向键或街道方向按钮可以上下左右走，左右会改变朝向。切换人物保留各自位置；沿街能找到路人、告示、店铺和随机事件。' },
     { sel: '#mapWrap', closeDrawer: true, title: '点人物用随身物品', text: '点街上的人物打开快捷物品。抽烟、喝酒后会播放动作，次数按使用者单独计算。涂鸦与钓鱼要先带齐用具，再到对应地点安排行动。' },
-    { sel: '#clockToggle', closeDrawer: true, title: '街上的时间', text: '站着也会走时。需要想一想时可以暂停；事件与安排窗口会暂时停下时钟。' },
+    { sel: '#tSlot', closeDrawer: true, title: '街上的时间', text: '站着时，时间会自动流逝；事件与安排窗口会暂时停下时钟。' },
     { sel: '[data-open="events"]', closeDrawer: true, title: '热点与愿望', text: '街上会冒出热点，只持续有限时间。第 1 天清晨老街有个免费赠餐的教学热点，可以让人去领。人也会冒愿望，不理会积压扣精神。' },
   ],
   2: [

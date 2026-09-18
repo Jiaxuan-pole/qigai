@@ -363,12 +363,17 @@ test('任务面板把安排交给集成回调，并通过引擎接取委托', as
   });
   assert.equal(typeof module.showTasks, 'function', '需要可操作的任务面板');
   const { UI } = await import('../public/ui/core.js');
-  const buttons = [];
+  const taskButtons = [];
+  const toggleButtons = [{ dataset: {} }];
   const content = { innerHTML: '', querySelectorAll(selector) {
-    if (selector !== '[data-task-action]') return [];
-    buttons.length = 0;
-    for (const match of this.innerHTML.matchAll(/data-task-action="([^"]+)"/g)) buttons.push({ dataset: { taskAction: match[1] } });
-    return buttons;
+    if (selector === '[data-task-action]') {
+      taskButtons.length = 0;
+      for (const match of this.innerHTML.matchAll(/data-task-action="([^"]+)"/g)) taskButtons.push({ dataset: { taskAction: match[1] } });
+      return taskButtons;
+    }
+    if (selector === '[data-show-tasks]') return [...this.innerHTML.matchAll(/data-show-tasks/g)].map(() => ({ dataset: {} }));
+    if (selector === '[data-toggle-task-strip]') return toggleButtons;
+    return [];
   } };
   const plain = { classList: { add() {}, remove() {}, toggle() {} }, style: {}, querySelector: () => null };
   const cells = { taskStrip: content, modalContent: content, toast: plain, modal: plain, modalOverlay: plain, modalClose: {} };
@@ -387,13 +392,21 @@ test('任务面板把安排交给集成回调，并通过引擎接取委托', as
     module.configureTasks({ onPlan: (request) => { planned = request; } });
     module.renderTaskStrip();
     assert.match(content.innerHTML, /长期目标/);
+    assert.match(content.innerHTML, /data-toggle-task-strip[^>]*aria-expanded="false"/);
+    assert.match(content.innerHTML, /id="taskStripList"[^>]* hidden/);
+    assert.match(content.innerHTML, /data-show-tasks/);
+    content.querySelectorAll('[data-toggle-task-strip]')[0].onclick();
+    assert.match(content.innerHTML, /data-toggle-task-strip[^>]*aria-expanded="true"/);
+    assert.doesNotMatch(content.innerHTML, /id="taskStripList"[^>]* hidden/);
+    module.renderTaskStrip();
+    assert.match(content.innerHTML, /data-toggle-task-strip[^>]*aria-expanded="true"/);
     module.showTasks();
-    buttons.find((button) => button.dataset.taskAction === 'favor:reg_liu').onclick();
+    taskButtons.find((button) => button.dataset.taskAction === 'favor:reg_liu').onclick();
     assert.deepEqual(planned, { actorId: 'xuan', actionId: 'shop', zone: 'market' });
     assert.equal(UI.state.favors.reg_liu, undefined);
     UI.state.actors.fan.location = 'market';
     module.showTasks();
-    buttons.find((button) => button.dataset.taskAction === 'favor:reg_liu').onclick();
+    taskButtons.find((button) => button.dataset.taskAction === 'favor:reg_liu').onclick();
     assert.equal(UI.state.favors.reg_liu.active.id, 'liu1');
     assert.equal(UI.state.favors.reg_liu.active.progress, 0);
     assert.equal(UI.state.flags.liuBonusMeal, undefined);

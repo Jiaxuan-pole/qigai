@@ -133,7 +133,7 @@ function assignNow(skipRisk = false) {
     return;
   }
   const r = assign(s, UI.sel.actor, UI.sel.hour, UI.sel.action, opts);
-  if (apply(r)) { setDrawerExpanded(false); toast(`已安排：${NAMES[UI.sel.actor]}「${a.name}」连续${opts.duration}小时，至${String(UI.sel.hour + opts.duration).padStart(2, '0')}:00。`); }
+  if (apply(r)) { if (liveClock?.paused) liveClock.restart(); setDrawerExpanded(false); toast(`已安排：${NAMES[UI.sel.actor]}「${a.name}」连续${opts.duration}小时，至${String(UI.sel.hour + opts.duration).padStart(2, '0')}:00。`); }
 }
 
 async function advance(force = false, automatic = false) {

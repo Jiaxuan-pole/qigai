@@ -1,10 +1,12 @@
 @import url('./character-summary.css');
 
-.clock-chip { position: relative; padding-right: 46px; min-width: 125px; }
-.clock-chip button { position: absolute; right: 5px; top: 6px; width: 34px; min-height: 34px; padding: 0; }
+.clock-chip { min-width: 74px; }
 .task-strip { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 10px 20px; border-bottom: 1px solid var(--line); background: #182b28; color: #e7ebdb; }
 .task-strip > div { min-width: 0; }
 .task-strip-heading { display: flex; align-items: center; gap: 14px; }
+.task-strip-title { min-width: 0; }
+.task-strip-summary { display: block; color: #b6ccc1; font-size: 12px; line-height: 1.5; }
+.task-strip-actions { display: flex; gap: 6px; }
 .task-strip-list { display: grid; flex: 1; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
 .task-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
 .task-strip .task-item { padding: 0 0 0 14px; border-bottom: 0; border-left: 1px solid #45615a; }

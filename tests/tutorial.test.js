@@ -57,6 +57,7 @@ test('新增玩法引导覆盖长期任务、人物展开、时长成本、移�
   assert.ok(first.some(step => step.sel === '#durationPick' && /精神/.test(step.text)));
   assert.ok(first.some(step => /左右.*朝向/.test(step.text)));
   assert.ok(first.some(step => /抽烟.*喝酒.*动作/.test(step.text)));
+  assert.ok(first.some(step => step.sel === '#tSlot' && /自动/.test(step.text)));
   assert.ok(stepsFor('combat').some(step => /防守.*撤离/.test(step.text)));
 });
 

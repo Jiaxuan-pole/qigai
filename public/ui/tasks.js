@@ -3,6 +3,7 @@ import { acceptFavor, deliverFavor } from '../game/engine.js';
 import { $, esc, UI, apply, closeModal, showModal } from './core.js';
 
 let handlers = {};
+let taskStripExpanded = false;
 
 export function configureTasks(callbacks = {}) {
   handlers = { ...callbacks };
@@ -59,6 +60,9 @@ function runTask(id) {
 function bindTasks(root) {
   root.querySelectorAll('[data-task-action]').forEach((button) => { button.onclick = () => runTask(button.dataset.taskAction); });
   root.querySelectorAll('[data-show-tasks]').forEach((button) => { button.onclick = showTasks; });
+  root.querySelectorAll('[data-toggle-task-strip]').forEach((button) => {
+    button.onclick = () => { taskStripExpanded = !taskStripExpanded; renderTaskStrip(); };
+  });
 }
 
 export function renderTaskStrip() {
@@ -66,7 +70,9 @@ export function renderTaskStrip() {
   if (!root) return;
   const tasks = objectives(UI.state);
   const current = tasks.filter((task) => !['completed', 'locked', 'failed'].includes(task.status)).slice(0, 3);
-  root.innerHTML = `<div class="task-strip-heading"><strong>长期目标</strong><button data-show-tasks>任务进度</button></div><div class="task-strip-list">${current.length ? current.map((task) => taskMarkup(task, true)).join('') : '<p class="small muted">这段旅程已经结束。</p>'}</div>`;
+  const stage = tasks.find((task) => task.kind === 'survival');
+  const stageSummary = stage ? `${stage.title}${progressText(stage) ? ` · ${progressText(stage)}` : ''}` : '当前没有长期目标';
+  root.innerHTML = `<div class="task-strip-heading"><div class="task-strip-title"><strong>长期目标</strong><span class="task-strip-summary">${esc(stageSummary)}</span></div><div class="task-strip-actions"><button type="button" data-toggle-task-strip aria-controls="taskStripList" aria-expanded="${taskStripExpanded}">${taskStripExpanded ? '收起' : '展开'}</button><button data-show-tasks>任务进度</button></div></div><div id="taskStripList" class="task-strip-list"${taskStripExpanded ? '' : ' hidden'}>${current.length ? current.map((task) => taskMarkup(task, true)).join('') : '<p class="small muted">这段旅程已经结束。</p>'}</div>`;
   bindTasks(root);
 }
 

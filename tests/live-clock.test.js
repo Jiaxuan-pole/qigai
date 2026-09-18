@@ -33,7 +33,7 @@ test('持续时钟空闲走时，暂停不积累，跨小时只推进一次', as
   assert.equal(clock.minutes, 0);
 });
 
-test('手动推进与暂停保持时钟一致，失败不会自动重试', async () => {
+test('自动推进被拒绝后暂停，救援恢复后再次持续走时', async () => {
   const module = await import('../public/ui/live-clock.js').catch(() => ({}));
   assert.equal(typeof module.createLiveClock, 'function');
   const clock = module.createLiveClock(() => false);
@@ -44,7 +44,8 @@ test('手动推进与暂停保持时钟一致，失败不会自动重试', async
   clock.tick(100001, true, '1:7');
   await Promise.resolve();
   assert.equal(clock.paused, true);
-  clock.toggle();
+  assert.equal(typeof clock.toggle, 'undefined');
+  clock.restart();
   assert.equal(clock.paused, false);
 });
 
@@ -54,7 +55,6 @@ test('后台120秒没有动画帧，恢复后不补算为游戏时间', async ()
   const frames = [];
   const listeners = new Map();
   const elements = {
-    clockToggle: { setAttribute() {} },
     game: { classList: { contains: () => false } },
     plannerOverlay: { hidden: true },
     tSlot: {},
@@ -96,7 +96,6 @@ test('自动救援警告拒绝推进后，回去安排可从零开始恢复时�
   const originalAnimationFrame = globalThis.requestAnimationFrame;
   const frames = [];
   const elements = {
-    clockToggle: { setAttribute() {} },
     game: { classList: { contains: () => false } },
     plannerOverlay: { hidden: true },
     tSlot: {},
