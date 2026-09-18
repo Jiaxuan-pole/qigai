@@ -1,0 +1,516 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>今晚睡哪儿 · 三人版生存与排程原型 v2.0</title><style>
+:root{--bg:#151b22;--panel:#222d35;--panel2:#29343a;--ink:#e4ddc9;--muted:#aab5b6;--line:#435056;--x:#71bfc3;--f:#dda45d;--bad:#e57e6b;--good:#9cbd83;--gold:#e3bb72;--paper:#d7cbb1}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "PingFang SC","Microsoft YaHei",system-ui,sans-serif}button,select{font:inherit}button{cursor:pointer;min-height:44px;border:1px solid var(--line);background:#29363e;color:var(--ink);padding:8px 13px;transition:background .12s,transform .12s}button:hover{background:#37464c}button:active{transform:translateY(1px)}button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}button:disabled{opacity:.42;cursor:not-allowed;transform:none}.shell{max-width:1600px;margin:auto;padding:24px 28px 20px}.eyebrow{font:12px/1.5 ui-monospace,monospace;letter-spacing:2px;color:var(--gold);text-transform:uppercase}.top{display:flex;justify-content:space-between;align-items:center;gap:24px;margin-bottom:22px}.brand{display:flex;gap:14px;align-items:center}.mark{width:43px;height:46px;border:3px solid var(--gold);position:relative;box-shadow:5px 5px 0 #34434b;flex:none}.mark:before{content:"";position:absolute;width:19px;height:20px;left:9px;top:10px;border:3px solid var(--gold);border-bottom:0}.brand h1{margin:0;font-size:29px;letter-spacing:4px;font-weight:900;line-height:1.3}.brand p{margin:3px 0 0;font-size:13px;color:var(--muted)}.top-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.day-chip{border-left:3px solid var(--gold);padding:0 18px;line-height:1.5}.day-chip strong{display:block;font-size:20px}.day-chip span{color:var(--muted);font-size:13px}.icon-btn{min-width:64px}.resourcebar{display:flex;justify-content:space-between;gap:20px;padding:12px 18px;border:1px solid var(--line);background:#1c262e;box-shadow:0 3px 0 #10161a;margin-bottom:16px}.resources{display:flex;gap:25px;align-items:center;flex-wrap:wrap}.resource{display:flex;align-items:center;gap:9px}.resource b{color:var(--gold);font:700 21px ui-monospace,monospace}.resource small{font-size:14px;color:var(--muted)}.chapterline{color:var(--muted);font-size:14px;display:flex;align-items:center;gap:10px}.chapterline .dot{width:7px;height:7px;background:var(--good)}.workspace{display:grid;grid-template-columns:225px minmax(380px,1fr) 292px;gap:16px;align-items:start}.characters{display:grid;gap:14px}.panel{border:1px solid var(--line);background:var(--panel);box-shadow:0 4px 0 #10171d}.char-card{padding:16px;position:relative;cursor:pointer;border-left:3px solid transparent;min-height:231px}.char-card.selected{border-color:var(--who);box-shadow:0 0 0 1px var(--who),0 4px 0 #10171d}.char-head{display:flex;gap:12px;align-items:center}.portrait{width:62px;height:72px;background:#17232a;image-rendering:pixelated;border-bottom:3px solid var(--who);flex:none}.char-name{font-size:24px;font-weight:850;line-height:1.3}.role{font-size:13px;color:var(--muted)}.badge{display:inline-block;font-size:12px;padding:1px 5px;border:1px solid var(--who);color:var(--who);margin-top:5px}.stats{margin-top:12px;display:grid;gap:7px}.stat{display:grid;grid-template-columns:30px 1fr 27px;gap:9px;align-items:center;font-size:13px}.track{height:5px;background:#131e25}.fill{height:100%;background:var(--who)}.fill.low{background:var(--bad)}.stat .value{text-align:right;font-family:ui-monospace,monospace;color:var(--muted)}.conditions{display:flex;gap:7px;margin-top:10px;font-size:12px;color:var(--muted)}.conditions .cold{color:var(--bad)}.together{padding:14px 16px;border:1px dashed #647268;background:#202e30}.together-top{display:flex;justify-content:space-between;margin-bottom:7px}.together-top strong{color:var(--good)}.together small{font-size:13px;color:var(--muted)}.worldpanel{overflow:hidden}.worldhead{display:flex;justify-content:space-between;align-items:center;padding:14px 17px;border-bottom:1px solid var(--line)}.worldhead h2{margin:0;font-size:18px;letter-spacing:1px}.worldhead small{font-size:12px;color:var(--muted)}.weather{font-size:14px;color:var(--gold)}.canvas-wrap{position:relative;background:#16232b;overflow:hidden}.scene{width:100%;height:auto;display:block;image-rendering:pixelated;aspect-ratio:480/250}.scene-note{position:absolute;top:14px;left:14px;background:#151b22e8;border-left:2px solid var(--gold);padding:5px 10px;font-size:12px;color:var(--ink)}.scene-caption{position:absolute;bottom:12px;right:14px;font-size:12px;background:#101820dc;padding:4px 9px;color:#c4c7bc}.locations{display:grid;grid-template-columns:repeat(6,1fr);gap:0;border-top:1px solid var(--line);background:#18222b}.locations button{border:0;border-right:1px solid #3b474e;font-size:13px;padding:8px 4px;min-height:50px;white-space:nowrap;background:transparent}.locations button:last-child{border-right:0}.locations button.active{background:#324047;color:var(--gold);box-shadow:inset 0 -3px var(--gold)}.quote{padding:14px 17px;display:flex;gap:12px;color:var(--muted);font-size:14px;border-top:1px solid var(--line);min-height:63px;align-items:center}.quote b{color:var(--f);white-space:nowrap}.rightcol{display:grid;gap:14px}.objectives{padding:16px}.section-tag{font:12px ui-monospace,monospace;color:var(--gold);letter-spacing:2px;margin-bottom:8px}.objectives h2{font-size:18px;margin:0 0 10px}.taskline{display:flex;gap:9px;align-items:flex-start;font-size:14px;margin:8px 0}.taskbox{width:13px;height:13px;border:1px solid var(--muted);flex:none;margin-top:5px}.taskbox.done{background:var(--good);border-color:var(--good)}.hint{font-size:13px;color:var(--muted);margin:8px 0 0}.action-panel{padding:15px}.actiontitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.actiontitle strong{font-size:17px}.actorlabel{color:var(--x)}.action-options{max-height:208px;overflow:auto;display:grid;gap:5px;scrollbar-width:thin;scrollbar-color:#59655e #1b262d}.actionoption{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;text-align:left;min-height:44px;font-size:14px}.actionoption.active{border-color:var(--gold);background:#394039}.actionoption small{font-size:12px;color:var(--muted)}.action-detail{background:#17232a;padding:11px;margin-top:10px;font-size:13px;min-height:115px}.action-detail strong{font-size:16px;display:block;margin-bottom:3px}.action-detail p{margin:4px 0;color:var(--muted)}.action-detail .income{color:var(--good)}.primary{background:var(--gold);color:#1d2425;border-color:var(--gold);font-weight:800;box-shadow:3px 3px 0 #080f13}.primary:hover{background:#f0c782}.assign{width:100%;margin-top:10px}.planner{margin-top:16px;padding:17px 20px 18px}.plan-header{display:flex;justify-content:space-between;align-items:baseline;gap:15px;margin-bottom:12px}.plan-header h2{font-size:20px;margin:0}.plan-header p{font-size:13px;color:var(--muted);margin:0}.schedule{display:grid;grid-template-columns:76px repeat(4,minmax(0,1fr));gap:8px}.timecell{font-size:13px;color:var(--muted);padding:2px 8px 5px;display:flex;justify-content:space-between;gap:5px;flex-wrap:wrap}.timecell.now{color:var(--gold)}.timecell b{font-weight:600;color:var(--ink)}.rowlabel{align-self:center;font-weight:800;font-size:16px}.slot{position:relative;text-align:left;padding:10px 12px;min-height:63px;background:#27353c;border-top:2px solid var(--who);overflow:hidden}.slot small{display:block;font-size:12px;color:var(--muted);margin-top:1px}.slot.selected{outline:2px solid var(--gold);outline-offset:-2px;background:#364139}.slot.coop{background:#3b3d32;border-top-color:var(--good)}.slot.executed{background:#19272b;opacity:.6}.slot.executed:after{content:"已完成";position:absolute;right:8px;top:8px;font-size:11px;color:var(--good)}.slot.locked{opacity:.5}.plan-footer{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-top:15px}.plan-status{font-size:13px;color:var(--muted)}.plan-status strong{color:var(--gold)}.plan-actions{display:flex;gap:9px}.journal{margin-top:17px;display:flex;gap:14px;align-items:flex-start;padding:12px 16px;background:#19232b;border:1px solid #35424a;font-size:13px;color:var(--muted);min-height:50px}.journal b{color:var(--gold);white-space:nowrap}.journal-text{flex:1}.bottomnote{display:flex;justify-content:space-between;gap:24px;font-size:12px;color:#a3afb2;margin:15px 0 0}.bottomnote span{max-width:75%}.toast{position:fixed;z-index:30;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--paper);color:#253038;border:2px solid #f5e5bf;padding:12px 20px;box-shadow:5px 5px 0 #0007;opacity:0;pointer-events:none;max-width:min(560px,90vw);transition:.15s}.toast.show{opacity:1;transform:translateX(-50%)}.modal-overlay{position:fixed;inset:0;background:#09131de3;z-index:20;display:none;align-items:center;justify-content:center;padding:24px}.modal-overlay.open{display:flex}.modal{width:min(760px,100%);max-height:90dvh;overflow:auto;background:#222d35;border:1px solid #7c8272;border-top:4px solid var(--gold);padding:26px;box-shadow:8px 8px 0 #060e17;position:relative}.modal h2{font-size:25px;margin:0 42px 6px 0}.modal h3{margin:18px 0 7px;font-size:17px}.modal p{font-size:14px;color:var(--muted)}.modal .close{position:absolute;right:15px;top:15px;width:44px;padding:0;font-size:22px}.modal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}.invitem{background:#17232a;border:1px solid var(--line);padding:15px}.invitem strong{display:block;font-size:24px;color:var(--gold)}.invitem span{font-size:14px}.chapteritem{padding:12px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:70px 1fr;gap:12px}.chapteritem .range{color:var(--gold);font:14px ui-monospace,monospace;margin-top:3px}.chapteritem strong{font-size:16px}.chapteritem p{margin:4px 0;font-size:13px}.modal .notebox{padding:12px 15px;background:#16252d;border-left:3px solid var(--x);font-size:14px;color:var(--ink);margin:15px 0}.summaryrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line)}.modalbuttons{display:flex;flex-wrap:wrap;gap:9px;margin-top:20px}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+@media(min-width:1500px){.worldhead{padding:17px}.canvas-wrap{min-height:330px}.scene{height:330px;object-fit:contain}.quote{min-height:77px}}
+@media(max-width:1220px){.shell{padding:20px}.workspace{grid-template-columns:205px minmax(320px,1fr)}.rightcol{grid-column:1/-1;grid-template-columns:1fr 2fr}.action-panel{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actiontitle{grid-column:1/-1;margin:0}.action-options{max-height:180px;grid-row:2/4}.action-detail{margin:0}.assign{margin:0}.chapterline{display:none}.top{gap:12px}.top-right{justify-content:flex-end}.char-card{min-height:225px}.together{padding:10px 15px}.quote{min-height:71px}}
+@media(max-width:760px){.shell{padding:16px 12px}.top{display:block;margin-bottom:16px}.brand h1{font-size:27px}.brand p{font-size:12px}.top-right{margin-top:18px;justify-content:flex-start;gap:7px}.day-chip{padding:0 13px 0 9px}.day-chip strong{font-size:17px}.top-right button{min-width:52px;padding:7px 10px;font-size:14px}.resources{gap:13px}.resourcebar{padding:11px 12px}.resource b{font-size:18px}.resource small{font-size:12px}.workspace{display:flex;flex-direction:column;gap:14px}.worldpanel{width:100%;order:0}.characters{order:1;width:100%;grid-template-columns:1fr 1fr;gap:10px}.char-card{padding:11px;min-height:215px}.char-head{gap:8px}.portrait{width:48px;height:58px}.char-name{font-size:21px}.role{font-size:12px}.badge{font-size:10px}.stat{gap:6px;font-size:12px;grid-template-columns:27px 1fr 24px}.conditions{gap:5px;font-size:11px;flex-wrap:wrap}.together{grid-column:1/-1}.together .track{width:40%;position:absolute;right:20px;top:25px}.together{position:relative}.together-top{padding-right:45%;margin:0}.together small{font-size:12px}.rightcol{width:100%;order:2;display:block}.objectives{margin-bottom:12px}.action-panel{grid-template-columns:1fr 1fr;gap:8px;padding:12px}.actionoption{font-size:12px;padding:6px 8px}.actionoption small{font-size:11px}.action-detail{font-size:12px;padding:10px}.action-detail strong{font-size:15px}.assign{font-size:13px}.actiontitle strong{font-size:16px}.planner{padding:14px 12px}.plan-header{display:block}.plan-header p{margin-top:4px}.schedule{grid-template-columns:42px repeat(2,minmax(0,1fr));gap:7px}.timecell{font-size:12px;padding:2px}.timecell span{font-size:10px}.rowlabel{font-size:14px}.slot{min-height:68px;padding:9px 7px;font-size:12px}.slot small{font-size:11px}.slot.executed:after{font-size:9px;right:4px;top:3px}.plan-footer{display:block}.plan-actions{margin-top:12px;justify-content:space-between}.plan-actions button{font-size:14px}.plan-actions .primary{flex:1}.plan-status{font-size:12px}.journal{padding:10px;gap:8px;font-size:12px}.bottomnote{display:block;font-size:11px}.bottomnote span{max-width:none;display:block;margin-bottom:6px}.locations button{font-size:11px;min-height:46px}.worldhead{padding:12px}.worldhead h2{font-size:17px}.scene-note{font-size:11px;top:9px;left:9px}.scene-caption{font-size:10px;bottom:8px;right:8px}.quote{font-size:12px;min-height:58px;padding:10px 12px}.modal-overlay{padding:12px}.modal{padding:21px 17px}.modal-grid{grid-template-columns:repeat(2,1fr)}.chapteritem{grid-template-columns:58px 1fr;gap:9px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}.toast{transition:none}}
+
+.role{white-space:nowrap;font-size:12px}
+@media(max-width:760px){
+.top-right{display:grid;grid-template-columns:minmax(100px,1fr) repeat(4,44px);gap:6px}
+.top-right button{min-width:0;font-size:12px;padding:5px 3px}
+.day-chip{padding:0 4px 0 8px}.day-chip span{font-size:11px}
+main{display:flex;flex-direction:column;gap:14px}.workspace{display:contents}
+.worldpanel{order:0}.characters{order:1}.planner{order:2;margin-top:0}.rightcol{order:3}.journal{order:4;margin-top:0}
+.together .track{position:static;width:100%;margin-top:7px}.together-top{padding-right:0}
+.role{white-space:normal;font-size:12px;line-height:1.5}.actionoption{font-size:14px}.slot{font-size:14px}
+.actiontitle{scroll-margin-top:14px}
+}
+
+
+:root{--m:#b1bd83}.char-card{min-height:0;padding:14px}.char-name{font-size:23px}.characters{gap:12px}.workspace{grid-template-columns:235px minmax(280px,1fr) 310px}.action-options{max-height:300px}.action-detail{min-height:120px}.role{font-size:12px}.conditions{flex-wrap:wrap}.dead{filter:grayscale(1);opacity:.6}.critical{border-color:var(--bad)}.life-bad{color:var(--bad);border-color:var(--bad)}.midnotes{margin-top:14px;padding:16px}.midnotes h3{margin:0 0 7px;font-size:17px}.risk-note{border-left:3px solid var(--bad);padding:9px 11px;background:#3c2e2d;font-size:14px;margin:8px 0}.choice-label{display:block;margin-top:10px;color:var(--gold)}select{display:block;width:100%;min-height:44px;margin-top:5px;background:#26353b;border:1px solid var(--line);color:var(--ink);padding:6px}.dialogue{line-height:2.1;background:#18252d;padding:17px;margin:15px 0;font-size:16px}.dialogue b{display:inline-block;width:52px;color:var(--gold)}.meeting-options{display:grid;gap:9px}.logitem{padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}.muted{color:var(--muted)}.summaryrow{overflow-wrap:anywhere}.modalbuttons{flex-wrap:wrap}.char-card.selected{box-shadow:0 0 0 1px var(--who),0 4px 0 #10171d}.characters .notebox{padding:10px;font-size:14px}.scene-note{max-width:85%}.scene-caption{max-width:85%;font-size:11px}.hint{line-height:1.7}.resourcebar{flex-wrap:wrap}.actionoption{gap:8px}.actionoption small{flex:none}.slot span{display:block;overflow-wrap:anywhere}.plan-status{max-width:62%}.save-note{font-size:12px}.bottomnote{flex-wrap:wrap}.bottomnote span{max-width:100%}.scene-controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.brand p{max-width:450px}.top-right{justify-content:flex-end}.modal{overflow-wrap:anywhere}.char-card p{margin:8px 0}.planner{margin-bottom:0}
+@media(max-width:1180px){.workspace{grid-template-columns:220px minmax(0,1fr)}.rightcol{grid-column:1/-1;grid-template-columns:1fr 1.5fr}.characters{grid-template-columns:1fr}.top{align-items:flex-start}.resources{gap:15px}.action-options{max-height:210px}}
+@media(max-width:760px){.shell{padding:16px 12px}.top{display:block}.brand h1{font-size:26px}.top-right{justify-content:flex-start;margin-top:15px;gap:6px}.day-chip{padding:0 12px}.workspace{display:flex;flex-direction:column;gap:14px}.worldcolumn{order:0;width:100%}.characters{order:1;display:grid;grid-template-columns:1fr;width:100%}.char-card{min-height:0}.rightcol{order:2;display:grid;grid-template-columns:1fr;width:100%}.stats{grid-template-columns:1fr 1fr;column-gap:18px}.conditions{margin-top:8px}.portrait{width:50px;height:60px}.resourcebar{padding:10px 12px;gap:9px}.resources{gap:11px}.resource b{font-size:19px}.resource small{font-size:12px}.locations{grid-template-columns:repeat(3,1fr)}.locations button{font-size:13px}.planner{padding:14px 10px}.plan-header{display:block}.plan-header h2{font-size:20px}.plan-header p{margin-top:6px}.schedule{grid-template-columns:52px repeat(2,minmax(0,1fr));gap:6px}.slot{min-height:85px;padding:9px 7px;font-size:14px}.timecell{font-size:12px;padding:3px}.timecell span{font-size:11px}.rowlabel{font-size:14px}.plan-footer{display:block}.plan-status{max-width:100%}.plan-actions{margin-top:12px;display:grid;grid-template-columns:1fr 1.6fr}.plan-actions button{padding:9px 5px;font-size:13px}.modal-overlay{padding:12px}.modal{padding:20px 15px}.modal h2{font-size:22px}.modal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.invitem{padding:12px}.chapteritem{grid-template-columns:65px minmax(0,1fr)}.brand{gap:10px}.icon-btn{min-width:56px;padding:8px 10px}.scene-note{font-size:11px;top:10px;left:10px}.scene-caption{right:8px;bottom:8px;font-size:10px}.worldhead{gap:8px;padding:12px}.worldhead h2{font-size:17px}.weather{font-size:12px;white-space:nowrap}.quote{font-size:13px}.action-options{max-height:220px}.midnotes{padding:14px}.summaryrow{gap:12px}.meeting-options button{text-align:left}}
+</style></head><body><div class="shell">
+<header class="top"><div class="brand"><div class="mark" aria-hidden="true"></div><div><div class="eyebrow">THREE LIVES / ONE MORE DAY</div><h1>今晚睡哪儿</h1><p>轩哥、凡哥、马哥 · 三人版 v2.0 · 可死亡生存规则演示</p></div></div><div class="top-right"><div class="day-chip"><strong id="daytext"></strong><span id="slottop"></span><div class="save-note" id="turntext"></div></div><button onclick="showChapters()" class="icon-btn">章节</button><button onclick="showBag()" class="icon-btn">物资</button><button onclick="showHelp()" class="icon-btn">存档／说明</button></div></header>
+<section class="resourcebar"><div class="resources"><div class="resource"><small>公共现金</small><b id="cash"></b></div><div class="resource"><small>食物</small><b id="food"></b></div><div class="resource"><small>零件</small><b id="parts"></b></div><div class="resource"><small>电量</small><b id="battery"></b></div><div class="resource"><small>在世</small><b id="survivors"></b></div></div><div class="chapterline"><span class="dot"></span><span id="chaptertext"></span></div></section>
+<main><div class="workspace"><aside class="characters" aria-label="三名主角">
+<div id="xuanCard" class="panel char-card" style="--who:var(--x)" tabindex="0" role="button" aria-label="选择轩哥"></div><div id="fanCard" class="panel char-card" style="--who:var(--f)" tabindex="0" role="button" aria-label="选择凡哥"></div><div id="maCard" class="panel char-card" style="--who:var(--m)" tabindex="0" role="button" aria-label="选择马哥"></div></aside>
+<div class="worldcolumn"><section class="panel worldpanel" aria-label="像素地点预览"><div class="worldhead"><div><h2 id="locationname"></h2><small>PIXEL SCENE / 地点预览</small></div><span class="weather" id="weather"></span></div><div class="canvas-wrap"><canvas class="scene" id="scene" width="480" height="250" aria-label="像素街区与尚在世的伙伴"></canvas><div class="scene-note" id="sceneNote"></div><div class="scene-caption">地点预览 · 不是人物实时位置</div></div><nav class="locations"><button data-zone="camp">旧桥营地</button><button data-zone="market">老街市场</button><button data-zone="recycle">回收小巷</button><button data-zone="station">站前街区</button><button data-zone="cinema">旧电影院</button><button data-zone="service">服务站</button></nav><div class="quote"><b id="speaker"></b><span id="quote"></span></div></section>
+<section class="panel midnotes"><div class="section-tag">NOT JUST THREE HEALTH BARS</div><h3>有本事，有毛病，也有各自想活的日子。</h3><p id="moodNote" class="hint"></p><p class="hint">健康归零进入濒死，过期不救会死亡。马哥第一次多一回合，不是无限复活。免费休整和爱好始终可用。</p><div class="scene-controls"><button onclick="showProfile()">人物与习惯</button><button onclick="showCamp()">床位与营地</button><button onclick="showLogs()">完整记事</button></div></section></div>
+<aside class="rightcol"><section class="panel objectives"><div class="section-tag">TODAY'S PRIORITIES</div><h2>今天要紧的事</h2><div id="priorityText"></div><p class="hint">先点日程格，再选行动。<br>收入未到账前不能拿来付本格成本。</p></section><section class="panel action-panel"><div class="actiontitle"><strong>安排：<span id="selectedlabel" class="actorlabel"></span></strong></div><div id="actionOptions" class="action-options"></div><div id="actionDetail" class="action-detail"></div><button id="assignBtn" class="primary assign"></button></section></aside></div>
+<section class="panel planner"><div class="plan-header"><h2>今天，几个人怎么过？</h2><p>三条队列 · 同一时钟 · 每人每天四格</p></div><div id="schedule" class="schedule"></div><div class="plan-footer"><div id="planStatus" class="plan-status"></div><div class="plan-actions"><button id="buyBtn">补给 ¥8／份</button><button id="advanceBtn" class="primary"></button></div></div></section>
+<div class="journal" role="status" aria-live="polite"><b>街头记事</b><div id="journal" class="journal-text"></div></div></main>
+<footer class="bottomnote"><span>交互原型 v2.0 · 完整七章／恋爱／自由画笔尚未制作。无联网、无真钱博彩，所有数值均为虚构规则。</span><span id="saveStatus"></span></footer></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div><div id="modalOverlay" class="modal-overlay"><section id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button id="modalClose" class="close" aria-label="关闭">×</button><div id="modalContent"></div></section></div>
+<script>
+/* 今晚睡哪儿 v2 — 纯逻辑层。无网络请求、真实金钱交易或现实赔率。 */
+'use strict';
+const Trio = (() => {
+  const IDS = ['xuan', 'fan', 'ma'];
+  const STATS = ['health', 'hunger', 'energy', 'warm', 'mind', 'clean'];
+  const RES = ['cash', 'food', 'parts', 'battery', 'wood', 'cloth'];
+  const NAMES = {xuan:'轩哥',fan:'凡哥',ma:'马哥'};
+  const clamp = (n, lo=0, hi=100) => Math.max(lo, Math.min(hi, n));
+  const copy = s => JSON.parse(JSON.stringify(s));
+  const act = (name, zone, energy, extra={}) => ({name,zone,energy,who:'any',...extra});
+  const ACTIONS = {
+    scavenge:act('分类回收','recycle',14,{cash:12,gain:{parts:1,wood:1},clean:-8,work:true,limit:3,note:'收入12，零件＋1、木料＋1，卫生−8。每天最多3个岗位。'}),
+    kitchen:act('早餐帮厨','market',16,{cash:16,gain:{food:2},work:true,allowed:[0],limit:1,note:'收入16、饭＋2；仅清晨，全队每天1个岗位。'}),
+    beg:act('街头乞讨','station',8,{cash:10,mind:-2,work:true,limit:3,note:'原型固定收入10；每日最多3次。'}),
+    repair:act('基础维修','recycle',18,{who:'xuan',cash:32,cost:{parts:1},work:true,limit:2,note:'收入32，零件−1；店里提供工具。非复杂专注任务。'}),
+    table:act('整理商户数据','recycle',16,{who:'xuan',cash:34,work:true,complex:true,equip:['computer'],limit:2,note:'收入34，使用唯一电脑；精神20—39额外体力4，低于20不可接。'}),
+    shoot:act('商户宣传拍摄','market',16,{who:'fan',cash:38,cost:{battery:1},work:true,equip:['camera'],limit:2,note:'收入38，电量−1，使用唯一相机。'}),
+    interview:act('许可采访','cinema',12,{who:'fan',mind:4,footage:1,equip:['camera'],limit:1,note:'精神＋4、许可素材＋1，不直接挣钱。'}),
+    edit:act('剪辑小委托','cinema',16,{who:'fan',cash:32,complex:true,work:true,equip:['computer'],limit:1,note:'收入32；占唯一电脑；原型为单格小委托。'}),
+    run:act('街头跑腿','station',18,{who:'ma',cash:24,work:true,limit:3,note:'收入24，稳定劳动也能养活马哥。每天最多3次。'}),
+    carry:act('搬运短工','market',24,{cash:28,work:true,limit:2,note:'收入28；马哥体力消耗20，其他人24。每天2个岗位。'}),
+    rest:act('回营休息','camp',0,{energyGain:25,mind:5,warm:6,heal:4,note:'体力＋25、精神＋5、保暖＋6、健康＋4；不是濒死抢救。'}),
+    warm:act('服务站休整','service',0,{energyGain:16,mind:5,warm:30,clean:15,note:'免费：体力＋16、精神＋5、保暖＋30、卫生＋15。'}),
+    clean:act('清洁与补水','service',4,{clean:40,mind:5,warm:10,note:'免费：卫生＋40、精神＋5、保暖＋10。'}),
+    joke:act('整理设备与烂梗','camp',0,{who:'xuan',energyGain:16,mind:10,note:'体力＋16、精神＋10。是一段整理与聊天，不是一个梗讲四小时。'}),
+    sketch:act('纸板速写','camp',0,{who:'fan',energyGain:12,mind:9,note:'免费：体力＋12、精神＋9；精神见底时仍可用。'}),
+    graffiti:act('许可墙面涂鸦','cinema',8,{who:'fan',cost:{cash:3},mind:14,art:1,limit:1,note:'材料预算3、精神＋14、作品＋1。获许可的固定涂鸦差分。'}),
+    freecards:act('无赌注纸牌','camp',0,{energyGain:10,mind:9,note:'免费：体力＋10、精神＋9；马哥赌念−10，不产生赌资。'}),
+    social:act('夜市友好搭话','market',8,{cost:{cash:4},mind:8,leisure:true,note:'与成年NPC聊天，精神＋8。消费不是亲密关系的兑换券。'}),
+    roof:act('两人共同修棚','camp',12,{min:2,cost:{cash:12,wood:2,cloth:2},camp:1,note:'任选两人；共同成本12、木2、布2，防雨＋1，最多3级。'}),
+    bed:act('铺一张干燥床','camp',8,{cost:{wood:1,cloth:2},beds:1,note:'木1、布2；增加1个干燥床位，最多3张。'}),
+    helper:act('雇工帮助修棚','camp',14,{cost:{cash:36,wood:2,cloth:2},camp:1,note:'一个主角也能施工；共同成本36、木2、布2。'}),
+    coop:act('轩凡联合商户单','market',20,{fixed:['xuan','fan'],cash:80,cost:{parts:1,battery:1},equip:['computer','camera'],work:true,limit:1,note:'轩哥＋凡哥；团队收入80只算一次，零件1、电量1。'}),
+    trio:act('三人布场委托','cinema',16,{min:3,cash:104,cost:{cash:4},work:true,limit:1,note:'三人同槽，返还收入104、支出4，净赚100。'}),
+    cards:act('虚构小额牌局','station',8,{cost:{cash:10},gamble:true,leisure:true,note:'入场10；马哥55%获胜、15%平局、30%失败，返还20／10／0（含本金）。每天全队最多2次博彩。'}),
+    lottery:act('虚构即开彩','station',4,{cost:{cash:5},gamble:true,leisure:true,note:'单张5；马哥返还0/5/10/25/100概率50/25/20/4/1%。其他人78/15/6/1/0%。占1格、计入每日2次。'}),
+    danger:act('危棚翻找【危险】','recycle',20,{cash:28,gain:{wood:2},risky:true,work:true,injury:[16,32],note:'确定受到16—32事故伤害，可能濒死！马哥普通事故减伤25%。另结算饥寒；不是必做任务。'}),
+    rescue:act('陪同送援','service',10,{rescue:true,min:2,cost:{cash:12},note:'选择一名濒死者，双方占同槽。支出12，目标恢复健康25、体力20。'}),
+    aid:act('联系救助','service',0,{downedOnly:true,aid:true,note:'濒死者可自行预约：首张救助券免费，之后每次20。全员濒死仍能选。'}),
+    wait:act('濒死等待','camp',0,{downedOnly:true,note:'不施救会继续消耗救援窗口；到期永久死亡。'})
+  };
+  const task=(id, participants, target=null, group=null)=>({id,participants:[...participants],target,group});
+  function actor(values,life='active') {
+    return {...Object.fromEntries(STATS.map((k,i)=>[k,values[i]])),life,joinedTurn:life==='unrecruited'?null:1,downedAt:null,deadline:null,deathTurn:null,deathCause:null,gritUsed:false,intox:0,smokes:0,jokeUsed:false,urge:life==='unrecruited'?65:15,grief:0};
+  }
+  function fresh(seed=260916) {
+    return {version:2,seed:seed>>>0,day:1,slot:0,turn:0,phase:'planning',metMa:false,
+      cash:56,food:4,parts:2,battery:3,wood:2,cloth:4,camp:1,beds:2,bedPriority:[...IDS],art:0,footage:0,vouchers:1,bets:0,orders:{},misfortuneChecked:[],
+      actors:{xuan:actor([82,54,62,50,28,45]),fan:actor([78,50,58,48,22,43]),ma:actor([90,46,72,52,56,35],'unrecruited')},
+      plan:{xuan:['scavenge','joke','repair','rest'].map(id=>task(id,['xuan'])),fan:['kitchen','sketch','rest','graffiti'].map(id=>task(id,['fan'])),ma:[null,null,null,null]},
+      ledger:{start:56,income:0,expense:0},log:['第1天：先安排两人。第3回合结束必遇马哥；前三回合教学保护，之后死亡规则开启。'],deaths:[]};
+  }
+  const alive=s=>IDS.filter(id=>['active','downed'].includes(s.actors[id].life));
+  const active=s=>IDS.filter(id=>s.actors[id].life==='active');
+  const reserve=s=>Math.max(0,alive(s).length*2-s.food)*8;
+  const push=(s,msg)=>{s.log.unshift(msg);s.log=s.log.slice(0,40);};
+  function random(seed,key) {
+    let h=(seed^2166136261)>>>0;
+    for(let i=0;i<key.length;i++){h^=key.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}
+    h^=h>>>16;h=Math.imul(h,0x7feb352d);h^=h>>>15;h=Math.imul(h,0x846ca68b);h^=h>>>16;
+    return (h>>>0)/4294967296;
+  }
+  function gambling(id,type,r) {
+    if(type==='cards')return r<(id==='ma'?.55:.40)?20:r<(id==='ma'?.70:.55)?10:0;
+    if(id==='ma')return r<.5?0:r<.75?5:r<.95?10:r<.99?25:100;
+    return r<.78?0:r<.93?5:r<.99?10:25;
+  }
+  const weather=day=>day>=25?'cold':day%4===0?'rain':'overcast';
+  function energyCost(s,id,a) {
+    let n=a.energy;if(a===ACTIONS.carry&&id==='ma')n=20;
+    if(a.complex&&s.actors[id].mind>=20&&s.actors[id].mind<40)n+=4;
+    return n;
+  }
+  function available(s,id) {
+    const p=s.actors[id];
+    if(p.life==='downed')return ['aid','wait'];
+    if(p.life!=='active')return [];
+    return Object.keys(ACTIONS).filter(k=>{const a=ACTIONS[k];return !a.downedOnly&&(a.who==='any'||a.who===id)&&(!a.fixed||a.fixed.includes(id));});
+  }
+  function cancelAt(s,id,slot) {
+    const old=s.plan[id][slot];
+    if(old?.group)for(const x of IDS){if(s.plan[x][slot]?.group===old.group)s.plan[x][slot]=null;}
+    else s.plan[id][slot]=null;
+  }
+  function assign(input,id,slot,actionId,participants=null,target=null) {
+    if(input.phase!=='planning')return {error:'当前需先处理剧情、结束画面或相遇事件。',state:input};
+    if(!IDS.includes(id)||!Number.isInteger(slot)||slot<input.slot||slot>3||!Object.hasOwn(ACTIONS,actionId))return {error:'无效角色、行动或已完成时段。',state:input};
+    const a=ACTIONS[actionId];
+    if(!available(input,id).includes(actionId))return {error:'当前生命状态或职业不能安排这项行动。',state:input};
+    let members=a.fixed?[...a.fixed]:(a.min?participants:[id]);
+    if(!Array.isArray(members)||!members.includes(id)||new Set(members).size!==members.length||members.some(x=>!IDS.includes(x)))return {error:'请选择明确且不重复的合作参与者。',state:input};
+    if(a.min&&members.length!==a.min)return {error:'这项合作需要'+a.min+'名参与者。',state:input};
+    if(a.rescue){if(!target||target===id||!members.includes(target)||input.actors[target].life!=='downed'||input.actors[id].life!=='active')return {error:'救援需一名可行动者与一名濒死目标。',state:input};}
+    for(const member of members)if(!a.rescue&&input.actors[member].life!==(a.downedOnly?'downed':'active'))return {error:NAMES[member]+'当前不能参与。',state:input};
+    if(a.allowed&&!a.allowed.includes(slot))return {error:'早餐帮厨只在清晨开放。',state:input};
+    if(a.risky&&input.turn<3)return {error:'前三回合教学保护阶段不开放危险任务。',state:input};
+    const s=copy(input);for(const m of members)cancelAt(s,m,slot);
+    const group=members.length>1?`${s.day}:${slot}:${actionId}:${members.slice().sort().join('-')}`:null;
+    const t=task(actionId,members,target,group);for(const m of members)s.plan[m][slot]=copy(t);
+    return {state:s};
+  }
+  function units(s) {
+    const result=[],seen=new Set();
+    for(const id of alive(s)){
+      const t=s.plan[id][s.slot];if(!t){result.push({actor:id,task:null});continue;}
+      const key=t.group||id;if(seen.has(key))continue;seen.add(key);result.push({actor:id,task:t,action:ACTIONS[t.id]});
+    }return result;
+  }
+  function preflight(s) {
+    if(s.phase!=='planning')return {error:'请先处理当前剧情或结束画面。'};
+    const jobs=units(s),costs={},equip=new Set(),counts={...s.orders};let bets=s.bets,vouchers=s.vouchers,bedAdds=0,campAdds=0;
+    const funding=[];
+    for(const j of jobs){
+      const {actor:id,task:t,action:a}=j;
+      if(!t||!a)return {error:'请为'+NAMES[id]+'安排当前时段。'};
+      if(a.allowed&&!a.allowed.includes(s.slot))return {error:a.name+'不在当前时段开放。'};
+      if(a.risky&&s.turn<3)return {error:'教学阶段不开放危险作业。'};
+      if(a.fixed&&a.fixed.slice().sort().join()!==t.participants.slice().sort().join())return {error:'职业合作参与者不正确。'};
+      if(a.min&&t.participants.length!==a.min)return {error:'合作人数不足。'};
+      if(!a.min&&!a.fixed&&(t.participants.length!==1||t.participants[0]!==id))return {error:'单人行动的参与者错误。'};
+      if(a.rescue&&(!t.target||!t.participants.includes(t.target)||s.actors[t.target].life!=='downed'))return {error:'救援目标已变化，请重排。'};
+      for(const m of t.participants){
+        const p=s.actors[m],mt=s.plan[m][s.slot];
+        if(!mt||JSON.stringify(mt)!==JSON.stringify(t))return {error:'合作绑定不完整，请重新选择参与者。'};
+        const isTarget=a.rescue&&m===t.target;
+        if(isTarget)continue;
+        if(p.life!==(a.downedOnly?'downed':'active'))return {error:NAMES[m]+'的生命状态不允许当前行动。'};
+        if(a.who!=='any'&&a.who!==m)return {error:'角色不能做这项专属工作。'};
+        if(p.life==='active'){
+          if(a.complex&&p.mind<20)return {error:NAMES[m]+'精神不足20，请改基础工作、免费爱好或休整。'};
+          if((a.risky||a.complex)&&p.intox>=2)return {error:NAMES[m]+'醉意较高，不能危险作业或复杂专注工作。'};
+          if(a.gamble&&p.intox>0)return {error:NAMES[m]+'有醉意，本回合不能付费博彩。'};
+          if(p.energy<energyCost(s,m,a))return {error:NAMES[m]+'体力不足（需'+energyCost(s,m,a)+'），请休整或选择轻活。'};
+        }
+      }
+      for(const e of a.equip||[]){if(equip.has(e))return {error:'唯一'+(e==='computer'?'电脑':'相机')+'同槽被重复占用，请调整时段。'};equip.add(e);}
+      counts[t.id]=(counts[t.id]||0)+1;if(a.limit&&counts[t.id]>a.limit)return {error:a.name+'的本日岗位／次数已用完。'};
+      if(a.gamble&&++bets>2)return {error:'全队今日付费博彩已达2次，可选无赌注纸牌或正常工作。'};
+      bedAdds+=a.beds||0;campAdds+=a.camp||0;
+      let cost={...(a.cost||{})},useVoucher=false;
+      if(a.aid){if(vouchers>0){vouchers--;useVoucher=true;}else cost.cash=20;}
+      for(const [k,v] of Object.entries(cost))costs[k]=(costs[k]||0)+v;
+      funding.push({...j,cost,useVoucher});
+    }
+    if(s.beds+bedAdds>3)return {error:'床位上限3，请改排多余施工。'};
+    if(s.camp+campAdds>3)return {error:'防雨等级上限3，请改排多余施工。'};
+    for(const [k,v] of Object.entries(costs))if(s[k]<v)return {error:({cash:'现金',parts:'零件',battery:'电量',wood:'木料',cloth:'布料'})[k]+'不足：本回合需'+v+'，现有'+s[k]+'。整回合未执行、未扣费。'};
+    if(jobs.some(j=>j.action.leisure)&&s.cash-(costs.cash||0)<reserve(s))return {error:'这会动用预留的两餐饭钱'+reserve(s)+'。先补食物或安排劳动。'};
+    return {jobs:funding,costs,counts,bets};
+  }
+  function setDowned(s,id,turn,cause,events) {
+    const p=s.actors[id];if(p.life!=='active'||p.health>0)return;
+    if(turn<=3){p.health=1;events.push(NAMES[id]+'受到前三回合教学保护。');return;}
+    const extra=id==='ma'&&!p.gritUsed;
+    p.life='downed';p.downedAt=turn;p.deadline=turn+(extra?2:1);p.deathCause=cause;
+    if(extra)p.gritUsed=true;
+    events.push(NAMES[id]+'濒死：'+cause+'。须在回合'+p.deadline+'结束前获救。'+(extra?'命硬：整局唯一的额外1回合已启用。':''));
+  }
+  function kill(s,id,turn,events) {
+    const p=s.actors[id];if(p.life==='dead')return;
+    p.life='dead';p.health=0;p.deathTurn=turn;p.deadline=null;
+    const record={id,day:s.day,turn,cause:p.deathCause||'救援未及时完成'};s.deaths.push(record);
+    events.push(NAMES[id]+'死亡。已取消其后续劳动和合作；幸存者继续。');
+    for(const m of alive(s)){s.actors[m].mind=clamp(s.actors[m].mind-18);s.actors[m].grief=3;}
+  }
+  function recover(s,id,events) {
+    const p=s.actors[id];p.life='active';p.health=25;p.energy=20;p.warm=Math.max(35,p.warm);p.mind=clamp(p.mind+5);p.downedAt=null;p.deadline=null;p.deathCause=null;
+    events.push(NAMES[id]+'已获救：健康25、体力20。请继续安排安全休整。');
+  }
+  function cleanupFuture(s,start) {
+    for(const id of IDS){
+      if(!['downed','dead'].includes(s.actors[id].life))continue;
+      for(let k=start;k<4;k++){cancelAt(s,id,k);if(s.actors[id].life==='downed')s.plan[id][k]=task('wait',[id]);}
+    }
+  }
+  function nextPlan(s) {
+    const templates={xuan:['scavenge','repair','joke','rest'],fan:['kitchen','graffiti','shoot','sketch'],ma:['run','carry','rest','freecards']};
+    const result={};for(const id of IDS){const p=s.actors[id];result[id]=templates[id].map(k=>p.life==='active'?task(k,[id]):p.life==='downed'?task('wait',[id]):null);}
+    return result;
+  }
+  function settle(input) {
+    const check=preflight(input);if(check.error)return {state:input,error:check.error};
+    const s=copy(input),events=[],turn=s.turn+1,slot=s.slot,day=s.day,startAlive=alive(input),damage={};
+    let income=0,expense=0;
+    for(const [k,v] of Object.entries(check.costs)){s[k]-=v;if(k==='cash')expense+=v;}
+    for(const {actor:id,task:t,action:a,useVoucher} of check.jobs){
+      if(useVoucher)s.vouchers--;
+      if(a.aid){recover(s,id,events);continue;}
+      if(a.rescue){recover(s,t.target,events);}
+      if(a.cash){s.cash+=a.cash;income+=a.cash;}
+      for(const [k,v] of Object.entries(a.gain||{}))s[k]+=v;
+      s.camp+=a.camp||0;s.beds+=a.beds||0;s.footage+=a.footage||0;s.art+=a.art||0;
+      if(a.gamble){
+        s.bets++;const r=random(s.seed,`bet:${s.day}:${id}:${s.bets}:${t.id}`),win=gambling(id,t.id,r);
+        s.cash+=win;income+=win;s.actors[id].urge=clamp(s.actors[id].urge+(win>(a.cost.cash)?6:12));
+        events.push(NAMES[id]+'「'+a.name+'」返还'+win+'（含本金），本次净'+(win-a.cost.cash)+'。');
+      }
+      for(const m of t.participants){
+        if(a.rescue&&m===t.target)continue;
+        const p=s.actors[m];if(input.actors[m].life!=='active')continue;
+        p.energy=clamp(p.energy-energyCost(input,m,a)+(a.energyGain||0));p.mind=clamp(p.mind+(a.mind||0));p.warm=clamp(p.warm+(a.warm||0));p.clean=clamp(p.clean+(a.clean||0));p.health=clamp(p.health+(a.heal||0));
+        if(t.id==='freecards'&&m==='ma')p.urge=clamp(p.urge-10);
+        if(a.work&&m==='ma')p.urge=clamp(p.urge-4);
+        if(a.injury){let hit=a.injury[0]+Math.floor(random(s.seed,`injury:${turn}:${m}`)*(a.injury[1]-a.injury[0]+1));if(m==='ma')hit=Math.ceil(hit*.75);damage[m]=hit;events.push(NAMES[m]+'危险劳动事故伤害'+hit+'，另结算本时段环境。');}
+        if(a.work&&!['camp','service'].includes(a.zone)&&!s.misfortuneChecked.includes(m)&&turn>3){
+          s.misfortuneChecked.push(m);
+          if(random(s.seed,`misfortune:${s.day}:${m}`)<(m==='ma'?.25:.12)){p.energy=clamp(p.energy-4);p.clean=clamp(p.clean-3);events.push(NAMES[m]+'遇到小倒霉：袋底开了，收拾多花体力4、卫生3；没有扣健康或没收收入。');}
+        }
+      }
+    }
+    s.orders=check.counts;s.turn=turn;
+    for(const id of startAlive)s.actors[id].hunger=clamp(s.actors[id].hunger-12);
+    if(slot===1||slot===3){
+      for(const id of [...startAlive].sort((a,b)=>s.actors[a].hunger-s.actors[b].hunger)){
+        if(s.food>0){s.food--;s.actors[id].hunger=clamp(s.actors[id].hunger+30);}else events.push(NAMES[id]+'缺一份饭。');
+      }
+    }
+    for(const id of startAlive){
+      const p=s.actors[id];if(p.life!=='active')continue;
+      const t=input.plan[id][slot],a=ACTIONS[t.id];
+      const inside=['service','cinema'].includes(a.zone)||['repair','table','edit'].includes(t.id)||(a.zone==='camp'&&s.camp>=2);
+      if(!inside)p.warm=clamp(p.warm-(weather(day)==='cold'?12:weather(day)==='rain'?8:2));
+      const hunger=p.hunger<=15?6:0,cold=p.warm<=20?6:0;
+      const reasons=[];if(damage[id])reasons.push('危险劳动');if(hunger)reasons.push('饥饿');if(cold)reasons.push('失温风险');
+      p.health=clamp(p.health-(damage[id]||0)-hunger-cold);setDowned(s,id,turn,reasons.join('＋')||'重伤',events);
+    }
+    for(const id of startAlive){const p=s.actors[id];if(p.life==='downed'&&p.deadline<=turn)kill(s,id,turn,events);}
+    s.ledger.income+=income;s.ledger.expense+=expense;
+    const actions=check.jobs.map(j=>j.task.participants.map(id=>NAMES[id]).join('＋')+'「'+j.action.name+'」').join('；');
+    push(s,`第${day}天第${turn}回合：${actions}。收入${income}，支出${expense}。`);
+    let night=null;
+    if(slot===3){
+      const need=alive(s),bedUsers=s.bedPriority.filter(id=>need.includes(id)).slice(0,s.beds);
+      for(const id of need){
+        const p=s.actors[id];p.hunger=clamp(p.hunger-12);
+        if(p.life==='active'){
+          const dryBed=bedUsers.includes(id),recovery=(dryBed?50:25)-p.intox*10;
+          p.energy=clamp(p.energy+recovery);p.mind=clamp(p.mind+(dryBed?5:2));
+          if(dryBed&&s.camp>=2)p.warm=clamp(p.warm+8);
+          else p.warm=clamp(p.warm-(weather(day)==='cold'?18:weather(day)==='rain'?10:4));
+          if(!dryBed)events.push(NAMES[id]+'没有干燥床位，夜间恢复较少。');
+          if(p.hunger>15&&p.warm>20)p.health=clamp(p.health+2);
+          p.health=clamp(p.health-(p.hunger<=15?6:0)-(p.warm<=20?6:0));
+          setDowned(s,id,turn,'夜间饥寒',events);
+        }
+        p.intox=0;p.smokes=0;p.jokeUsed=false;p.grief=Math.max(0,p.grief-1);
+      }
+      night={day,...s.ledger,end:s.cash,food:s.food,survivors:alive(s).length,beds:s.beds};
+    }
+    if(s.metMa&&alive(s).length===0)s.phase='gameover';
+    else if(turn===3&&!s.metMa)s.phase='meeting';
+    else if(day===28&&slot===3)s.phase='ending';
+    if(s.phase==='gameover'||s.phase==='ending'){cleanupFuture(s,slot+1);}
+    else if(slot===3){s.day++;s.slot=0;s.bets=0;s.orders={};s.misfortuneChecked=[];s.ledger={start:s.cash,income:0,expense:0};s.plan=nextPlan(s);}
+    else {s.slot++;cleanupFuture(s,s.slot);}
+    for(const msg of events)push(s,msg);
+    return {state:s,events,night};
+  }
+  function meet(input,choice) {
+    if(input.phase!=='meeting'||input.metMa||input.turn!==3||![0,1,2].includes(choice))return {state:input,error:'当前没有待处理的马哥相遇。'};
+    const s=copy(input);s.metMa=true;s.phase='planning';s.actors.ma.life='active';s.actors.ma.joinedTurn=4;
+    if(choice===1)s.actors.ma.mind=clamp(s.actors.ma.mind+4);
+    s.plan.ma[3]=task('rest',['ma']);push(s,'马哥入队。从第4回合开始可控；三人每天六份饭，目前只有'+s.beds+'张床。');return {state:s};
+  }
+  function buyFood(input,count=1) {
+    if(input.phase!=='planning'||!Number.isInteger(count)||count<1||count>20)return {state:input,error:'当前不能购买。'};
+    if(input.cash<count*8)return {state:input,error:'现金不足。可以安排帮厨、回收、跑腿或短工。'};
+    const s=copy(input);s.cash-=count*8;s.food+=count;s.ledger.expense+=count*8;push(s,'购买食物'+count+'份，支出'+count*8+'。');return {state:s};
+  }
+  function habit(input,id,kind) {
+    if(input.phase!=='planning'||!IDS.includes(id)||input.actors[id].life!=='active')return {state:input,error:'当前不能使用个人习惯。'};
+    const s=copy(input),p=s.actors[id];let cost=0;
+    if(kind==='smoke'){
+      if(p.smokes>=2)return {state:input,error:'今天已使用两次，不再重复提供即时满足。'};
+      cost=3;
+    }else if(kind==='drink'){
+      if(p.intox>=2)return {state:input,error:'本日饮酒上限已到；需要夜间休整。'};cost=6;
+    }else if(kind==='joke'){
+      if(id!=='xuan'||p.jokeUsed)return {state:input,error:'仅轩哥每天一次附带短梗。'};
+      if(p.grief>0||alive(s).some(x=>s.actors[x].life==='downed'))return {state:input,error:'现在先认真处理同伴的状况，不播放开心烂梗。'};
+    }else return {state:input,error:'未知习惯。'};
+    if(s.cash-cost<reserve(s))return {state:input,error:'不足以同时保留两餐饭钱'+reserve(s)+'；可选免费爱好。'};
+    s.cash-=cost;s.ledger.expense+=cost;
+    if(kind==='smoke'){p.mind=clamp(p.mind+(p.smokes===0?4:1));p.energy=clamp(p.energy-2);p.smokes++;}
+    if(kind==='drink'){p.mind=clamp(p.mind+6);p.intox++;}
+    if(kind==='joke'){p.mind=clamp(p.mind+3);p.jokeUsed=true;}
+    push(s,NAMES[id]+(kind==='smoke'?'抽了一次烟：花3、体力−2，第二次满足减弱。':kind==='drink'?'喝了一份酒：花6、精神＋6；不增加保暖，夜间恢复下降。':'：“生活把我优化了，但是没发补偿。”精神＋3。'));
+    return {state:s};
+  }
+  function valid(s) {
+    try{
+      if(!s||s.version!==2||!Number.isInteger(s.seed)||s.seed<0||s.seed>4294967295)return false;
+      if(!Number.isInteger(s.day)||s.day<1||s.day>28||![0,1,2,3].includes(s.slot)||!Number.isInteger(s.turn)||s.turn<0||s.turn>112)return false;
+      if(!['planning','meeting','gameover','ending'].includes(s.phase)||typeof s.metMa!=='boolean')return false;
+      if(!['gameover','ending'].includes(s.phase)&&s.turn!==(s.day-1)*4+s.slot)return false;
+      for(const k of RES)if(!Number.isInteger(s[k])||s[k]<0||s[k]>1000000)return false;
+      for(const [k,max] of Object.entries({camp:3,beds:3,art:500,footage:500,vouchers:1,bets:2}))if(!Number.isInteger(s[k])||s[k]<0||s[k]>max)return false;
+      if(!Array.isArray(s.bedPriority)||s.bedPriority.length!==3||new Set(s.bedPriority).size!==3||s.bedPriority.some(id=>!IDS.includes(id)))return false;
+      for(const id of IDS){
+        const p=s.actors?.[id];if(!p||!['unrecruited','active','downed','dead'].includes(p.life))return false;
+        for(const k of STATS)if(!Number.isInteger(p[k])||p[k]<0||p[k]>100)return false;
+        if(p.life==='active'&&p.health===0)return false;
+        if(['downed','dead'].includes(p.life)&&p.health!==0)return false;
+        if(typeof p.gritUsed!=='boolean'||typeof p.jokeUsed!=='boolean')return false;
+        for(const [k,max]of Object.entries({intox:2,smokes:2,urge:100,grief:3}))if(!Number.isInteger(p[k])||p[k]<0||p[k]>max)return false;
+        for(const k of ['joinedTurn','downedAt','deadline','deathTurn'])if(p[k]!==null&&(!Number.isInteger(p[k])||p[k]<0||p[k]>114))return false;
+        if(p.deathCause!==null&&(typeof p.deathCause!=='string'||p.deathCause.length>200))return false;
+        if(p.life==='downed'&&(p.deadline===null||p.deadline<=s.turn||p.downedAt===null))return false;
+        if(p.life==='dead'&&(p.deathTurn===null||p.deathTurn>s.turn))return false;
+        if(!Array.isArray(s.plan?.[id])||s.plan[id].length!==4)return false;
+        for(let i=0;i<4;i++){
+          const t=s.plan[id][i];if(t===null)continue;
+          if(!Object.hasOwn(ACTIONS,t.id)||!Array.isArray(t.participants)||t.participants.length<1||t.participants.length>3||new Set(t.participants).size!==t.participants.length||!t.participants.includes(id)||t.participants.some(m=>!IDS.includes(m)))return false;
+          if(t.target!==null&&!IDS.includes(t.target))return false;
+          if(t.group!==null&&(typeof t.group!=='string'||t.group.length>100))return false;
+          if(t.participants.length>1&&!t.group)return false;
+          if(i>=s.slot&&!['ending','gameover'].includes(s.phase)&&t.group){for(const m of t.participants)if(JSON.stringify(s.plan[m][i])!==JSON.stringify(t))return false;}
+        }
+      }
+      if(s.metMa===(s.actors.ma.life==='unrecruited'))return false;
+      if(s.phase==='meeting'&&(s.turn!==3||s.metMa))return false;
+      if(s.turn>3&&!s.metMa)return false;
+      if(s.turn===3&&!s.metMa&&s.phase!=='meeting')return false;
+      if(s.actors.xuan.life==='unrecruited'||s.actors.fan.life==='unrecruited')return false;
+      if(s.phase==='gameover'&&alive(s).length!==0)return false;
+      if(!s.ledger||!['start','income','expense'].every(k=>Number.isInteger(s.ledger[k])&&s.ledger[k]>=0&&s.ledger[k]<10000000))return false;
+      if(s.ledger.start+s.ledger.income-s.ledger.expense!==s.cash)return false;
+      if(!Array.isArray(s.log)||s.log.length>40||s.log.some(x=>typeof x!=='string'||x.length>2600))return false;
+      if(!s.orders||typeof s.orders!=='object'||Array.isArray(s.orders)||Object.entries(s.orders).some(([k,v])=>!Object.hasOwn(ACTIONS,k)||!Number.isInteger(v)||v<0||v>12))return false;
+      if(!Array.isArray(s.misfortuneChecked)||s.misfortuneChecked.some(x=>!IDS.includes(x)))return false;
+      if(!Array.isArray(s.deaths)||s.deaths.length>3||s.deaths.some(d=>!IDS.includes(d.id)||!Number.isInteger(d.day)||!Number.isInteger(d.turn)||typeof d.cause!=='string'||d.cause.length>200))return false;
+      return true;
+    }catch(_){return false;}
+  }
+  return {IDS,STATS,NAMES,ACTIONS,fresh,copy,alive,active,reserve,random,gambling,weather,energyCost,available,task,assign,preflight,settle,meet,buyFood,habit,valid};
+})();
+if(typeof module!=='undefined'&&module.exports)module.exports=Trio;
+
+/* 三人版界面。世界为地点预览，全部规则由 Trio 结算。 */
+const G=Trio, $=id=>document.getElementById(id);
+const TIMES=['清晨','日间','午后','晚间'];
+const HOURS=['06:00—10:00','10:00—14:00','14:00—18:00','18:00—22:00'];
+const META={xuan:{name:'轩哥',role:'程序员 / 爱玩烂梗',color:'#71bfc3',trait:'初始精神28 · 技术、备份、嘴贫'},fan:{name:'凡哥',role:'电影导演 / 爱涂鸦',color:'#dda45d',trait:'初始精神22 · 影像、视觉、创作'},ma:{name:'马哥',role:'街面熟人 / 好赌命硬',color:'#b1bd83',trait:'生活运低 · 牌运高 · 整局一次额外救援窗口'}};
+const ZONES={camp:'旧桥 · 临时营地',market:'老街 · 早餐与夜市',recycle:'回收巷 · 老周的店',station:'站前 · 临时工作街',cinema:'旧影院 · 许可涂鸦墙',service:'服务站 · 灯还亮着'};
+const CHAPTERS=[['被城市登出','第3回合遇马哥；补第三张床，解决三个人的饭。'],['各有各的糊口办法','维修、拍摄与涂鸦、跑腿；第一笔可自由安排的钱。'],['雨不会挑人','提前准备、保护器材与墙画；必要时让任务给救援让路。'],['手气不是出路','高价广告合同与马哥的牌桌诱惑；不自动追赌。'],['各自的岸，三个人的账','试工与采访撞期；马哥帮忙也要放弃自己的劳动时间。'],['三个人，几张床','寒潮前按存活人数准备床位、食物和退路。'],['片尾名单','工作、作品、生活各自收束；人物是否活着决定画面与台词。']];
+const KEY='street-trio-ui-v2';
+const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let state=G.fresh(), selectedActor='xuan',selectedSlot=0,selectedAction='scavenge',zone='camp',toastTimer,lastFocus=null,storageOK=true;
+try{const raw=localStorage.getItem(KEY);if(raw){const s=JSON.parse(raw);if(G.valid(s)){state=s;selectedSlot=s.slot;}else storageOK=false;}}catch(_){storageOK=false;}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));storageOK=true;}catch(_){storageOK=false;}$('saveStatus').textContent=storageOK?'仅此浏览器本地保存 · 可导出备份':'本地保存不可用／旧存档无效 · 请导出当前进度';}
+function toast(msg){$('toast').textContent=msg;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),4800);}
+function apply(result){if(result.error){toast(result.error);return false;}state=result.state;save();render();return true;}
+function card(id){
+  const a=META[id],p=state.actors[id];
+  if(p.life==='unrecruited')return `<div class="section-tag">第三位伙伴</div><h2 style="margin:8px 0">马哥</h2><p class="muted">尚未相遇</p><div class="notebox">第3回合结束必遇<br>第4回合开始可控</div><p class="hint">生活运低，但牌桌上不一样。</p>`;
+  const life=p.life==='dead'?'已死亡 · 回合'+p.deathTurn:p.life==='downed'?'濒死 · 剩'+(p.deadline-state.turn)+'回合':p.mind<20?'心力不足 · 可休整':p.mind<40?'精神低迷':'可行动';
+  return `<div class="char-head"><canvas class="portrait" id="portrait-${id}" width="32" height="38" aria-hidden="true"></canvas><div><div class="char-name">${a.name}</div><div class="role">${a.role}</div><span class="badge ${p.life!=='active'?'life-bad':''}">${life}</span></div></div><div class="stats">${[['健康','health'],['饱食','hunger'],['体力','energy'],['精神','mind']].map(([label,k])=>`<div class="stat"><span>${label}</span><div class="track"><div class="fill ${p[k]<30?'low':''}" style="width:${p[k]}%"></div></div><span class="value">${p[k]}</span></div>`).join('')}</div><div class="conditions"><span class="${p.warm<=20?'cold':''}">保暖${p.warm}</span><span>卫生${p.clean}</span><span>醉意${p.intox}</span></div>${id==='ma'?`<div class="hint">命硬额外窗口：${p.gritUsed?'已使用':'尚未使用'} · 赌念${p.urge}</div>`:''}${p.grief?'<div class="hint">哀伤中 · 免费恢复仍可用</div>':''}`;
+}
+function chooseSlot(id,slot){
+  if(state.actors[id].life==='unrecruited'){toast('马哥会在第3回合结束出现。');return;}
+  selectedActor=id;selectedSlot=Math.max(state.slot,slot);selectedAction=state.plan[id][selectedSlot]?.id||G.available(state,id)[0]||'rest';render();
+}
+function renderCharacters(){
+  for(const id of G.IDS){const el=$(id+'Card');el.innerHTML=card(id);el.classList.toggle('selected',selectedActor===id);el.classList.toggle('dead',state.actors[id].life==='dead');el.classList.toggle('critical',state.actors[id].life==='downed');if(state.actors[id].life!=='unrecruited')drawPortrait(id);}
+}
+function renderSchedule(){
+  const mobile=innerWidth<=760,groups=mobile?[[0,1],[2,3]]:[[0,1,2,3]];let html='';
+  for(const group of groups){html+='<div></div>'+group.map(i=>`<div class="timecell ${i===state.slot?'now':''}"><b>${TIMES[i]}${i===state.slot?' · 当前':''}</b><span>${HOURS[i]}</span></div>`).join('');
+    for(const id of G.IDS){const p=state.actors[id];html+=`<div class="rowlabel" style="color:${META[id].color}">${META[id].name}</div>`;
+      html+=group.map(i=>{const t=state.plan[id][i],a=t&&G.ACTIONS[t.id];const prior=i<state.slot;const absent=p.life==='unrecruited'||(state.day===1&&id==='ma'&&i<3);let title=absent?'未入队':p.life==='dead'&&!prior?'已死亡':a?.name||'＋ 安排行动';let note=absent?'没有行动／收入':p.life==='dead'&&!prior?'遗物与回顾':t?.group?'↔ '+t.participants.map(x=>META[x].name).join('＋'):p.life==='downed'&&!prior?'救援期限：回合'+p.deadline:'点击更换安排';return `<button class="slot ${prior?'executed':''} ${t?.group?'coop':''} ${selectedActor===id&&selectedSlot===i?'selected':''}" style="--who:${META[id].color}" data-slot="${i}" data-actor="${id}" ${prior||absent||p.life==='dead'||state.phase!=='planning'?'disabled':''}><span>${title}</span><small>${note}</small></button>`;}).join('');
+    }
+  }
+  $('schedule').innerHTML=html;document.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>chooseSlot(b.dataset.actor,+b.dataset.slot));
+}
+function actionDetail(){
+  const a=G.ACTIONS[selectedAction];if(!a)return '';
+  let chooser='';
+  if(a.rescue){const targets=G.alive(state).filter(x=>state.actors[x].life==='downed'&&x!==selectedActor);chooser=`<label class="choice-label">救援目标<select id="partner">${targets.map(x=>`<option value="${x}">${META[x].name} · 剩${state.actors[x].deadline-state.turn}回合</option>`).join('')||'<option value="">当前无人濒死</option>'}</select></label>`;}
+  else if(a.min===2){const partners=G.active(state).filter(x=>x!==selectedActor);chooser=`<label class="choice-label">合作伙伴<select id="partner">${partners.map(x=>`<option value="${x}">${META[x].name}</option>`).join('')||'<option value="">没有可行动伙伴</option>'}</select></label>`;}
+  const limit=a.limit?`本日已用${state.orders[selectedAction]||0}／${a.limit}`:'';
+  return `<strong>${a.name}</strong><p>${ZONES[a.zone]} · ${(a.min||a.fixed)?'各占1格':'占1格'}</p><p>执行者体力成本 ${G.energyCost(state,selectedActor,a)} ${a.energyGain?'／恢复'+a.energyGain:''}</p><p>${a.note}</p>${limit?`<p>${limit}</p>`:''}${a.risky?'<div class="risk-note">有死亡可能：事故之外还需考虑饥饿、寒冷和救援期限。</div>':''}${chooser}`;
+}
+function renderActions(){
+  const possible=G.available(state,selectedActor);
+  if(!possible.includes(selectedAction))selectedAction=possible[0]||'';
+  $('selectedlabel').textContent=META[selectedActor].name+' · '+TIMES[selectedSlot];$('selectedlabel').style.color=META[selectedActor].color;
+  $('actionOptions').innerHTML=possible.map(k=>{const a=G.ACTIONS[k];return `<button class="actionoption ${selectedAction===k?'active':''}" data-action="${k}"><span>${a.min||a.fixed?'↔ ':''}${a.name}</span><small>${a.cash?'收入'+a.cash:a.gamble?'游戏内零花钱':a.mind?'精神＋'+a.mind:a.rescue||a.aid?'救命行动':'生活安排'}</small></button>`;}).join('')||'<p class="hint">该角色当前不可安排行动。</p>';
+  document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>{selectedAction=b.dataset.action;renderActions();});
+  $('actionDetail').innerHTML=selectedAction?actionDetail():'<p>未入队或已死亡的角色没有行动槽。</p>';
+  const existing=state.plan[selectedActor][selectedSlot];if($('partner')&&existing?.id===selectedAction){const chosen=existing.target||existing.participants.find(x=>x!==selectedActor);if(chosen)$('partner').value=chosen;}
+  $('assignBtn').disabled=!selectedAction||state.phase!=='planning';$('assignBtn').textContent='安排到'+TIMES[selectedSlot];
+}
+function assignNow(skipRisk=false){
+  const a=G.ACTIONS[selectedAction];if(!a)return;
+  let members=null,target=null;
+  if(a.rescue){target=$('partner')?.value;members=[selectedActor,target];}
+  else if(a.min===2)members=[selectedActor,$('partner')?.value];
+  else if(a.min===3)members=[...G.IDS];
+  if(a.risky&&!skipRisk){showModal('这项劳动可能让角色濒死',`<p>${META[selectedActor].name}当前健康${state.actors[selectedActor].health}。本行动有明示的16—32事故伤害，马哥减免25%，并叠加饥寒伤害。请留出施救的人和钱。</p><div class="modalbuttons"><button id="confirmRisk" class="primary">仍然安排危险劳动</button><button onclick="closeModal()">返回</button></div>`);$('confirmRisk').onclick=()=>{closeModal();assignNow(true);};return;}
+  const result=G.assign(state,selectedActor,selectedSlot,selectedAction,members,target);
+  if(apply(result))toast('已安排。'+((a.min||a.fixed)?'合作共同成本只记一次。':'当前时段会与其他主角同时结算。'));
+}
+function phaseDialog(){
+  if(state.phase==='meeting')showMeeting();
+  if(state.phase==='gameover')showModal('这回，没有明天',`<p>所有已入队主角已经死亡。本局结束，不会通过睡眠自动复活。</p>${state.deaths.map(d=>`<div class="summaryrow"><span>${META[d.id].name} · 第${d.day}天／回合${d.turn}</span><b>${esc(d.cause)}</b></div>`).join('')}<p>可导出这局记录，或读取自己此前保存的备份；读取是回到过去，不是剧情复活。</p><div class="modalbuttons"><button onclick="exportSave()">导出记录</button><button onclick="importSave()">导入备份</button><button onclick="showReset()">重新开始</button></div>`);
+  if(state.phase==='ending')showModal('28天经营规则演示结束',`<p>当前仍活着${G.alive(state).length}人，现金${state.cash}，作品${state.art}。此原型没有制作完整七章分支与结局演出，不能据此声称已体验完整故事。</p><div class="modalbuttons"><button onclick="exportSave()">保存回顾</button><button onclick="showReset()">重新开始</button><button onclick="closeModal()">查看状态</button></div>`);
+}
+function advance(force=false){
+  const check=G.preflight(state);if(check.error){toast(check.error);phaseDialog();return;}
+  const doomed=G.alive(state).filter(id=>{const p=state.actors[id],t=state.plan[id][state.slot];return p.life==='downed'&&p.deadline<=state.turn+1&&!['aid','rescue'].includes(t?.id);});
+  if(doomed.length&&!force){showModal('继续后，将有人死亡',`<p>${doomed.map(x=>META[x].name).join('、')}处在最后一个救援回合，却没有得到救援安排。继续结算会造成永久死亡。</p><div class="modalbuttons"><button onclick="closeModal()" class="primary">回去安排救援</button><button id="confirmDeath">确认仍然推进</button></div>`);$('confirmDeath').onclick=()=>{closeModal();advance(true);};return;}
+  const result=G.settle(state);if(!apply(result))return;selectedSlot=state.slot;
+  if(!G.alive(state).includes(selectedActor))selectedActor=G.alive(state)[0]||selectedActor;
+  selectedAction=state.plan[selectedActor]?.[selectedSlot]?.id||'rest';render();
+  if(state.phase!=='planning'){phaseDialog();return;}
+  if(result.night)showNight(result.night,result.events);
+  else if(result.events.some(e=>/濒死|死亡|已获救/.test(e)))showModal('这一回合发生的事',`<div class="notebox">${result.events.map(e=>esc(e)).join('<br><br>')}</div><div class="modalbuttons"><button class="primary" onclick="closeModal()">回到排程</button></div>`);
+  else toast('回合'+state.turn+'已共同结算。'+(result.events[0]||'可以调整下一格。'));
+}
+function showMeeting(){
+  showModal('第3回合 · 钱没丢，人也在',`<p>一个人拎着底漏了的塑料袋来到会合点。饭洒了一半，手里的零钱倒攥得很平。</p><div class="dialogue"><b>马哥</b>袋子坏了。<br><b>凡哥</b>你这叫运气好还是不好？<br><b>马哥</b>我运气不好，命还行。<br><b>轩哥</b>我们这儿没床位了。<br><b>马哥</b>我不白吃。我会搬东西，会跑腿，会打牌。<br><b>轩哥</b>第三个先别写简历上。<br><b>马哥</b>那个是专业。</div><p>三条选择都会入队，不要求支付现金。马哥从第4回合开始行动。</p><div class="meeting-options">${['先搭伙，公共饭钱不能动。','先缓缓，今晚别再折腾。','能干活就行，牌桌的事明天说。'].map((text,i)=>`<button onclick="joinMa(${i})">${text}</button>`).join('')}</div>`);
+}
+function joinMa(choice){if(apply(G.meet(state,choice))){closeModal();selectedActor='ma';selectedSlot=state.slot;selectedAction='rest';render();toast('马哥加入。今天还剩晚间1格，明天三人共12格。');}}
+function showModal(title,body){clearTimeout(toastTimer);$('toast').classList.remove('show');lastFocus=document.activeElement;$('modalContent').innerHTML='<div class="section-tag">STREET NOTES / THREE LIVES</div><h2 id="modalTitle">'+esc(title)+'</h2>'+body;$('modalOverlay').classList.add('open');document.body.style.overflow='hidden';$('modalClose').disabled=state.phase==='meeting';$('modal').querySelector('button:not(:disabled)')?.focus();}
+function closeModal(){if(state.phase==='meeting')return;$('modalOverlay').classList.remove('open');document.body.style.overflow='';lastFocus?.focus();}
+function showNight(n,events){showModal('第'+n.day+'天 · 今晚的账',`<div class="summaryrow"><span>开始余额</span><b>${n.start}</b></div><div class="summaryrow"><span>工作与返还合计</span><b>＋${n.income}</b></div><div class="summaryrow"><span>各项支出</span><b>−${n.expense}</b></div><div class="summaryrow"><span>结余</span><b>${n.end}</b></div><div class="modal-grid"><div class="invitem"><strong>${n.food}</strong><span>剩余食物／需${n.survivors*2}</span></div><div class="invitem"><strong>${n.beds}</strong><span>干燥床位／存活${n.survivors}</span></div><div class="invitem"><strong>${state.art}</strong><span>留下的涂鸦</span></div></div><div class="notebox">${events.map(esc).join('<br>')||'正常休整已结算。'}${n.food<n.survivors*2?'<br>余粮不足，请为明天留出吃饭的安排。':''}</div><p>每天只在确认推进时结算；离线不会继续消耗生命。</p><button class="primary" onclick="closeModal()">安排明天</button>`);}
+function showProfile(id=selectedActor){const p=state.actors[id],m=META[id];showModal(m.name+' · 特点与习惯',`<p>${m.trait}</p><div class="notebox">三人都抽烟、喝酒、好色，但不自动花共同钱包。这里仅演示即时嗜好与友好聊天；完整亲密分支和长期疾病没有实现。</div><h3>精神 ${p.mind} / 100</h3><p>${id==='xuan'?'免费完整行动「整理设备与烂梗」：精神＋10。':id==='fan'?'免费纸板速写＋9；许可涂鸦＋14，并留下作品。':'无赌注纸牌精神＋9、赌念−10。跑腿与搬运仍是稳定收入。'}</p><h3>主动批准消费</h3><p>两餐饭钱保护：${G.reserve(state)}。当前抽烟${p.smokes}/2、醉意${p.intox}/2。饮酒不加保暖，会减少夜间体力恢复。</p><div class="modalbuttons"><button onclick="useHabit('${id}','smoke')" ${p.life!=='active'?'disabled':''}>抽烟 · 3</button><button onclick="useHabit('${id}','drink')" ${p.life!=='active'?'disabled':''}>喝酒 · 6</button>${id==='xuan'?`<button onclick="useHabit('${id}','joke')" ${p.life!=='active'?'disabled':''}>说个短梗 · 今日一次</button>`:''}</div>${id==='ma'?`<h3>命硬不是不死</h3><p>普通事故伤害减25%；首次濒死救援窗口为2回合。额外窗口${p.gritUsed?'已经用掉':'尚未使用'}。饥寒持续伤害不减免。</p><h3>游戏内赔率</h3><p>牌局成本10：55%返20，15%返10，30%返0。彩票成本5：0/5/10/25/100的返还概率50/25/20/4/1%。返还包括本金；团队每天最多2次。全部是虚构平衡值。</p>`:''}<div class="modalbuttons">${G.IDS.filter(x=>state.actors[x].life!=='unrecruited').map(x=>`<button onclick="showProfile('${x}')">${META[x].name}</button>`).join('')}<button class="primary" onclick="closeModal()">回到排程</button></div>`);}
+function useHabit(id,kind){const r=G.habit(state,id,kind);if(apply(r)){showProfile(id);toast(state.log[0]);}}
+function showBag(){showModal('物资与食物',`<p>本原型为公共库存；正式版还需三人独立背包和物品交接。电脑与相机已检查同槽排他使用。</p><div class="modal-grid">${[['food','食物'],['parts','零件'],['battery','电量'],['wood','木料'],['cloth','布料'],['vouchers','免费救助券']].map(([k,label])=>`<div class="invitem"><strong>${state[k]}</strong><span>${label}</span></div>`).join('')}</div><p>目前${G.alive(state).length}人在世：完整一天需要${G.alive(state).length*2}份饭。没有入队与已死亡者不消耗食物。</p><div class="modalbuttons"><button onclick="purchase(1,true)">买1份 · 8</button><button onclick="purchase(3,true)">买3份 · 24</button><button onclick="closeModal()">返回</button></div>`);}
+function purchase(count=1,refresh=false){if(apply(G.buyFood(state,count))){if(refresh)showBag();toast('买入'+count+'份食物。');}}
+function showCamp(){showModal('营地 · 要数清楚有几个人',`<div class="modal-grid"><div class="invitem"><strong>${state.camp}/3</strong><span>防雨等级</span></div><div class="invitem"><strong>${state.beds}/3</strong><span>干燥床位</span></div><div class="invitem"><strong>${state.art}</strong><span>已完成涂鸦</span></div></div><p>修棚任意两人合作；加床一人完成。床不够时，后面的角色睡眠恢复较少。防雨不等于自动免疫寒潮。</p><h3>今晚床位分配顺序</h3>${state.bedPriority.filter(x=>G.alive(state).includes(x)).map(x=>`<div class="summaryrow"><span>${META[x].name}</span><button onclick="prioritizeBed('${x}')">优先给床位</button></div>`).join('')}<p>这里只实现床位数量与顺序，不包含自由拖动的6×4建造网格。</p><button class="primary" onclick="closeModal()">在日程安排施工</button>`);}
+function prioritizeBed(id){if(state.phase!=='planning'){toast('当前不能调整。');return;}state.bedPriority=[id,...state.bedPriority.filter(x=>x!==id)];save();render();showCamp();}
+function showChapters(){showModal('七章 · 三个人的街头28天',`<p>以下为剧情结构概览，完整任务与所有死亡差分尚未编程实现。原型只实现前三回合相遇及经营生命规则。</p>${CHAPTERS.map((c,i)=>`<div class="chapteritem"><div class="range">D${i*4+1}—${i*4+4}</div><div><strong>${c[0]}</strong><p>${c[1]}</p></div></div>`).join('')}`);}
+function showLogs(){showModal('街头记事',state.log.map(x=>`<div class="logitem">${esc(x)}</div>`).join(''));}
+function exportSave(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='今晚睡哪儿_三人版存档.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);toast('已导出当前进度。');}
+function importSave(){const input=document.createElement('input');input.type='file';input.accept='.json,application/json';input.onchange=async()=>{try{const file=input.files[0];if(!file||file.size>300000)throw Error('未选择文件或文件过大');const s=JSON.parse(await file.text());if(!G.valid(s))throw Error('版本、生命状态、预约或数值无效；v1存档不兼容');state=s;selectedActor=G.alive(s)[0]||'xuan';selectedSlot=s.slot;save();render();closeModal();if(s.phase!=='planning')phaseDialog();else toast('三人版存档已导入。');}catch(e){toast('无法导入：'+e.message);}};input.click();}
+function showReset(){showModal('重新开始三人版？',`<p>这会覆盖当前v2浏览器进度，不修改旧版文件与旧版存档。可以先导出。</p><div class="modalbuttons"><button onclick="exportSave()">先导出</button><button class="primary" onclick="resetDemo()">确认从第1天开始</button><button onclick="closeModal()">取消</button></div>`);}
+function resetDemo(){state=G.fresh();selectedActor='xuan';selectedSlot=0;selectedAction='scavenge';zone='camp';closeModal();save();render();toast('从第1天开始，第3回合必遇马哥。');}
+function showHelp(){showModal('三人版 · 操作与实现边界',`<h3>点格子，选行动，然后共同推进</h3><p>每推进一次算1回合，不是一天。第3回合结束相遇，第4回合马哥可控；从那一回合开始启用死亡。后三人的完整一天有12个人次。</p><p>合作选择具体伙伴。危险劳动有确认；濒死者可选择「联系救助」，或由活着的同伴「陪同送援」。到期不救就永久死亡。马哥只在首次多一个救援回合。</p><h3>这不是成品游戏</h3><p>已实现的核心是相遇、排程、精神、简单嗜好、虚构博彩、床位、濒死与减员。未实现完整28天剧情、自由画笔、真实出牌、完整恋爱、分包旅行、长期疾病与多格合同。场景只是地点预览。</p><h3>快捷键</h3><p>1/2/3选人；空格推进；Esc关闭普通面板。相遇必须先选一条对话。没有离线消耗或联网付费。v1存档不导入此版。</p><div class="modalbuttons"><button onclick="exportSave()">导出存档</button><button onclick="importSave()">导入存档</button><button onclick="showReset()">重置</button><button onclick="closeModal()" class="primary">返回</button></div>`);}
+function render(){
+  const chapter=Math.min(6,Math.floor((state.day-1)/4)),count=G.alive(state).length;
+  $('daytext').textContent='第 '+String(state.day).padStart(2,'0')+' 天';$('slottop').textContent=TIMES[state.slot]+' '+HOURS[state.slot];$('turntext').textContent='已完成 '+state.turn+' 回合';
+  $('cash').textContent='¥'+state.cash;for(const k of ['food','parts','battery'])$(k).textContent=state[k];$('survivors').textContent=count;
+  $('chaptertext').textContent='第'+(chapter+1)+'章 · '+CHAPTERS[chapter][0];
+  const risk=G.alive(state).filter(x=>state.actors[x].life==='downed');
+  $('priorityText').innerHTML=risk.length?risk.map(x=>`<div class="risk-note">${META[x].name}濒死，剩${state.actors[x].deadline-state.turn}回合。<br>联系救助，或安排同伴送援。</div>`).join(''):`<div class="taskline"><span class="taskbox ${state.metMa?'done':''}"></span><span>${state.metMa?'马哥已入队':'第3回合结束遇到马哥'}</span></div><div class="taskline"><span class="taskbox ${state.food>=count*2?'done':''}"></span><span>${count}人在世，一天${count*2}份饭</span></div><div class="taskline"><span class="taskbox ${state.beds>=count?'done':''}"></span><span>干燥床位${state.beds}／${count}人</span></div>`;
+  renderCharacters();renderSchedule();renderActions();
+  $('advanceBtn').textContent=state.phase==='planning'?'推进'+TIMES[state.slot]+' · 回合'+(state.turn+1)+' →':state.phase==='meeting'?'先与马哥见面':state.phase==='gameover'?'本局已结束':'28天演示结束';
+  $('advanceBtn').disabled=state.phase!=='planning';$('buyBtn').disabled=state.phase!=='planning';
+  $('planStatus').textContent=(state.turn<3?'前三回合教学保护。':'死亡已开启。')+' 每次推进共同结算；午间、晚间按存活人数吃饭。';
+  $('journal').textContent=state.log[0];$('locationname').textContent=ZONES[zone];
+  $('weather').textContent=G.weather(state.day)==='cold'?'寒潮 · −5°C':G.weather(state.day)==='rain'?'下雨 · 6°C':'阴天 · 8°C';
+  $('sceneNote').textContent=state.phase==='gameover'?'几个人的故事，停在了这里。':risk.length?'现在先救人，其他事情可以重排。':state.metMa?'多一个人，多一双手，也多一张嘴。':'第3回合之后，这里会多一个人。';
+  if(risk.length){$('speaker').textContent='现在';$('quote').textContent='先把人带回来。';}
+  else if(state.deaths.length){$('speaker').textContent='空位';$('quote').textContent='留下的画和东西还在，人不会因为睡一觉就回来。';}
+  else if(state.metMa){$('speaker').textContent='马哥';$('quote').textContent='“我运气不好，命还行。你说打牌？那是另一回事。”';}
+  else{$('speaker').textContent='轩哥';$('quote').textContent='“我现在也是云原生，抬头全是云。”';}
+  $('moodNote').textContent=state.metMa?'三人都能做基础工作；职业、爱好与嗜好是不同的选择。':'轩哥精神28，凡哥22。工作之外，留一点恢复的时间。';
+  document.querySelectorAll('[data-zone]').forEach(b=>b.classList.toggle('active',b.dataset.zone===zone));drawScene();
+}
+
+function px(c,x,y,w,h,color){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
+function sprite(c,x,y,who,scale=1){if(who==='ma'){c.save();c.translate(Math.round(x),Math.round(y));c.scale(scale,scale);px(c,0,29,20,3,'#152028');px(c,2,1,13,4,'#3e4941');px(c,0,4,18,3,'#829174');px(c,4,7,11,7,'#bb906b');px(c,12,9,2,2,'#292c28');px(c,2,14,14,12,'#617951');px(c,7,15,4,10,'#9ea77c');px(c,0,16,3,9,'#3f533e');px(c,15,16,3,9,'#556d48');px(c,15,23,4,3,'#c09a77');px(c,16,21,2,4,'#dbd3b1');px(c,3,25,5,6,'#38443b');px(c,11,25,5,6,'#38443b');px(c,2,30,7,2,'#222d2b');px(c,10,30,8,2,'#222d2b');px(c,14,16,4,6,'#d3c7a6');px(c,15,17,2,2,'#9c5f4c');c.restore();return;}c.save();c.translate(Math.round(x),Math.round(y));c.scale(scale,scale);const xuan=who==='xuan';px(c,-1,27,19,3,'#152028');px(c,3,0,11,4,'#24262c');px(c,1,3,15,6,'#2b292b');px(c,3,6,12,7,'#c99675');px(c,2,5,3,5,'#343034');px(c,13,7,2,2,'#181c22');if(xuan){px(c,6,7,8,1,'#233338');px(c,6,8,3,2,'#465a65');px(c,11,8,3,2,'#465a65');}px(c,3,13,11,11,xuan?'#426d78':'#9d754d');px(c,2,13,4,12,xuan?'#2e4f5b':'#75573d');px(c,7,14,3,10,xuan?'#5f8f91':'#ba9262');px(c,4,24,4,6,'#303c48');px(c,10,24,4,6,'#303c48');px(c,3,29,6,2,'#1c252d');px(c,10,29,6,2,'#1c252d');px(c,13,15,3,8,xuan?'#517d86':'#a98051');px(c,13,22,3,3,'#c08c6c');if(xuan){px(c,-2,13,5,11,'#354857');px(c,-2,16,4,2,'#5a7380');}else{px(c,4,12,11,3,'#a65b49');px(c,9,14,3,6,'#9b503f');px(c,12,18,6,5,'#222d35');px(c,14,19,3,3,'#68878a');}c.restore();}
+function drawPortrait(id){const c=$('portrait-'+id).getContext('2d');c.imageSmoothingEnabled=false;px(c,0,0,32,38,'#192a32');for(let y=4;y<38;y+=7)px(c,0,y,32,1,'#22353d');sprite(c,8,4,id,1);}
+function skyline(c){px(c,0,0,480,250,'#6a8288');px(c,0,50,480,70,'#879795');const buildings=[[0,46,38,100],[44,31,47,112],[98,61,34,90],[139,24,52,128],[202,40,34,117],[244,14,48,140],[308,44,40,105],[359,35,52,114],[424,61,55,90]];for(const [x,y,w,h]of buildings){px(c,x,y,w,h,'#566f78');px(c,x+3,y+3,w-6,h-3,'#5e7780');for(let wy=y+10;wy<y+h-7;wy+=13)for(let wx=x+7;wx<x+w-4;wx+=10)px(c,wx,wy,3,5,(wx+wy)%3===0?'#b5ae84':'#789093');}px(c,0,119,480,31,'#425e67');px(c,0,133,480,4,'#809692');}
+function drawBridge(c){skyline(c);px(c,0,16,480,17,'#414e55');px(c,0,28,480,8,'#263b47');px(c,0,8,480,5,'#abb0a0');for(let x=0;x<480;x+=30)px(c,x,0,3,10,'#667477');px(c,45,33,38,142,'#697d7c');px(c,51,34,8,143,'#81908a');px(c,76,34,7,143,'#435b64');px(c,393,33,41,144,'#617674');px(c,398,34,8,143,'#788981');px(c,428,34,6,143,'#3d5760');for(let y=56;y<160;y+=27){px(c,46,y,28,2,'#596d70');px(c,397,y,29,2,'#4e666a');}px(c,0,156,480,94,'#3e5256');px(c,0,171,480,4,'#677675');px(c,0,215,480,35,'#33474c');for(let x=0;x<480;x+=29){px(c,x,232+(x%7),17,1,'#52686b');px(c,x+13,188+(x%9),7,2,'#586c6c');}px(c,95,117,122,4,'#7a7062');px(c,100,110,5,86,'#4f483f');px(c,205,111,5,83,'#4f483f');for(let x=100;x<214;x+=12)px(c,x,113-(x%3),12,10,state.camp>=2?'#b4a77b':'#8e947d');px(c,110,131,95,57,'#33434b');px(c,109,176,91,15,'#7e6b55');px(c,112,169,45,12,'#b1a487');px(c,161,174,37,8,'#678087');px(c,112,184,43,5,'#615643');px(c,163,184,33,5,'#4f6169');px(c,230,166,58,5,'#927e5f');px(c,234,171,5,28,'#63523e');px(c,278,171,5,28,'#63523e');px(c,244,150,26,16,'#273b45');px(c,247,153,20,10,'#82afb0');px(c,241,167,34,2,'#9aaca4');px(c,310,173,35,29,'#8b7257');px(c,310,171,35,5,'#aa9070');px(c,326,174,2,26,'#b29c7a');px(c,354,85,3,110,'#273d46');px(c,349,81,14,7,'#e2bb73');px(c,350,87,11,7,'#b39765');px(c,341,95,32,2,'#637067');px(c,277,112,75,1,'#87938a');px(c,283,112,12,23,'#859994');px(c,286,112,5,25,'#afbab0');px(c,308,112,16,20,'#99765a');px(c,330,112,13,13,'#b4a183');px(c,25,185,50,26,'#384d54');px(c,22,183,56,3,'#627476');if(state.actors.xuan.life==='active')sprite(c,181,184,'xuan',1.4);if(state.actors.fan.life==='active')sprite(c,284,191,'fan',1.4);if(state.actors.ma.life==='active')sprite(c,351,197,'ma',1.4);}
+function shopFront(c,kind){skyline(c);px(c,0,66,480,147,'#40565d');px(c,0,174,480,76,'#485b5d');px(c,0,211,480,5,'#788078');for(let x=0;x<480;x+=55){px(c,x,230,36,2,'#657473');}if(kind==='market'){px(c,37,94,173,111,'#957954');for(let x=31;x<217;x+=18)px(c,x,84,18,20,(x%36===31)?'#cc9b68':'#7e6751');px(c,44,113,157,70,'#2b3d43');px(c,48,169,149,28,'#8e6049');for(let x=57;x<195;x+=27){px(c,x,161,18,10,'#c5b08a');px(c,x+4,150,2,7,'#babfa8');px(c,x+6,141,2,7,'#babfa8');}px(c,270,97,160,109,'#697778');px(c,281,111,137,69,'#354b55');px(c,276,86,151,19,'#9d7055');px(c,285,91,116,4,'#ddba80');}else if(kind==='recycle'){px(c,49,69,209,135,'#667472');px(c,56,92,194,113,'#263b45');px(c,49,72,209,21,'#ab9b77');for(let i=0;i<4;i++){px(c,66+i*43,143,30,23,'#6e817d');px(c,69+i*43,146,24,15,'#294653');px(c,72+i*43,158,18,3,'#6b9e9e');}px(c,62,172,188,6,'#ad8c61');px(c,71,178,6,32,'#786446');px(c,237,178,6,32,'#786446');for(let i=0;i<5;i++)px(c,302+i*17,167+(i%2)*11,26,30,'#8a7157');}else if(kind==='cinema'){px(c,62,45,356,164,'#786c64');px(c,81,105,319,89,'#263c48');px(c,145,64,189,30,'#b99964');for(let i=0;i<16;i++)px(c,143+i*12,59,4,3,'#ead29a');px(c,194,112,85,84,'#182c39');px(c,197,120,36,68,'#4c5c64');px(c,240,120,36,68,'#536066');px(c,109,120,43,65,'#d1bc90');px(c,113,124,35,37,'#788886');px(c,333,119,42,66,'#bcb091');px(c,338,124,31,43,'#49646d');}else if(kind==='service'){px(c,67,57,335,153,'#8c9b96');px(c,75,96,318,107,'#778d8b');px(c,80,65,308,23,'#476c74');for(let i=0;i<6;i++)px(c,109+i*39,73,19,6,'#d3d7bb');px(c,113,113,94,52,'#a4c2b3');px(c,118,117,39,44,'#637f81');px(c,161,117,41,44,'#536f76');px(c,278,112,65,91,'#344e5a');px(c,283,117,55,61,'#c8b684');px(c,329,166,3,9,'#efcf8c');}else{px(c,31,74,422,27,'#687d7f');px(c,61,101,15,102,'#91a09a');px(c,371,101,15,102,'#91a09a');px(c,86,142,256,7,'#a18a69');px(c,93,149,7,52,'#5b625c');px(c,328,149,7,52,'#5b625c');px(c,264,90,87,39,'#d0c1a2');for(let i=0;i<4;i++)px(c,273,98+i*7,65-i*8,2,'#7b8581');}if(state.actors.xuan.life==='active')sprite(c,190,190,'xuan',1.4);if(state.actors.fan.life==='active')sprite(c,280,188,'fan',1.4);if(state.actors.ma.life==='active')sprite(c,355,191,'ma',1.4);}
+function drawScene(){const c=$('scene').getContext('2d');c.imageSmoothingEnabled=false;if(zone==='camp')drawBridge(c);else shopFront(c,zone);if(G.weather(state.day)==='rain'){for(let i=0;i<35;i++){const x=(i*53)%480,y=(i*37)%235;px(c,x,y,1,7,'#9ab1ad');}}if(state.slot>=3){c.fillStyle='rgba(12,29,47,0.26)';c.fillRect(0,0,480,250);}if(state.art>0){for(let i=0;i<Math.min(state.art,5);i++){px(c,52,92+i*7,23,3,['#ddaa68','#79b5aa','#b18b91','#d5c9a1','#b1bd83'][i]);px(c,57+i*3,88,3,37,'#d1c4a2');}}for(let x=0;x<480;x+=4)px(c,x,249,2,1,'#809388');}
+
+
+$('assignBtn').onclick=()=>assignNow();$('advanceBtn').onclick=()=>advance();$('buyBtn').onclick=()=>purchase(1);$('modalClose').onclick=closeModal;$('modalOverlay').onclick=e=>{if(e.target===$('modalOverlay'))closeModal();};
+for(const id of G.IDS){$(id+'Card').onclick=()=>chooseSlot(id,selectedSlot);$(id+'Card').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();chooseSlot(id,selectedSlot);}};}
+document.querySelectorAll('[data-zone]').forEach(b=>b.onclick=()=>{zone=b.dataset.zone;render();});
+document.addEventListener('keydown',e=>{const open=$('modalOverlay').classList.contains('open');if(e.key==='Escape'&&open){closeModal();return;}if(open&&e.key==='Tab'){const els=[...$('modal').querySelectorAll('button,input,select,[tabindex]:not([tabindex="-1"])')].filter(x=>!x.disabled),first=els[0],last=els[els.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}return;}if(open||['INPUT','TEXTAREA','SELECT','BUTTON'].includes(document.activeElement?.tagName))return;if(['1','2','3'].includes(e.key))chooseSlot(G.IDS[+e.key-1],state.slot);if(e.code==='Space'){e.preventDefault();advance();}});
+let resizeTimer;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(renderSchedule,100);});
+window.demoAPI={core:G,getState:()=>G.copy(state),setState:s=>{if(!G.valid(s))throw Error('Invalid test state');state=G.copy(s);selectedActor=G.alive(s)[0]||'xuan';selectedSlot=s.slot;save();render();},advance,chooseSlot};
+render();save();if(state.phase!=='planning')phaseDialog();
+
+</script></body></html>

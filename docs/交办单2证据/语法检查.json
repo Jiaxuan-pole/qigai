@@ -1,0 +1,47 @@
+[
+  {
+    "file": "tests/engine.test.js",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "file": "tests/engine-fixtures.js",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "file": "tests/tickets.test.js",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "file": "tests/autoplay.test.js",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "file": "scripts/autoplay.js",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "file": "scripts/autoplay/observe.js",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "file": "scripts/autoplay/policies.js",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "file": "scripts/autoplay/runner.js",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "file": "scripts/autoplay/statistics.js",
+    "exitCode": 0,
+    "output": ""
+  }
+]

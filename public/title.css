@@ -1,0 +1,19 @@
+/* 标题页：用海报当背景，海报里已经画了标题字，原文字标题只留给读屏；菜单压在底部一条渐暗的栏上，不遮人物。 */
+.title-screen{position:relative;padding:0;align-items:flex-end;background:#0b1218 url(/art/title-wide-20260918.png) center/cover no-repeat}
+.title-screen:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,10,14,0) 58%,rgba(6,10,14,.55) 80%,rgba(6,10,14,.94) 100%);pointer-events:none}
+.title-inner{position:relative;max-width:none;width:100%;padding:16px 24px 14px;display:grid;justify-items:center;gap:10px}
+.title-mark,.title-screen .eyebrow,.title-inner h1,.title-inner .subtitle,.title-inner .tagline{position:absolute;width:1px;height:1px;margin:0;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.title-menu{grid-auto-flow:column;gap:12px}
+.title-menu button.big{min-width:170px;background:rgba(12,19,25,.82);backdrop-filter:blur(2px)}
+.title-menu button.primary{background:var(--gold);color:#101418}
+.title-foot{margin-top:0;color:#c9d0cf;text-shadow:0 1px 2px #000}
+.title-inner .disclaimer{margin:0;max-width:860px;text-align:center;color:#9aa5a7;text-shadow:0 1px 2px #000}
+/* 竖屏：用竖版海报整张放顶部，不裁标题字；底边用短渐变接到深色区，菜单两列排在下面。 */
+@media(max-width:700px){
+  .title-screen{background:#0b1218 url(/art/title-portrait-20260918.png) top center/100% auto no-repeat;align-items:flex-start}
+  .title-screen:before{background:linear-gradient(180deg,rgba(11,18,24,0) calc(100vw * 1402 / 1122 - 28px),#0b1218 calc(100vw * 1402 / 1122))}
+  .title-inner{padding:calc(100vw * 1402 / 1122 + 6px) 16px 14px;gap:10px}
+  .title-menu{grid-auto-flow:row;grid-template-columns:1fr 1fr;width:100%;max-width:420px;gap:10px}
+  .title-menu button.big{min-width:0;width:100%;font-size:17px;min-height:50px}
+  .title-foot{gap:6px 14px;font-size:12px}
+}

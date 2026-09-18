@@ -1,0 +1,6163 @@
+{
+  "meta": {
+    "title": "今晚睡哪儿",
+    "version": "3.0-design",
+    "subtitle": "三人的街头100日",
+    "date": "2026-09-16",
+    "contentStatus": "策划与开发数据，不是可运行的100日成品游戏",
+    "source": "基于本对话三人v2策划修订",
+    "allCharactersInIntimacyContentAreFictionalAdults": true,
+    "noRealMoneyGambling": true,
+    "numericalModel": "虚构、待平衡；非医疗、现实赔率或软件SDK参数"
+  },
+  "rules": {
+    "durationDays": 100,
+    "slotsPerDay": 4,
+    "slotNames": [
+      "清晨",
+      "日间",
+      "午后",
+      "晚间"
+    ],
+    "slotHours": [
+      "06:00—10:00",
+      "10:00—14:00",
+      "14:00—18:00",
+      "18:00—22:00"
+    ],
+    "join": {
+      "actorId": "ma",
+      "afterTurn": 3,
+      "controllableFromTurn": 4,
+      "firstThreeTurnsProtected": true
+    },
+    "maxLivingPersonActions": 1197,
+    "foodPerLivingActorPerDay": 2,
+    "foodPrice": 8,
+    "shopping": {
+      "requiresSameDistrict": true,
+      "requiresOpenStore": true,
+      "minorErrandsPerActorPerSlot": 1,
+      "canPreviewRemotely": true,
+      "executePurchaseRemotely": false,
+      "foodAndPrescribedCareAreNotMinorErrands": true
+    },
+    "begging": {
+      "encountersPerMainAction": 3,
+      "oneOutcomePerNpcPerTeamPerDay": true,
+      "currencyOutcomes": [
+        0,
+        3,
+        6,
+        12,
+        0,
+        0
+      ],
+      "weights": [
+        35,
+        25,
+        20,
+        10,
+        8,
+        2
+      ],
+      "outcomeKinds": [
+        "refusal",
+        "cash",
+        "cash",
+        "cash",
+        "food",
+        "job_tip"
+      ],
+      "dailyRefusalMindLossCap": 2
+    },
+    "gambling": {
+      "paidActionsTeamDailyCap": 2,
+      "ticketPrice": 5,
+      "cardStake": 10,
+      "cardGrossPayouts": [
+        20,
+        10,
+        0
+      ],
+      "cardWeights": {
+        "ma": [
+          55,
+          15,
+          30
+        ],
+        "others": [
+          40,
+          15,
+          45
+        ]
+      },
+      "ticketGrossPayouts": [
+        0,
+        5,
+        10,
+        25,
+        100
+      ],
+      "ticketWeights": {
+        "ma": [
+          50,
+          25,
+          20,
+          4,
+          1
+        ],
+        "others": [
+          78,
+          15,
+          6,
+          1,
+          0
+        ]
+      },
+      "ticketOutcomeLockedAt": "purchase_commit",
+      "ticketLuckOwnerLockedAt": "purchase_commit",
+      "ticketDailyQuotaChargedAt": "purchase_commit",
+      "claimOnce": true,
+      "requiresSober": true
+    },
+    "desire": {
+      "maxActivePerActor": 3,
+      "maxPerCategory": 1,
+      "latentRevealGraceTurns": 2,
+      "growthTicks": "action_turn_only",
+      "midThreshold": 60,
+      "highThreshold": 85,
+      "midMindLoss": 1,
+      "highMindLoss": 2,
+      "mindLossCapPerActorPerTurn": 3,
+      "promisedGraceTurns": 4,
+      "promiseExtensionsMax": 1,
+      "exactFulfillmentIntensityReduction": 70,
+      "partialFulfillmentIntensityReduction": 30,
+      "supportedReframeAllowed": true
+    },
+    "mentalCrisis": {
+      "triggerMind": 0,
+      "consecutiveTurns": 4,
+      "zeroMindHealthDamage": 8,
+      "lowMindHealthDamage": 4,
+      "recoveryMindThreshold": 20,
+      "deathVia": "health_zero_then_rescue_deadline",
+      "nightCountsAsActionTurn": false,
+      "noSelfHarmScripts": true
+    },
+    "hygiene": {
+      "riskRollsPerActorPerDay": 1,
+      "baseRisk": 0.02,
+      "hygieneRiskBuckets": [
+        [
+          60,
+          0
+        ],
+        [
+          40,
+          0.005
+        ],
+        [
+          20,
+          0.02
+        ],
+        [
+          0,
+          0.16
+        ]
+      ],
+      "dirtyFoodExtra": 0.12,
+      "uncoveredWoundExtra": 0.1,
+      "careReduction": 0.06,
+      "riskCap": 0.4,
+      "criticalDirtyThreshold": 10,
+      "criticalDirtyConsecutiveTurns": 8,
+      "criticalDirtyGuarantee": "mild_hygiene_illness",
+      "campDirtNeedsActorExposure": true
+    },
+    "disease": {
+      "severityMax": 100,
+      "untreatedGrowthPerTurn": 3,
+      "badHygieneExtra": 2,
+      "matchingCareReduction": 7,
+      "restReduction": 3,
+      "healthDamageStages": [
+        [
+          1,
+          29,
+          0
+        ],
+        [
+          30,
+          59,
+          3
+        ],
+        [
+          60,
+          84,
+          6
+        ],
+        [
+          85,
+          100,
+          10
+        ]
+      ],
+      "cureRequiresResolvedSymptoms": true,
+      "supplyWithoutCareActionDoesNotTreat": true,
+      "realDoseUnits": false,
+      "safeSleepMildSeverityReduction": 2
+    },
+    "rescue": {
+      "standardFollowingTurns": 1,
+      "maFirstFollowingTurns": 2,
+      "maExtraUsesPerRun": 1,
+      "rescueBeforeDeadlineCheck": true,
+      "newNightDownedGetsNextMorning": true,
+      "endDay100EmergencyOnlyTail": true,
+      "tailMaxGlobalTurn": 402,
+      "noNewWorkOrIncomeInTail": true,
+      "companionCost": 12,
+      "serviceCost": 20,
+      "firstServiceVoucher": 1,
+      "restoredHealth": 25,
+      "restoredMindMinimum": 20
+    },
+    "events": {
+      "locationSpawnProbabilityPerEligibleSlot": 0.3,
+      "majorEventsTeamDailyCap": 2,
+      "visibleAmbientHotspotsCap": 3,
+      "opportunityExpiryDefaultTurns": 2,
+      "ordinaryMisfortunePerActorDailyCap": 1,
+      "majorNegativeAvoidSameActorForTurns": 4,
+      "mechanicalSeedOwnedByEngine": true
+    },
+    "ai": {
+      "configurationNote": "人物对话、NPC/路人对话与部分随机事件：使用 pi sdk 接 glm5.2，关闭思考；相关配置在 /Users/Admin/Desktop/polev3/kaelis-engine。",
+      "gameStateOwner": "deterministic_engine",
+      "allowedOutputs": [
+        "dialogueText",
+        "desireCueReference",
+        "choiceText",
+        "approvedTemplateAssembly"
+      ],
+      "requiresValidationBeforeCommit": true,
+      "fallback": "authored_local_template",
+      "actualIntegrationPerformed": false
+    },
+    "fishing": {
+      "zone": "river",
+      "energy": 20,
+      "baitPerAttempt": 1,
+      "skillMax": 100,
+      "skillGainMiss": 1,
+      "skillGainCatch": 2,
+      "baseCatchPercent": 12,
+      "skillCatchPercentPerPoint": 0.24,
+      "rodBonuses": {
+        "fishing_rod_simple": 0,
+        "fishing_rod": 5,
+        "fishing_rod_pro": 10
+      },
+      "weatherBonuses": {
+        "clear": 0,
+        "overcast": 4,
+        "rain": -8,
+        "storm": -20,
+        "cold": -6,
+        "coldwave": -14
+      },
+      "catchPercentBounds": [
+        5,
+        55
+      ],
+      "rareBasePercent": 4,
+      "rareSkillPercentPerPoint": 0.2,
+      "rarePercentCap": 28,
+      "note": "全部为虚构游戏数值；马哥60起步仍有空钩，其他角色可练至100。"
+    },
+    "walking": {
+      "energyPerEdge": 2,
+      "sameDistrictEnergy": 0,
+      "phase": "planning",
+      "note": "只走相邻街区；不推进回合，不变更排程。"
+    },
+    "coffee": {
+      "unitsPerCredit": 4,
+      "creditPerThreshold": 20,
+      "instantUnits": 1,
+      "freshUnits": 2,
+      "creditMax": 180,
+      "cupsMax": 18,
+      "safeCups": 5,
+      "riskPerCupAfterSafe": 0.08,
+      "riskKeyPrefix": "coffee-risk",
+      "note": "虚构排程数值：速溶每次1单位、现制每杯2单位；每4单位给一次行动额度，第六杯起须确认风险。"
+    }
+  },
+  "actors": [
+    {
+      "id": "xuan",
+      "name": "轩哥",
+      "role": "程序员",
+      "traits": [
+        "技术修复",
+        "爱玩烂梗",
+        "抽烟",
+        "喝酒",
+        "好色"
+      ],
+      "initial": {
+        "health": 82,
+        "food": 54,
+        "energy": 62,
+        "warmth": 50,
+        "mind": 28,
+        "hygiene": 45
+      },
+      "freeRecovery": "整理旧设备、和熟人接梗",
+      "freeRecoveryMind": 10,
+      "fishingSkillInitial": 0
+    },
+    {
+      "id": "fan",
+      "name": "凡哥",
+      "role": "电影导演",
+      "traits": [
+        "影像制作",
+        "爱涂鸦",
+        "抽烟",
+        "喝酒",
+        "好色"
+      ],
+      "initial": {
+        "health": 78,
+        "food": 50,
+        "energy": 58,
+        "warmth": 48,
+        "mind": 22,
+        "hygiene": 43
+      },
+      "freeRecovery": "纸板速写、整理已有镜头",
+      "freeRecoveryMind": 9,
+      "fishingSkillInitial": 0
+    },
+    {
+      "id": "ma",
+      "name": "马哥",
+      "role": "街头跑腿与短工",
+      "traits": [
+        "日常倒霉",
+        "牌运高",
+        "彩票运高",
+        "命硬",
+        "好赌",
+        "抽烟",
+        "喝酒",
+        "好色"
+      ],
+      "initial": {
+        "health": 90,
+        "food": 46,
+        "energy": 72,
+        "warmth": 52,
+        "mind": 56,
+        "hygiene": 35
+      },
+      "freeRecovery": "无赌注纸牌、整理跑腿路线",
+      "freeRecoveryMind": 10,
+      "fishingSkillInitial": 60
+    }
+  ],
+  "districts": [
+    {
+      "id": "camp",
+      "name": "旧桥营地",
+      "neighbors": [
+        "market",
+        "recycle",
+        "river"
+      ],
+      "hotspots": [
+        "三人床铺",
+        "洗漱角",
+        "愿望板",
+        "物资箱",
+        "壁画",
+        "遗物角"
+      ]
+    },
+    {
+      "id": "market",
+      "name": "老街早夜市",
+      "neighbors": [
+        "camp",
+        "station",
+        "cinema",
+        "river",
+        "cafe"
+      ],
+      "hotspots": [
+        "阿旺便利店",
+        "阿梅早餐摊",
+        "市场口路人",
+        "雨棚下随机事件"
+      ]
+    },
+    {
+      "id": "recycle",
+      "name": "电子回收巷",
+      "neighbors": [
+        "camp",
+        "service",
+        "furniture"
+      ],
+      "hotspots": [
+        "老周回收铺",
+        "零件堆",
+        "短工招贴"
+      ]
+    },
+    {
+      "id": "station",
+      "name": "站前街",
+      "neighbors": [
+        "market",
+        "service",
+        "cardhall"
+      ],
+      "hotspots": [
+        "老钱彩票亭",
+        "站口行人",
+        "西侧空地随机牌局",
+        "街角小酒馆"
+      ]
+    },
+    {
+      "id": "cinema",
+      "name": "旧影院与广场",
+      "neighbors": [
+        "market",
+        "service",
+        "cafe",
+        "cardhall"
+      ],
+      "hotspots": [
+        "小何文具五金",
+        "许可涂鸦墙",
+        "许姐工作间",
+        "广场路人"
+      ]
+    },
+    {
+      "id": "service",
+      "name": "公共服务站街区",
+      "neighbors": [
+        "recycle",
+        "station",
+        "cinema",
+        "furniture"
+      ],
+      "hotspots": [
+        "安心药房",
+        "小唐服务窗口",
+        "公共水点",
+        "热水澡堂与洗衣处",
+        "值班诊所"
+      ]
+    },
+    {
+      "id": "cafe",
+      "name": "街角咖啡店",
+      "neighbors": [
+        "market",
+        "cinema"
+      ],
+      "hotspots": [
+        "咖啡吧台",
+        "靠窗小桌"
+      ],
+      "note": "独立街区；与老街和旧影院双向相邻。"
+    },
+    {
+      "id": "river",
+      "name": "旧桥河岸",
+      "neighbors": [
+        "camp",
+        "market"
+      ],
+      "hotspots": [
+        "河岸钓位"
+      ],
+      "note": "可钓鱼；与营地和老街双向相邻。"
+    },
+    {
+      "id": "cardhall",
+      "name": "棋牌馆",
+      "neighbors": [
+        "station",
+        "cinema"
+      ],
+      "hotspots": [
+        "馆内牌桌",
+        "前台"
+      ],
+      "description": "站前街与旧影院之间的室内棋牌馆；不替代站前街西侧空地的随机牌局。"
+    },
+    {
+      "id": "furniture",
+      "name": "家具城",
+      "neighbors": [
+        "service",
+        "recycle"
+      ],
+      "hotspots": [
+        "营地家具城"
+      ],
+      "note": "独立家具店；购买家具自动送到营地包裹。"
+    }
+  ],
+  "shops": [
+    {
+      "id": "convenience",
+      "name": "阿旺便利店",
+      "district": "market",
+      "position": "市场东口、通往站前街的路边，黄色雨棚与绿色售货窗",
+      "openSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "unlockDay": 1,
+      "categories": [
+        "food",
+        "tobacco",
+        "alcohol",
+        "daily",
+        "fuel",
+        "lottery"
+      ],
+      "note": "收银台出售即开彩；货架出售日常品。与彩票亭共用团队购票额度。"
+    },
+    {
+      "id": "coffee_shop",
+      "name": "街角咖啡店",
+      "district": "cafe",
+      "position": "街角咖啡吧台，靠窗有一排小桌",
+      "openSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "unlockDay": 1,
+      "categories": [
+        "daily"
+      ],
+      "note": "六种单杯咖啡；杯数规则由小时制咖啡配置统一结算。"
+    },
+    {
+      "id": "lottery_kiosk",
+      "name": "老钱彩票亭",
+      "district": "station",
+      "position": "站口东侧，小红招牌；牌局热点位于站口西侧空地，二者不是同一入口",
+      "openSlots": [
+        1,
+        2,
+        3
+      ],
+      "unlockDay": 1,
+      "categories": [
+        "lottery"
+      ],
+      "note": "购票、刮开、核销返还、查看本局中奖记录。"
+    },
+    {
+      "id": "recycle_shop",
+      "name": "老周回收铺",
+      "district": "recycle",
+      "position": "回收巷尽头的卷帘门内",
+      "openSlots": [
+        1,
+        2
+      ],
+      "unlockDay": 1,
+      "categories": [
+        "tool",
+        "device",
+        "daily"
+      ],
+      "note": "旧电脑、工具、零件、寄存；报价与物品实例分开。"
+    },
+    {
+      "id": "pharmacy",
+      "name": "安心药房",
+      "district": "service",
+      "position": "服务站入口左侧街角，白底药箱图标",
+      "openSlots": [
+        0,
+        1,
+        2
+      ],
+      "unlockDay": 1,
+      "categories": [
+        "medical",
+        "daily"
+      ],
+      "note": "护理用品与诊所计划用品；夜间紧急情况用值班救助而非假装店门一直开。"
+    },
+    {
+      "id": "bathhouse",
+      "name": "热水澡堂与洗衣处",
+      "district": "service",
+      "position": "服务站后院右侧，与免费公共水点相邻",
+      "openSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "unlockDay": 1,
+      "categories": [
+        "service"
+      ],
+      "note": "洗澡、洗衣合成一个生活维护行动；免费水点不要求买门票。"
+    },
+    {
+      "id": "art_hardware",
+      "name": "小何文具五金",
+      "district": "cinema",
+      "position": "旧影院西侧窄门店，门口挂画笔和扳手图标",
+      "openSlots": [
+        1,
+        2
+      ],
+      "unlockDay": 2,
+      "categories": [
+        "art",
+        "tool",
+        "daily",
+        "fuel"
+      ],
+      "note": "颜料、纸笔、胶带、防雨修补件；不出售电影导演专属万能升级。"
+    },
+    {
+      "id": "tavern",
+      "name": "街角小酒馆",
+      "district": "station",
+      "position": "站前街南端，暖黄灯牌",
+      "openSlots": [
+        2,
+        3
+      ],
+      "unlockDay": 3,
+      "categories": [
+        "food",
+        "alcohol"
+      ],
+      "note": "酒与简餐、成年人社交、熟客委托；不是唯一精神恢复来源。"
+    },
+    {
+      "id": "clinic",
+      "name": "服务站值班诊所",
+      "district": "service",
+      "position": "服务站内侧的诊疗窗口",
+      "openSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "unlockDay": 1,
+      "categories": [
+        "service",
+        "medical"
+      ],
+      "note": "普通诊疗以日间为主；夜间窗口只提供紧急援助。金额均为虚构服务点数。"
+    },
+    {
+      "id": "furniture_store",
+      "name": "营地家具城",
+      "district": "furniture",
+      "position": "服务站与回收巷之间的家具陈列店",
+      "openSlots": [
+        1,
+        2
+      ],
+      "unlockDay": 1,
+      "categories": [
+        "furniture"
+      ],
+      "note": "购买家具自动快递到营地包裹，无需运费和等待；不进入背包，须回营拆包摆放。"
+    }
+  ],
+  "items": [
+    {
+      "id": "meal",
+      "name": "简单正餐",
+      "category": "food",
+      "price": 8,
+      "uses": 1,
+      "effectText": "饱食+30；变质后不得按新鲜食物结算",
+      "shopIds": [
+        "convenience",
+        "tavern"
+      ],
+      "isFictionalBalance": true,
+      "shelfLifeDays": 1
+    },
+    {
+      "id": "bread",
+      "name": "袋装面包",
+      "category": "food",
+      "price": 5,
+      "uses": 1,
+      "effectText": "饱食+18；便于携带",
+      "shopIds": [
+        "convenience"
+      ],
+      "isFictionalBalance": true,
+      "shelfLifeDays": 3
+    },
+    {
+      "id": "hot_soup",
+      "name": "热汤简餐",
+      "category": "food",
+      "price": 10,
+      "uses": 1,
+      "effectText": "饱食+26；舒适+1次；不治疗疾病",
+      "shopIds": [
+        "tavern"
+      ],
+      "isFictionalBalance": true,
+      "shelfLifeDays": 1
+    },
+    {
+      "id": "tea",
+      "name": "茶包",
+      "category": "daily",
+      "price": 4,
+      "uses": 4,
+      "effectText": "配公共热水完成放松：精神+2；每日一次",
+      "shopIds": [
+        "convenience"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "coffee",
+      "name": "速溶咖啡",
+      "category": "daily",
+      "price": 6,
+      "uses": 3,
+      "effectText": "精神+2；每次算1提神单位，累计4单位给一次行动额度。",
+      "shopIds": [
+        "convenience"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "espresso",
+      "name": "浓缩咖啡",
+      "category": "daily",
+      "price": 4,
+      "uses": 1,
+      "effectText": "一小杯，算作一杯咖啡与2提神单位。",
+      "shopIds": [
+        "coffee_shop"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "americano",
+      "name": "美式咖啡",
+      "category": "daily",
+      "price": 5,
+      "uses": 1,
+      "effectText": "清爽一杯，算作一杯咖啡与2提神单位。",
+      "shopIds": [
+        "coffee_shop"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "latte",
+      "name": "拿铁",
+      "category": "daily",
+      "price": 7,
+      "uses": 1,
+      "effectText": "奶香一杯，算作一杯咖啡与2提神单位。",
+      "shopIds": [
+        "coffee_shop"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "cappuccino",
+      "name": "卡布奇诺",
+      "category": "daily",
+      "price": 7,
+      "uses": 1,
+      "effectText": "绵密一杯，算作一杯咖啡与2提神单位。",
+      "shopIds": [
+        "coffee_shop"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "mocha",
+      "name": "摩卡",
+      "category": "daily",
+      "price": 8,
+      "uses": 1,
+      "effectText": "可可香一杯，算作一杯咖啡与2提神单位。",
+      "shopIds": [
+        "coffee_shop"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "cold_brew",
+      "name": "冷萃咖啡",
+      "category": "daily",
+      "price": 6,
+      "uses": 1,
+      "effectText": "冰凉一杯，算作一杯咖啡与2提神单位。",
+      "shopIds": [
+        "coffee_shop"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "soda",
+      "name": "汽水",
+      "category": "daily",
+      "price": 4,
+      "uses": 1,
+      "effectText": "精神+2；可满足小额口味愿望",
+      "shopIds": [
+        "convenience"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "cigarette",
+      "name": "廉价香烟",
+      "category": "tobacco",
+      "price": 12,
+      "uses": 6,
+      "effectText": "每次消耗1使用格；当日首次精神+4、第二次+1；体力-2",
+      "shopIds": [
+        "convenience"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "cigarette_regular",
+      "name": "普通香烟",
+      "category": "tobacco",
+      "price": 20,
+      "uses": 8,
+      "effectText": "每次1格；当日首次精神+5、第二次+1；体力-2；需要火",
+      "shopIds": [
+        "convenience"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "cigarette_premium",
+      "name": "精选香烟",
+      "category": "tobacco",
+      "price": 32,
+      "uses": 10,
+      "effectText": "每次1格；当日首次精神+6、第二次+1；体力-2；需要火",
+      "shopIds": [
+        "convenience"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "lighter",
+      "name": "打火机",
+      "category": "daily",
+      "price": 3,
+      "uses": 12,
+      "effectText": "供相应交互使用；不用时不自动消耗",
+      "shopIds": [
+        "convenience",
+        "art_hardware"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "charcoal_cheap",
+      "name": "便宜木炭",
+      "category": "fuel",
+      "price": 6,
+      "uses": 4,
+      "smokePerUnit": 3,
+      "effectText": "每一使用格是一份燃料；烟尘3，连续多用可能招来城管或小混混。",
+      "shopIds": [
+        "convenience",
+        "art_hardware"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "charcoal_quality",
+      "name": "优质木炭",
+      "category": "fuel",
+      "price": 12,
+      "uses": 6,
+      "smokePerUnit": 1,
+      "effectText": "每一使用格是一份燃料；烟尘1，连续多用仍可能招来城管或小混混。",
+      "shopIds": [
+        "convenience",
+        "art_hardware"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "charcoal_smokeless",
+      "name": "无烟木炭",
+      "category": "fuel",
+      "price": 20,
+      "uses": 6,
+      "smokePerUnit": 0,
+      "effectText": "每一使用格是一份燃料；烟尘0，不触发有烟燃料的聚集风险。",
+      "shopIds": [
+        "convenience",
+        "art_hardware"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "beer",
+      "name": "罐装啤酒",
+      "category": "alcohol",
+      "price": 6,
+      "uses": 1,
+      "effectText": "首次精神+5；醉意+1；不增加保暖",
+      "shopIds": [
+        "convenience",
+        "tavern"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "spirit",
+      "name": "小瓶烈酒",
+      "category": "alcohol",
+      "price": 12,
+      "uses": 2,
+      "effectText": "每次一使用格精神+6；醉意+2；风险高于啤酒",
+      "shopIds": [
+        "convenience",
+        "tavern"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "beer_bottle",
+      "name": "瓶装啤酒",
+      "category": "alcohol",
+      "price": 10,
+      "uses": 2,
+      "effectText": "每次1格精神+5、醉意+1；本日醉意到2不能再喝",
+      "shopIds": [
+        "convenience",
+        "tavern"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "baijiu",
+      "name": "普通白酒",
+      "category": "alcohol",
+      "price": 18,
+      "uses": 3,
+      "effectText": "每次1格精神+6、醉意+2；本日醉意到2不能再喝",
+      "shopIds": [
+        "convenience",
+        "tavern"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "vodka",
+      "name": "伏特加",
+      "category": "alcohol",
+      "price": 28,
+      "uses": 3,
+      "effectText": "每次1格精神+6、醉意+2；本日醉意到2不能再喝",
+      "shopIds": [
+        "convenience",
+        "tavern"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "soap",
+      "name": "肥皂",
+      "category": "daily",
+      "price": 5,
+      "uses": 5,
+      "effectText": "洗漱行动可用：卫生+25；不是点击物品就瞬间全身清洁",
+      "shopIds": [
+        "convenience",
+        "pharmacy"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "towel",
+      "name": "毛巾",
+      "category": "daily",
+      "price": 10,
+      "uses": 20,
+      "effectText": "洗漱工具；用后有潮湿状态，要晾干",
+      "shopIds": [
+        "convenience",
+        "art_hardware"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "wipes",
+      "name": "湿巾",
+      "category": "daily",
+      "price": 6,
+      "uses": 3,
+      "effectText": "附带擦洗：卫生+12；每日一次，不替代脏衣处理",
+      "shopIds": [
+        "convenience",
+        "pharmacy"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "toothbrush",
+      "name": "牙刷",
+      "category": "daily",
+      "price": 4,
+      "uses": 30,
+      "effectText": "生活维护工具；并入洗漱，不另设刷牙小游戏",
+      "shopIds": [
+        "convenience",
+        "pharmacy"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "toothpaste",
+      "name": "牙膏",
+      "category": "daily",
+      "price": 8,
+      "uses": 10,
+      "effectText": "配牙刷用于生活维护；提高舒适度",
+      "shopIds": [
+        "convenience",
+        "pharmacy"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "detergent",
+      "name": "洗衣粉",
+      "category": "daily",
+      "price": 9,
+      "uses": 5,
+      "effectText": "洗衣行动消耗1格，清除衣物脏污；晾干需时间",
+      "shopIds": [
+        "convenience"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "socks",
+      "name": "替换袜子",
+      "category": "daily",
+      "price": 10,
+      "uses": 1,
+      "effectText": "可换下湿脏衣物标签；换下的仍留待清洗",
+      "shopIds": [
+        "convenience"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "clean_clothes",
+      "name": "干净换洗衣服",
+      "category": "daily",
+      "price": 24,
+      "uses": 1,
+      "effectText": "衣物实例，换装改善舒适与衣物清洁；不治疗已经发生的感染",
+      "shopIds": [
+        "convenience"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "trash_bag",
+      "name": "垃圾袋",
+      "category": "daily",
+      "price": 3,
+      "uses": 5,
+      "effectText": "营地清洁用；不清掉人物所有疾病",
+      "shopIds": [
+        "convenience"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "rain_cover",
+      "name": "防雨罩",
+      "category": "tool",
+      "price": 12,
+      "uses": 1,
+      "effectText": "降低对应装备和包裹受潮；需分配实例",
+      "shopIds": [
+        "art_hardware"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "bandage",
+      "name": "绷带",
+      "category": "medical",
+      "price": 8,
+      "uses": 3,
+      "effectText": "按伤口护理任务使用；不能单独治好重症感染",
+      "shopIds": [
+        "pharmacy"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "cleaning_care",
+      "name": "清洁护理包",
+      "category": "medical",
+      "price": 10,
+      "uses": 3,
+      "effectText": "对匹配的伤口护理状态有效；不是万用回血药",
+      "shopIds": [
+        "pharmacy"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "rehydration",
+      "name": "补液用品",
+      "category": "medical",
+      "price": 8,
+      "uses": 2,
+      "effectText": "匹配诊所提示的支持用品；降低对应疾病附加消耗，不直接治愈感染",
+      "shopIds": [
+        "pharmacy"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "symptom_relief",
+      "name": "症状缓解包",
+      "category": "medical",
+      "price": 12,
+      "uses": 2,
+      "effectText": "临时减轻症状惩罚；不自动降低全部疾病严重度",
+      "shopIds": [
+        "pharmacy"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "care_course",
+      "name": "诊所计划治疗用品",
+      "category": "medical",
+      "price": 24,
+      "uses": 4,
+      "effectText": "需有效治疗计划且病种匹配；每次护理让病情增量-7",
+      "shopIds": [
+        "pharmacy",
+        "clinic"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "thermometer",
+      "name": "体温检查用品",
+      "category": "medical",
+      "price": 12,
+      "uses": 20,
+      "effectText": "用于查看症状提示；不能据此生成真实诊断",
+      "shopIds": [
+        "pharmacy"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "paper_set",
+      "name": "纸笔套装",
+      "category": "art",
+      "price": 6,
+      "uses": 6,
+      "effectText": "速写、记账、纸牌计分；废纸替代仍可用",
+      "shopIds": [
+        "art_hardware"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "paint",
+      "name": "涂鸦颜料",
+      "category": "art",
+      "price": 12,
+      "uses": 4,
+      "effectText": "每件许可小涂鸦消耗1格；材质按任务说明",
+      "shopIds": [
+        "art_hardware"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "cards",
+      "name": "旧扑克牌",
+      "category": "daily",
+      "price": 8,
+      "uses": 1,
+      "effectText": "营地无赌注娱乐；不自动增加收入或继承马哥牌运",
+      "shopIds": [
+        "convenience"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "headphones",
+      "name": "二手耳机",
+      "category": "device",
+      "price": 30,
+      "uses": 1,
+      "effectText": "轩哥中期个人愿望与工作舒适物件",
+      "shopIds": [
+        "recycle_shop"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "keyboard",
+      "name": "可用旧键盘",
+      "category": "device",
+      "price": 40,
+      "uses": 1,
+      "effectText": "技术工作与轩哥个人愿望；不是开局生存必需品",
+      "shopIds": [
+        "recycle_shop"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "electronic_part",
+      "name": "电子零件",
+      "category": "tool",
+      "price": 6,
+      "uses": 1,
+      "effectText": "维修材料",
+      "shopIds": [
+        "recycle_shop"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "tape",
+      "name": "修补胶带",
+      "category": "tool",
+      "price": 5,
+      "uses": 5,
+      "effectText": "修棚、包裹及道具维护",
+      "shopIds": [
+        "art_hardware"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "ticket",
+      "name": "街角即开彩",
+      "category": "lottery",
+      "price": 5,
+      "uses": 1,
+      "effectText": "5元票；购票时锁定购票人、结果与票价；与其他票共用每日额度；只核销一次",
+      "shopIds": [
+        "convenience",
+        "lottery_kiosk"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "ticket_10",
+      "name": "三个铃铛即开彩",
+      "category": "lottery",
+      "price": 10,
+      "uses": 1,
+      "effectText": "10元票；中奖权重同5元票，返还金额按2倍；购买锁定，仅核销一次",
+      "shopIds": [
+        "convenience",
+        "lottery_kiosk"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "ticket_20",
+      "name": "好日子即开彩",
+      "category": "lottery",
+      "price": 20,
+      "uses": 1,
+      "effectText": "20元票；中奖权重同5元票，返还金额按4倍；购买锁定，仅核销一次",
+      "shopIds": [
+        "convenience",
+        "lottery_kiosk"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "bath_service",
+      "name": "洗澡与洗衣服务",
+      "category": "service",
+      "price": 10,
+      "uses": 1,
+      "effectText": "占一个生活维护主行动；角色卫生+55，衣物仍需晾干",
+      "shopIds": [
+        "bathhouse"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "clinical_visit",
+      "name": "诊所评估与治疗计划",
+      "category": "service",
+      "price": 18,
+      "uses": 1,
+      "effectText": "占一个主行动；确定游戏病种标签与匹配护理路径",
+      "shopIds": [
+        "clinic"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "shoes",
+      "name": "合脚二手鞋",
+      "category": "daily",
+      "price": 20,
+      "uses": 1,
+      "effectText": "可替换破损鞋物件，满足对应愿望；需要合脚条件",
+      "shopIds": [
+        "recycle_shop"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "blanket",
+      "name": "干燥毯子",
+      "category": "daily",
+      "price": 24,
+      "uses": 1,
+      "effectText": "个人寝具，分配后改善睡眠与保暖；受潮会改变效果",
+      "shopIds": [
+        "convenience"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "camera",
+      "name": "可用二手相机",
+      "category": "device",
+      "price": 160,
+      "uses": 1,
+      "effectText": "唯一设备实例，可拍摄；仍有借用和低成本设备替代路线",
+      "shopIds": [
+        "recycle_shop"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "underwear",
+      "name": "换洗内衣",
+      "category": "daily",
+      "price": 12,
+      "uses": 1,
+      "effectText": "衣物实例；换下后需要洗涤晾干，不自动治疗疾病",
+      "shopIds": [
+        "convenience"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "fishing_rod_simple",
+      "name": "捡来的简易竿",
+      "category": "tool",
+      "price": 0,
+      "uses": 1,
+      "effectText": "钓鱼命中修正+0；翻桶低概率获得",
+      "shopIds": [],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "fishing_rod",
+      "name": "普通手竿",
+      "category": "tool",
+      "price": 20,
+      "uses": 1,
+      "effectText": "钓鱼命中修正+5",
+      "shopIds": [
+        "convenience"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "fishing_rod_pro",
+      "name": "专业竿",
+      "category": "tool",
+      "price": 42,
+      "uses": 1,
+      "effectText": "钓鱼命中修正+10",
+      "shopIds": [
+        "art_hardware"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "fish_bait",
+      "name": "鱼饵",
+      "category": "daily",
+      "price": 3,
+      "uses": 1,
+      "effectText": "河岸钓鱼每回合消耗1份",
+      "shopIds": [
+        "convenience"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "fish_common",
+      "name": "常见鱼",
+      "category": "ingredient",
+      "price": 6,
+      "uses": 1,
+      "effectText": "生鱼：篝火加工后食用饱食+32；也可在老街便利店卖6",
+      "shopIds": [],
+      "shelfLifeDays": 1,
+      "isFictionalBalance": true
+    },
+    {
+      "id": "fish_rare",
+      "name": "少见鱼",
+      "category": "ingredient",
+      "price": 14,
+      "uses": 1,
+      "effectText": "生鱼：篝火加工后食用饱食+46；也可在老街便利店卖14",
+      "shopIds": [],
+      "shelfLifeDays": 1,
+      "isFictionalBalance": true
+    },
+    {
+      "id": "bed_basic",
+      "name": "基础单人床",
+      "category": "furniture",
+      "price": 45,
+      "uses": 1,
+      "effectText": "购买后自动快递到营地包裹，无需运费和等待；不进入背包，须回营拆包摆放。摆放后睡眠每小时体力+30，地铺每小时+20；普通次日体力100、醉意/宿醉次晨80不变。",
+      "shopIds": [
+        "furniture_store"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "bed_comfort",
+      "name": "舒适单人床",
+      "category": "furniture",
+      "price": 90,
+      "uses": 1,
+      "effectText": "购买后自动快递到营地包裹，无需运费和等待；不进入背包，须回营拆包摆放。本版与基础床同机械效果：摆放后睡眠每小时体力+30，地铺每小时+20；普通次日体力100、醉意/宿醉次晨80不变；外观更精致，不额外提供数值。",
+      "shopIds": [
+        "furniture_store"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "dining_table",
+      "name": "营地餐桌",
+      "category": "furniture",
+      "price": 35,
+      "uses": 1,
+      "effectText": "购买后自动快递到营地包裹，无需运费和等待；不进入背包，须回营拆包摆放。摆放后，营地成功消耗食物精神+2，每人每日最多2次。",
+      "shopIds": [
+        "furniture_store"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "chair",
+      "name": "木椅",
+      "category": "furniture",
+      "price": 12,
+      "uses": 1,
+      "effectText": "购买后自动快递到营地包裹，无需运费和等待；不进入背包，须回营拆包摆放。摆放后可坐靠与美观陈列。",
+      "shopIds": [
+        "furniture_store"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "sofa",
+      "name": "旧沙发",
+      "category": "furniture",
+      "price": 70,
+      "uses": 1,
+      "effectText": "购买后自动快递到营地包裹，无需运费和等待；不进入背包，须回营拆包摆放。摆放后可坐靠与美观陈列。",
+      "shopIds": [
+        "furniture_store"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "cabinet",
+      "name": "储物柜",
+      "category": "furniture",
+      "price": 40,
+      "uses": 1,
+      "effectText": "购买后自动快递到营地包裹，无需运费和等待；不进入背包，须回营拆包摆放。摆放后可作收纳陈列与美观布置。",
+      "shopIds": [
+        "furniture_store"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "lamp",
+      "name": "营灯",
+      "category": "furniture",
+      "price": 18,
+      "uses": 1,
+      "effectText": "购买后自动快递到营地包裹，无需运费和等待；不进入背包，须回营拆包摆放。摆放后用于美观陈列。",
+      "shopIds": [
+        "furniture_store"
+      ],
+      "isFictionalBalance": true
+    },
+    {
+      "id": "rug",
+      "name": "旧地毯",
+      "category": "furniture",
+      "price": 25,
+      "uses": 1,
+      "effectText": "购买后自动快递到营地包裹，无需运费和等待；不进入背包，须回营拆包摆放。摆放后用于美观布置。",
+      "shopIds": [
+        "furniture_store"
+      ],
+      "isFictionalBalance": true
+    }
+  ],
+  "wishTemplates": [
+    {
+      "id": "quiet_smoke",
+      "name": "想抽一根",
+      "actorScope": "all",
+      "category": "daily",
+      "startIntensity": 12,
+      "growthPerTurn": 0.5,
+      "targetItemIds": [
+        "cigarette",
+        "cigarette_regular",
+        "cigarette_premium"
+      ],
+      "substitutes": [
+        "陪伴休整",
+        "换一个减压活动"
+      ],
+      "indirectLine": "烟盒拿起来又放下。",
+      "maxPerCategory": 1,
+      "generatesMechanically": true,
+      "fulfillmentRequiresCommittedAction": true,
+      "owningItemAloneIsEnough": false
+    },
+    {
+      "id": "evening_drink",
+      "name": "想晚上喝点",
+      "actorScope": "all",
+      "category": "daily",
+      "startIntensity": 12,
+      "growthPerTurn": 0.5,
+      "targetItemIds": [
+        "beer",
+        "spirit",
+        "beer_bottle",
+        "baijiu",
+        "vodka"
+      ],
+      "substitutes": [
+        "热饮夜话",
+        "无酒聚会"
+      ],
+      "indirectLine": "今天能不能别一回去就倒头睡。",
+      "maxPerCategory": 1,
+      "generatesMechanically": true,
+      "fulfillmentRequiresCommittedAction": true,
+      "owningItemAloneIsEnough": false
+    },
+    {
+      "id": "clean_clothes_wish",
+      "name": "想穿件干净衣服",
+      "actorScope": "all",
+      "category": "comfort",
+      "startIntensity": 30,
+      "growthPerTurn": 1,
+      "targetItemIds": [
+        "clean_clothes"
+      ],
+      "substitutes": [
+        "清洗旧衣并晾干"
+      ],
+      "indirectLine": "袖口又被他往里面翻了一下。",
+      "maxPerCategory": 1,
+      "generatesMechanically": true,
+      "fulfillmentRequiresCommittedAction": true,
+      "owningItemAloneIsEnough": false
+    },
+    {
+      "id": "good_meal",
+      "name": "想吃一顿像样的",
+      "actorScope": "all",
+      "category": "comfort",
+      "startIntensity": 28,
+      "growthPerTurn": 1,
+      "targetItemIds": [
+        "hot_soup"
+      ],
+      "substitutes": [
+        "共同做饭",
+        "接受朋友邀请"
+      ],
+      "indirectLine": "路过摊子时多看了两眼。",
+      "maxPerCategory": 1,
+      "generatesMechanically": true,
+      "fulfillmentRequiresCommittedAction": true,
+      "owningItemAloneIsEnough": false
+    },
+    {
+      "id": "xuan_keyboard",
+      "name": "想要可用键盘",
+      "actorScope": "xuan",
+      "category": "personal",
+      "startIntensity": 30,
+      "growthPerTurn": 1,
+      "targetItemIds": [
+        "keyboard"
+      ],
+      "substitutes": [
+        "修好旧键盘",
+        "借工作位"
+      ],
+      "indirectLine": "这键盘的空格键比我们还没着落。",
+      "maxPerCategory": 1,
+      "generatesMechanically": true,
+      "fulfillmentRequiresCommittedAction": true,
+      "owningItemAloneIsEnough": true
+    },
+    {
+      "id": "xuan_headphones",
+      "name": "想要耳机",
+      "actorScope": "xuan",
+      "category": "personal",
+      "startIntensity": 28,
+      "growthPerTurn": 1,
+      "targetItemIds": [
+        "headphones"
+      ],
+      "substitutes": [
+        "借耳机完成一次工作",
+        "有安静工作位"
+      ],
+      "indirectLine": "他把空着的耳机插孔看了很久。",
+      "maxPerCategory": 1,
+      "generatesMechanically": true,
+      "fulfillmentRequiresCommittedAction": true,
+      "owningItemAloneIsEnough": true
+    },
+    {
+      "id": "xuan_understood",
+      "name": "想有人认真听自己说",
+      "actorScope": "xuan",
+      "category": "relational",
+      "startIntensity": 30,
+      "growthPerTurn": 1,
+      "targetItemIds": [],
+      "substitutes": [
+        "同伴长谈",
+        "共同完成小工具"
+      ],
+      "indirectLine": "那个梗这次没接着讲。",
+      "maxPerCategory": 1,
+      "generatesMechanically": true,
+      "fulfillmentRequiresCommittedAction": true,
+      "owningItemAloneIsEnough": false
+    },
+    {
+      "id": "fan_paint",
+      "name": "想要颜料",
+      "actorScope": "fan",
+      "category": "personal",
+      "startIntensity": 32,
+      "growthPerTurn": 1,
+      "targetItemIds": [
+        "paint"
+      ],
+      "substitutes": [
+        "纸笔速写",
+        "借颜料",
+        "用已有材料完成小画"
+      ],
+      "indirectLine": "那面墙还空着。",
+      "maxPerCategory": 1,
+      "generatesMechanically": true,
+      "fulfillmentRequiresCommittedAction": true,
+      "owningItemAloneIsEnough": false
+    },
+    {
+      "id": "fan_camera",
+      "name": "想用一次像样的拍摄设备",
+      "actorScope": "fan",
+      "category": "aspiration",
+      "startIntensity": 25,
+      "growthPerTurn": 0.5,
+      "targetItemIds": [
+        "camera"
+      ],
+      "substitutes": [
+        "租借一次相机",
+        "缩小拍摄方案"
+      ],
+      "indirectLine": "他翻开了那张一直没用上的分镜。",
+      "maxPerCategory": 1,
+      "generatesMechanically": true,
+      "fulfillmentRequiresCommittedAction": true,
+      "owningItemAloneIsEnough": false
+    },
+    {
+      "id": "fan_seen",
+      "name": "想让作品被认真看见",
+      "actorScope": "fan",
+      "category": "relational",
+      "startIntensity": 30,
+      "growthPerTurn": 1,
+      "targetItemIds": [],
+      "substitutes": [
+        "同伴看完一小段",
+        "小范围展示草图"
+      ],
+      "indirectLine": "你上次说想看，后来没看。",
+      "maxPerCategory": 1,
+      "generatesMechanically": true,
+      "fulfillmentRequiresCommittedAction": true,
+      "owningItemAloneIsEnough": false
+    },
+    {
+      "id": "ma_cards",
+      "name": "想坐一次牌桌",
+      "actorScope": "ma",
+      "category": "daily",
+      "startIntensity": 45,
+      "growthPerTurn": 2,
+      "targetItemIds": [
+        "cards"
+      ],
+      "substitutes": [
+        "无赌注牌局",
+        "围观并和熟人聊天"
+      ],
+      "indirectLine": "我就过去看看今天谁在。",
+      "maxPerCategory": 1,
+      "generatesMechanically": true,
+      "fulfillmentRequiresCommittedAction": true,
+      "owningItemAloneIsEnough": false
+    },
+    {
+      "id": "ma_lottery",
+      "name": "想试一张彩票",
+      "actorScope": "ma",
+      "category": "daily",
+      "startIntensity": 35,
+      "growthPerTurn": 2,
+      "targetItemIds": [
+        "ticket"
+      ],
+      "substitutes": [
+        "约定小额娱乐预算",
+        "换成无赌注纸牌"
+      ],
+      "indirectLine": "他瞄了一眼收银台，没立刻伸手。",
+      "maxPerCategory": 1,
+      "generatesMechanically": true,
+      "fulfillmentRequiresCommittedAction": true,
+      "owningItemAloneIsEnough": false
+    },
+    {
+      "id": "ma_reliable",
+      "name": "想有一份稳当活",
+      "actorScope": "ma",
+      "category": "aspiration",
+      "startIntensity": 25,
+      "growthPerTurn": 0.5,
+      "targetItemIds": [],
+      "substitutes": [
+        "完成固定岗位试做",
+        "整理可执行找工计划"
+      ],
+      "indirectLine": "我也不是非得每天碰运气。",
+      "maxPerCategory": 1,
+      "generatesMechanically": true,
+      "fulfillmentRequiresCommittedAction": true,
+      "owningItemAloneIsEnough": false
+    },
+    {
+      "id": "ma_shoes",
+      "name": "想换双不漏水的鞋",
+      "actorScope": "ma",
+      "category": "personal",
+      "startIntensity": 30,
+      "growthPerTurn": 1,
+      "targetItemIds": [
+        "shoes"
+      ],
+      "substitutes": [
+        "修补旧鞋",
+        "接受合脚二手鞋"
+      ],
+      "indirectLine": "他甩了甩鞋里的水。",
+      "maxPerCategory": 1,
+      "generatesMechanically": true,
+      "fulfillmentRequiresCommittedAction": true,
+      "owningItemAloneIsEnough": true
+    },
+    {
+      "id": "adult_connection",
+      "name": "想约会／被在乎",
+      "actorScope": "all",
+      "category": "relational",
+      "startIntensity": 25,
+      "growthPerTurn": 1,
+      "targetItemIds": [],
+      "substitutes": [
+        "成年人自愿约会",
+        "朋友陪伴",
+        "明确沟通期待"
+      ],
+      "indirectLine": "今天能不能见见除了雇主以外的人。",
+      "maxPerCategory": 1,
+      "generatesMechanically": true,
+      "fulfillmentRequiresCommittedAction": true,
+      "owningItemAloneIsEnough": false
+    },
+    {
+      "id": "private_room",
+      "name": "想有个属于自己的角落",
+      "actorScope": "all",
+      "category": "aspiration",
+      "startIntensity": 20,
+      "growthPerTurn": 0.5,
+      "targetItemIds": [],
+      "substitutes": [
+        "整理私人物件区",
+        "预约安静工作角",
+        "形成可执行的住房计划"
+      ],
+      "indirectLine": "这张床能不能别紧贴着过道。",
+      "maxPerCategory": 1,
+      "generatesMechanically": true,
+      "fulfillmentRequiresCommittedAction": true,
+      "owningItemAloneIsEnough": false
+    }
+  ],
+  "eventTemplates": [
+    {
+      "id": "street_cards",
+      "name": "雨棚下的牌桌",
+      "category": "opportunity",
+      "districtIds": [
+        "station",
+        "market"
+      ],
+      "openSlots": [
+        1,
+        2,
+        3
+      ],
+      "effectPolicy": "明示入场10，返还与概率由规则层确定；可离场／无赌注",
+      "constraint": "明示主行动替换，日付费博彩额度共享",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "lottery_queue",
+      "name": "收银台前的犹豫",
+      "category": "desire",
+      "districtIds": [
+        "market",
+        "station"
+      ],
+      "openSlots": [
+        1,
+        2,
+        3
+      ],
+      "effectPolicy": "显露彩票愿望；购票须进店且主动确认",
+      "constraint": "不自动购票、不自动兑出大奖",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "beg_worker",
+      "name": "赶时间的工人",
+      "category": "begging",
+      "districtIds": [
+        "station"
+      ],
+      "openSlots": [
+        0,
+        1
+      ],
+      "effectPolicy": "零钱／拒绝／短工线索之一，预算已生成",
+      "constraint": "同NPC全队当日只判一次求助结果",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "beg_food",
+      "name": "拿着多一份饭的路人",
+      "category": "begging",
+      "districtIds": [
+        "market"
+      ],
+      "openSlots": [
+        0,
+        2
+      ],
+      "effectPolicy": "餐食或礼貌拒绝，固定结果种子",
+      "constraint": "不是所有同类NPC都无限给饭",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "beg_artist",
+      "name": "停在涂鸦前的人",
+      "category": "begging",
+      "districtIds": [
+        "cinema"
+      ],
+      "openSlots": [
+        2,
+        3
+      ],
+      "effectPolicy": "小委托／聊天／物资求助",
+      "constraint": "凡哥可以聊创作，不强制成功",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "repair_request",
+      "name": "路边坏掉的扫码设备",
+      "category": "work",
+      "districtIds": [
+        "market"
+      ],
+      "openSlots": [
+        1,
+        2
+      ],
+      "effectPolicy": "开放已定价维修订单",
+      "constraint": "需要工具与客户许可",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "carry_boxes",
+      "name": "散在地上的箱子",
+      "category": "work",
+      "districtIds": [
+        "station",
+        "market"
+      ],
+      "openSlots": [
+        0,
+        1,
+        2
+      ],
+      "effectPolicy": "搬运小单；费用与体力固定",
+      "constraint": "不是所有帮忙都付钱，先显示",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "free_wall",
+      "name": "愿意借墙的店主",
+      "category": "art",
+      "districtIds": [
+        "cinema",
+        "market"
+      ],
+      "openSlots": [
+        1,
+        2
+      ],
+      "effectPolicy": "许可涂鸦位与后续订单",
+      "constraint": "写入许可标记，不直接送成品",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "shared_tea",
+      "name": "可以坐会儿",
+      "category": "social",
+      "districtIds": [
+        "service",
+        "cinema"
+      ],
+      "openSlots": [
+        1,
+        2
+      ],
+      "effectPolicy": "短聊仅一次小恢复；长谈要行动槽",
+      "constraint": "可以拒绝而不扣关系",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "old_customer",
+      "name": "认出你的老客户",
+      "category": "relationship",
+      "districtIds": [
+        "market",
+        "recycle"
+      ],
+      "openSlots": [
+        1,
+        2
+      ],
+      "effectPolicy": "依据已确认关系开放机会",
+      "constraint": "死者不能在场认出别人",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "ripped_bag",
+      "name": "袋底开了",
+      "category": "misfortune",
+      "districtIds": [
+        "market",
+        "station"
+      ],
+      "openSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "effectPolicy": "少量卫生／体力损失，有当日上限",
+      "constraint": "马哥权重高，不扣健康、不删任务物",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "wrong_entrance",
+      "name": "工作入口换了",
+      "category": "misfortune",
+      "districtIds": [
+        "station"
+      ],
+      "openSlots": [
+        0,
+        1,
+        2
+      ],
+      "effectPolicy": "少量体力损失或改路提示",
+      "constraint": "不撤销锁价合同的全部报酬",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "clothes_rain",
+      "name": "晾晒前下雨",
+      "category": "weather",
+      "districtIds": [
+        "camp"
+      ],
+      "openSlots": [
+        0,
+        1,
+        2
+      ],
+      "effectPolicy": "选择收衣或用防雨物",
+      "constraint": "天气预告已存在；不凭AI改变天气",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "last_soap",
+      "name": "最后一块肥皂",
+      "category": "shop",
+      "districtIds": [
+        "market",
+        "service"
+      ],
+      "openSlots": [
+        1,
+        2
+      ],
+      "effectPolicy": "商店库存机会；仍有免费清洁替代",
+      "constraint": "不把付费卫生品设为唯一活路",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "clinic_queue",
+      "name": "诊所的短队伍",
+      "category": "care",
+      "districtIds": [
+        "service"
+      ],
+      "openSlots": [
+        0,
+        1,
+        2
+      ],
+      "effectPolicy": "提供当格普通诊疗名额",
+      "constraint": "重症援助入口独立于普通队伍",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "care_reminder",
+      "name": "他今天又没换衣服",
+      "category": "care",
+      "districtIds": [
+        "camp"
+      ],
+      "openSlots": [
+        0,
+        3
+      ],
+      "effectPolicy": "暴露卫生与护理缺口",
+      "constraint": "不由AI直接宣告染病",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "bad_joke",
+      "name": "这个梗真够烂的",
+      "category": "banter",
+      "districtIds": [
+        "camp",
+        "market"
+      ],
+      "openSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "effectPolicy": "轩哥当日一次短互动恢复",
+      "constraint": "濒死、死亡当晚禁用开心版本",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "unfinished_wall",
+      "name": "墙上还差一块",
+      "category": "desire",
+      "districtIds": [
+        "camp",
+        "cinema"
+      ],
+      "openSlots": [
+        2,
+        3
+      ],
+      "effectPolicy": "凡哥既有创作愿望的暗示",
+      "constraint": "不能无限新增买颜料愿望",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "one_more_game",
+      "name": "都到这里了",
+      "category": "desire",
+      "districtIds": [
+        "station"
+      ],
+      "openSlots": [
+        1,
+        2,
+        3
+      ],
+      "effectPolicy": "马哥已有赌念的表达与离场选项",
+      "constraint": "不追加免费博彩次数",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "adult_chat",
+      "name": "夜市的一次搭话",
+      "category": "social",
+      "districtIds": [
+        "market",
+        "station"
+      ],
+      "openSlots": [
+        2,
+        3
+      ],
+      "effectPolicy": "成年人友好社交，可拒绝／告别",
+      "constraint": "消费不等于同意，不涉及未成年人",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "returned_tool",
+      "name": "工具送回来了",
+      "category": "relationship",
+      "districtIds": [
+        "recycle",
+        "camp"
+      ],
+      "openSlots": [
+        1,
+        2,
+        3
+      ],
+      "effectPolicy": "依据借用日志归还真实物品",
+      "constraint": "奖励白名单，无凭空复制设备",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "lost_note",
+      "name": "湿掉的记事纸",
+      "category": "story",
+      "districtIds": [
+        "market",
+        "cinema"
+      ],
+      "openSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "effectPolicy": "线索或人物小故事",
+      "constraint": "不可生成关键任务的唯一锁钥",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "job_tip",
+      "name": "还有一班短工",
+      "category": "work",
+      "districtIds": [
+        "station",
+        "service"
+      ],
+      "openSlots": [
+        0,
+        1,
+        2
+      ],
+      "effectPolicy": "开放有容量的普通岗位",
+      "constraint": "失效日与预约占用清楚显示",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "market_close",
+      "name": "今天提前收摊",
+      "category": "shop",
+      "districtIds": [
+        "market"
+      ],
+      "openSlots": [
+        0,
+        1,
+        2
+      ],
+      "effectPolicy": "下一时段商店营业变更预告",
+      "constraint": "已经提交的购物不被事后撤销",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "public_water",
+      "name": "水点排队",
+      "category": "care",
+      "districtIds": [
+        "service"
+      ],
+      "openSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "effectPolicy": "清洁机会与同地点闲聊",
+      "constraint": "不把免费基本恢复永久封锁",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "small_screening",
+      "name": "有人愿意看一段",
+      "category": "art",
+      "districtIds": [
+        "cinema",
+        "camp"
+      ],
+      "openSlots": [
+        2,
+        3
+      ],
+      "effectPolicy": "已有作品的小范围观看",
+      "constraint": "必须有对应素材与观看许可",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "shared_dinner",
+      "name": "多坐一个人",
+      "category": "social",
+      "districtIds": [
+        "camp",
+        "market"
+      ],
+      "openSlots": [
+        3
+      ],
+      "effectPolicy": "共同餐食与陪伴选项",
+      "constraint": "人数、食物成本按真实在场者",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "memorial_object",
+      "name": "那个位置空着",
+      "category": "memory",
+      "districtIds": [
+        "camp"
+      ],
+      "openSlots": [
+        0,
+        3
+      ],
+      "effectPolicy": "逝者遗物与存活者回应",
+      "constraint": "仅实际死亡后出现；不得复活",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "warm_place",
+      "name": "有一处可以躲风",
+      "category": "weather",
+      "districtIds": [
+        "service",
+        "cinema"
+      ],
+      "openSlots": [
+        1,
+        2,
+        3
+      ],
+      "effectPolicy": "短时室内位置或有效床位线索",
+      "constraint": "不凭台词直接授予永久住所",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "dangerous_shortcut",
+      "name": "近路并不便宜",
+      "category": "risk",
+      "districtIds": [
+        "station",
+        "recycle"
+      ],
+      "openSlots": [
+        1,
+        2,
+        3
+      ],
+      "effectPolicy": "明确伤害区间和安全绕行",
+      "constraint": "不允许普通闲聊随机即死",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "strained_friend",
+      "name": "今天不想再解释",
+      "category": "relationship",
+      "districtIds": [
+        "camp"
+      ],
+      "openSlots": [
+        3
+      ],
+      "effectPolicy": "回应已确认的失约／积压愿望",
+      "constraint": "不得凭空捏造玩家背叛行为",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    },
+    {
+      "id": "quiet_night",
+      "name": "今晚没有新麻烦",
+      "category": "ambient",
+      "districtIds": [
+        "camp"
+      ],
+      "openSlots": [
+        3
+      ],
+      "effectPolicy": "无强制选择的生活片段",
+      "constraint": "允许真的什么都不发生",
+      "defaultExpiresAfterTurns": 2,
+      "requiresActivePresentActor": true,
+      "aiMode": "text_or_bounded_assembly",
+      "forbiddenAiFields": [
+        "cashDelta",
+        "healthDelta",
+        "probability",
+        "death",
+        "resurrection",
+        "newKeyItem"
+      ],
+      "repeatCooldownDays": 3
+    }
+  ],
+  "chapters": [
+    {
+      "id": "ch01",
+      "number": 1,
+      "startDay": 1,
+      "endDay": 10,
+      "title": "被城市登出",
+      "objective": "先活过第一周，并知道物资从哪里来",
+      "anchor": "桥下渐渐有了熟面孔；留心天气",
+      "systems": "落脚、商店、乞讨、卫生和三人分工",
+      "branch": "床位、防雨或临时安置；未完成不阻断日期"
+    },
+    {
+      "id": "ch02",
+      "number": 2,
+      "startDay": 11,
+      "endDay": 20,
+      "title": "街上的规矩",
+      "objective": "维持收入，认识路人而不只记住其钱包",
+      "anchor": "第15天预告、第18天强降雨",
+      "systems": "随机牌局、乞讨熟面孔、第一场持续疾病",
+      "branch": "保护物资／借仓／转移；有人濒死优先救援"
+    },
+    {
+      "id": "ch03",
+      "number": 3,
+      "startDay": 21,
+      "endDay": 30,
+      "title": "人不能只靠吃饭",
+      "objective": "第一次处理三个人不同的愿望",
+      "anchor": "第25天早寒，不是最终寒潮",
+      "systems": "个人心愿、暗示、承诺、清洁与精神支持",
+      "branch": "工具／颜料／娱乐／日常生活预算的取舍"
+    },
+    {
+      "id": "ch04",
+      "number": 4,
+      "startDay": 31,
+      "endDay": 40,
+      "title": "手气与生意",
+      "objective": "让偶然的好运遇上可持续的收入",
+      "anchor": "第35天联合工作与限时牌局同槽",
+      "systems": "长期订单、商拍合同、广告涂鸦与预算",
+      "branch": "接商拍／改形式／拒单接活；牌局不锁主线"
+    },
+    {
+      "id": "ch05",
+      "number": 5,
+      "startDay": 41,
+      "endDay": 50,
+      "title": "三个人的账",
+      "objective": "职业机会、创作与照护抢同一格",
+      "anchor": "第44天预告、第45天试工与采访撞期",
+      "systems": "三人协作不是免费替身；关系和失约",
+      "branch": "马哥帮采访须有预处理，也牺牲自己的工作"
+    },
+    {
+      "id": "ch06",
+      "number": 6,
+      "startDay": 51,
+      "endDay": 60,
+      "title": "把日子洗干净",
+      "objective": "把靠抢救维持的生活改成能持续的日常",
+      "anchor": "第54天卫生巡查；第57天阶段诊疗复查",
+      "systems": "洗衣晾干、营地清洁、按计划护理、心理危机",
+      "branch": "治疗／找人代工／缩合同；不强制某人必定生病"
+    },
+    {
+      "id": "ch07",
+      "number": 7,
+      "startDay": 61,
+      "endDay": 70,
+      "title": "寒潮之前",
+      "objective": "为还活着的每个人留好床位和余量",
+      "anchor": "第66天公布第71—74天寒潮；第70天检查",
+      "systems": "安全住所、日常品、药品和工作设备分配",
+      "branch": "共同租屋／工作间／服务站／合格营地"
+    },
+    {
+      "id": "ch08",
+      "number": 8,
+      "startDay": 71,
+      "endDay": 80,
+      "title": "最长的几夜",
+      "objective": "安全、工作和人的想望在寒潮中相互牵制",
+      "anchor": "第71—74天寒潮峰值；非每一天都同样严寒",
+      "systems": "有限店时、值班医疗、室内工作、真实减员",
+      "branch": "按实际准备结算，不强制牺牲任何角色"
+    },
+    {
+      "id": "ch09",
+      "number": 9,
+      "startDay": 81,
+      "endDay": 90,
+      "title": "想要的不只是活着",
+      "objective": "把长期愿望转成做得到的下一步",
+      "anchor": "第85天长期机会；第88天路线确认",
+      "systems": "职业、作品、固定岗位、关系与记忆",
+      "branch": "大目标可协商缩小；单人仍有路线"
+    },
+    {
+      "id": "ch10",
+      "number": 10,
+      "startDay": 91,
+      "endDay": 100,
+      "title": "今晚终于有答案",
+      "objective": "完成自己的交付，承认真正发生的得失",
+      "anchor": "第98天准备；第100天收束",
+      "systems": "住房、职业、作品、马哥的选择、遗物",
+      "branch": "主线到第100日；末夜濒死先结清救援尾声再终局"
+    }
+  ],
+  "dailyNodes": [
+    {
+      "day": 1,
+      "chapterId": "ch01",
+      "title": "纸板上先画两个人",
+      "focus": {
+        "xuan": "清点还能用的设备",
+        "fan": "问早餐摊工作",
+        "ma": "留心桥下的新面孔"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "清点／回收",
+          "辨认便利店并规划采购",
+          "整理设备与休整",
+          "共同会合与夜话"
+        ],
+        "fan": [
+          "早餐摊帮忙／路人求助",
+          "纸板速写",
+          "服务站询问／休整",
+          "共同会合与夜话"
+        ],
+        "ma": [
+          "未入队",
+          "未入队",
+          "留心桥下的动静",
+          "加入后的休息与夜话"
+        ]
+      },
+      "worldNote": "教学、打开地图与店铺",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_001"
+    },
+    {
+      "day": 2,
+      "chapterId": "ch01",
+      "title": "先找店，不是先找菜单",
+      "focus": {
+        "xuan": "去阿旺便利店列采购单",
+        "fan": "跟市场口路人求助",
+        "ma": "认清彩票亭与短工位置"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "去阿旺便利店列采购单",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "跟市场口路人求助",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "认清彩票亭与短工位置",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "同地区购买与乞讨次数教学",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_002"
+    },
+    {
+      "day": 3,
+      "chapterId": "ch01",
+      "title": "第三张床",
+      "focus": {
+        "xuan": "准备床铺材料",
+        "fan": "速写第三个人并问床位",
+        "ma": "搬运寝具"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "准备床铺材料",
+          "与马哥准备第三张床",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "速写第三个人并问床位",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "搬运寝具",
+          "与轩哥准备第三张床",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "第三张床与相机去留",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_003"
+    },
+    {
+      "day": 4,
+      "chapterId": "ch01",
+      "title": "第一场夜雨",
+      "focus": {
+        "xuan": "检查防雨与设备",
+        "fan": "确认临时床位",
+        "ma": "安置包裹与床铺"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "检查防雨与设备",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "确认临时床位",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "安置包裹与床铺",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "准备不足可转移，不强制淋雨",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_004"
+    },
+    {
+      "day": 5,
+      "chapterId": "ch01",
+      "title": "烟盒和饭盒",
+      "focus": {
+        "xuan": "做第一次维修诊断",
+        "fan": "接早餐摊画招牌需求",
+        "ma": "跑第一单腿"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "做第一次维修诊断",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "接早餐摊画招牌需求",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "跑第一单腿",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "日常品不再是直接扣钱的魔法按钮",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_005"
+    },
+    {
+      "day": 6,
+      "chapterId": "ch01",
+      "title": "站口有人摆了桌",
+      "focus": {
+        "xuan": "完成表格小单",
+        "fan": "记录街头人物",
+        "ma": "围观牌局或接短工"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "完成表格小单",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "记录街头人物",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "围观牌局或接短工",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "首次牌局模板保证可见，下注仍可拒绝",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_006"
+    },
+    {
+      "day": 7,
+      "chapterId": "ch01",
+      "title": "人也要洗",
+      "focus": {
+        "xuan": "安排公共水点洗漱",
+        "fan": "洗衣并晾干",
+        "ma": "清理营地垃圾"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "安排公共水点洗漱",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "洗衣并晾干",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "清理营地垃圾",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "免费清洁与付费澡堂并存",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_007"
+    },
+    {
+      "day": 8,
+      "chapterId": "ch01",
+      "title": "各有各的手艺",
+      "focus": {
+        "xuan": "交付小修复",
+        "fan": "交付招牌草图",
+        "ma": "归还借用工具"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "交付小修复",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "交付招牌草图",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "归还借用工具",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "工作收益与零花预算",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_008"
+    },
+    {
+      "day": 9,
+      "chapterId": "ch01",
+      "title": "没说出口的东西",
+      "focus": {
+        "xuan": "翻看旧键盘但暂不购买",
+        "fan": "询问颜料价格",
+        "ma": "摸出旧纸牌"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "翻看旧键盘但暂不购买",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "询问颜料价格",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "摸出旧纸牌",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "第一次愿望暗示，UI同步登记",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_009"
+    },
+    {
+      "day": 10,
+      "chapterId": "ch01",
+      "title": "今晚先有个着落",
+      "focus": {
+        "xuan": "核算十天收支",
+        "fan": "给营地画一个记号",
+        "ma": "确认明天短工"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "核算十天收支",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "给营地画一个记号",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "确认明天短工",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "第一章检查，不自动结局",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_010"
+    },
+    {
+      "day": 11,
+      "chapterId": "ch02",
+      "title": "熟面孔不等于提款机",
+      "focus": {
+        "xuan": "帮熟人排查设备",
+        "fan": "回访曾帮过忙的路人",
+        "ma": "与站口工人闲聊"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "帮熟人排查设备",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "回访曾帮过忙的路人",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "与站口工人闲聊",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "路人预算与记忆，重复乞讨不重复奖励",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_011"
+    },
+    {
+      "day": 12,
+      "chapterId": "ch02",
+      "title": "一次拒绝",
+      "focus": {
+        "xuan": "工作样例整理",
+        "fan": "处理乞讨被拒后的对话",
+        "ma": "采购当日补给"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "工作样例整理",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "处理乞讨被拒后的对话",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "采购当日补给",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "拒绝不是生死判决，提供其他机会",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_012"
+    },
+    {
+      "day": 13,
+      "chapterId": "ch02",
+      "title": "散了的箱子",
+      "focus": {
+        "xuan": "维修收入",
+        "fan": "商户拍摄",
+        "ma": "处理一次非致命小霉运"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "维修收入",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "商户拍摄",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "处理一次非致命小霉运",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "马哥生活运独立于赌运",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_013"
+    },
+    {
+      "day": 14,
+      "chapterId": "ch02",
+      "title": "纸牌也能不带钱",
+      "focus": {
+        "xuan": "整理设备与伙伴接梗",
+        "fan": "给牌桌画一张记分纸",
+        "ma": "无赌注牌局"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "整理设备与伙伴接梗",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "给牌桌画一张记分纸",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "无赌注牌局",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "娱乐替代与欲望部分满足",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_014"
+    },
+    {
+      "day": 15,
+      "chapterId": "ch02",
+      "title": "积水线往上了",
+      "focus": {
+        "xuan": "查看雨情并备份",
+        "fan": "联系旧影院寄存",
+        "ma": "勘查搬运路线"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "查看雨情并备份",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "联系旧影院寄存",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "勘查搬运路线",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "预告第18天暴雨",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_015"
+    },
+    {
+      "day": 16,
+      "chapterId": "ch02",
+      "title": "先搬哪一箱",
+      "focus": {
+        "xuan": "打包电脑与零件",
+        "fan": "选择保护画稿或借仓",
+        "ma": "帮助鲁叔搬第一批"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "打包电脑与零件",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "选择保护画稿或借仓",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "帮助鲁叔搬第一批",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "共同物資预算，不强制全选",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_016"
+    },
+    {
+      "day": 17,
+      "chapterId": "ch02",
+      "title": "药房的灯还亮着",
+      "focus": {
+        "xuan": "补库存与应急金",
+        "fan": "询问卫生用品",
+        "ma": "去药房备护理包"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "补库存与应急金",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "询问卫生用品",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "去药房备护理包",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "备药不等于预先强制生病",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_017"
+    },
+    {
+      "day": 18,
+      "chapterId": "ch02",
+      "title": "雨不会挑人",
+      "focus": {
+        "xuan": "室内维修或处理转移",
+        "fan": "确认人和作品的去向",
+        "ma": "搬迁收尾或协助救援"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "室内维修或处理转移",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "确认人和作品的去向",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "搬迁收尾或协助救援",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "暴雨按准备结算",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_018"
+    },
+    {
+      "day": 19,
+      "chapterId": "ch02",
+      "title": "湿衣服不是换张图",
+      "focus": {
+        "xuan": "清洁设备并检查账目",
+        "fan": "洗衣晾干、整理画稿",
+        "ma": "检查营地卫生"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "清洁设备并检查账目",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "洗衣晾干、整理画稿",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "检查营地卫生",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "湿衣、个人卫生、营地卫生分开",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_019"
+    },
+    {
+      "day": 20,
+      "chapterId": "ch02",
+      "title": "别只记住谁给过钱",
+      "focus": {
+        "xuan": "确认一个稳定小单",
+        "fan": "感谢愿意接受回访的路人",
+        "ma": "交回借来的物件"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "确认一个稳定小单",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "感谢愿意接受回访的路人",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "交回借来的物件",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "街头关系转为可持续机会",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_020"
+    },
+    {
+      "day": 21,
+      "chapterId": "ch03",
+      "title": "这钱能不能花在自己身上",
+      "focus": {
+        "xuan": "明确想要一副耳机",
+        "fan": "明确想要颜料",
+        "ma": "明确想找一场牌局"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "明确想要一副耳机",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "明确想要颜料",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "明确想找一场牌局",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "三人欲望同时出现但上限受控",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_021"
+    },
+    {
+      "day": 22,
+      "chapterId": "ch03",
+      "title": "有些话只说半句",
+      "focus": {
+        "xuan": "回应自己的含糊暗示",
+        "fan": "用草稿表达长期作品目标",
+        "ma": "提起没兑现的小愿望"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "回应自己的含糊暗示",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "用草稿表达长期作品目标",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "提起没兑现的小愿望",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "AI可表达，不可偷偷加欲望",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_022"
+    },
+    {
+      "day": 23,
+      "chapterId": "ch03",
+      "title": "延期不是忘了",
+      "focus": {
+        "xuan": "确认一项可执行购买约定",
+        "fan": "选便宜材料替代方案",
+        "ma": "把娱乐安排到有空的一格"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "确认一项可执行购买约定",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "选便宜材料替代方案",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "把娱乐安排到有空的一格",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "承诺必须经玩家确认",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_023"
+    },
+    {
+      "day": 24,
+      "chapterId": "ch03",
+      "title": "满足一点也算",
+      "focus": {
+        "xuan": "试用借来的键盘",
+        "fan": "在纸板完成小画",
+        "ma": "无赌注牌局和熟人聊天"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "试用借来的键盘",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "在纸板完成小画",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "无赌注牌局和熟人聊天",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "替代方案减少压力，不必一口气买大件",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_024"
+    },
+    {
+      "day": 25,
+      "chapterId": "ch03",
+      "title": "第一阵冷风",
+      "focus": {
+        "xuan": "补防雨罩并确认工作位",
+        "fan": "修复营地画纸边缘",
+        "ma": "把干袜子送回营地"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "补防雨罩并确认工作位",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "修复营地画纸边缘",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "把干袜子送回营地",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "早寒检查，不是第28日终局",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_025"
+    },
+    {
+      "day": 26,
+      "chapterId": "ch03",
+      "title": "你先坐一会儿",
+      "focus": {
+        "xuan": "安排免费休整",
+        "fan": "陪精神最低的人谈话",
+        "ma": "接一单腿补生活费"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "安排免费休整",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "陪精神最低的人谈话",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "接一单腿补生活费",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "精神支持和工作互相让时段",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_026"
+    },
+    {
+      "day": 27,
+      "chapterId": "ch03",
+      "title": "买到了，不代表都好了",
+      "focus": {
+        "xuan": "处理一项自己的愿望",
+        "fan": "完成许可涂鸦",
+        "ma": "核对零花预算"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "处理一项自己的愿望",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "完成许可涂鸦",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "核对零花预算",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "心愿解决不恢复全部健康",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_027"
+    },
+    {
+      "day": 28,
+      "chapterId": "ch03",
+      "title": "没有片尾字幕",
+      "focus": {
+        "xuan": "继续正常职业单",
+        "fan": "继续整理素材",
+        "ma": "继续跑腿"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "继续正常职业单",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "继续整理素材",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "继续跑腿",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "验证旧28日结局钩子已删除",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_028"
+    },
+    {
+      "day": 29,
+      "chapterId": "ch03",
+      "title": "新的想法要慢一点",
+      "focus": {
+        "xuan": "梳理职业长目标",
+        "fan": "决定下一面画的主题",
+        "ma": "提出稳定工作想法"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "梳理职业长目标",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "决定下一面画的主题",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "提出稳定工作想法",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "冷却后再生成心愿，不连续骚扰",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_029"
+    },
+    {
+      "day": 30,
+      "chapterId": "ch03",
+      "title": "第一张愿望清单",
+      "focus": {
+        "xuan": "核算预算与承诺",
+        "fan": "保留完成和放下的愿望",
+        "ma": "回顾自己的收手或追赌记录"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "核算预算与承诺",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "保留完成和放下的愿望",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "回顾自己的收手或追赌记录",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "第三章收束，愿望不全靠消费",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_030"
+    },
+    {
+      "day": 31,
+      "chapterId": "ch04",
+      "title": "报价变大了",
+      "focus": {
+        "xuan": "读长期合同",
+        "fan": "读广告涂鸦需求",
+        "ma": "打听稳定岗位"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "读长期合同",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "读广告涂鸦需求",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "打听稳定岗位",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "订单门槛、账期和设备争用",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_031"
+    },
+    {
+      "day": 32,
+      "chapterId": "ch04",
+      "title": "牌桌旁的生意",
+      "focus": {
+        "xuan": "做工作样例",
+        "fan": "和中间人确认拍摄范围",
+        "ma": "选择是否作为演员出镜"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "做工作样例",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "和中间人确认拍摄范围",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "选择是否作为演员出镜",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "明示演绎，不盗用路人身份",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_032"
+    },
+    {
+      "day": 33,
+      "chapterId": "ch04",
+      "title": "收银台的那张彩票",
+      "focus": {
+        "xuan": "代买公共用品",
+        "fan": "补颜料并保留收据",
+        "ma": "到店购买即开彩或放弃"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "代买公共用品",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "补颜料并保留收据",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "到店购买即开彩或放弃",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "购票实例、固定结果和核销教学",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_033"
+    },
+    {
+      "day": 34,
+      "chapterId": "ch04",
+      "title": "谁用电脑",
+      "focus": {
+        "xuan": "安排维修用机窗口",
+        "fan": "安排剪辑用机窗口",
+        "ma": "跑腿借工作位"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "安排维修用机窗口",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "安排剪辑用机窗口",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "跑腿借工作位",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "唯一设备预约",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_034"
+    },
+    {
+      "day": 35,
+      "chapterId": "ch04",
+      "title": "一格只能去一个地方",
+      "focus": {
+        "xuan": "联合工作准备",
+        "fan": "联合拍摄或替代订单",
+        "ma": "限时牌局或已承诺的场务"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "联合工作准备",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "联合拍摄或替代订单",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "限时牌局或已承诺的场务",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "拒绝牌局不锁剧情，接受要付机会成本",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_035"
+    },
+    {
+      "day": 36,
+      "chapterId": "ch04",
+      "title": "赢了之后",
+      "focus": {
+        "xuan": "核对收入而非幻想未来奖金",
+        "fan": "补一次纸板速写",
+        "ma": "承受赢钱或输钱后的赌念"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "核对收入而非幻想未来奖金",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "补一次纸板速写",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "承受赢钱或输钱后的赌念",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "结果不被AI改写，不因中奖强制倒霉",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_036"
+    },
+    {
+      "day": 37,
+      "chapterId": "ch04",
+      "title": "墙能不能当广告位",
+      "focus": {
+        "xuan": "确认交付格式",
+        "fan": "决定广告与自己的画如何分区",
+        "ma": "布置许可墙面"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "确认交付格式",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "决定广告与自己的画如何分区",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "布置许可墙面",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "创作与报酬独立记录",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_037"
+    },
+    {
+      "day": 38,
+      "chapterId": "ch04",
+      "title": "今天不欠明天的饭",
+      "focus": {
+        "xuan": "完成合同片段",
+        "fan": "完成广告草图",
+        "ma": "采购六份饭缺口"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "完成合同片段",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "完成广告草图",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "采购六份饭缺口",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "饭钱预留按存活人数计算",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_038"
+    },
+    {
+      "day": 39,
+      "chapterId": "ch04",
+      "title": "交付前的最后一改",
+      "focus": {
+        "xuan": "备份和验收",
+        "fan": "确认出镜者使用范围",
+        "ma": "送回借用器材"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "备份和验收",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "确认出镜者使用范围",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "送回借用器材",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "文本许可与真实状态一致",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_039"
+    },
+    {
+      "day": 40,
+      "chapterId": "ch04",
+      "title": "钱到账以后",
+      "focus": {
+        "xuan": "确认下一单",
+        "fan": "选择保留哪些素材",
+        "ma": "把一笔钱放回公共预算"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "确认下一单",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "选择保留哪些素材",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "把一笔钱放回公共预算",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "商业路线收束，不强迫戒掉所有爱好",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_040"
+    },
+    {
+      "day": 41,
+      "chapterId": "ch05",
+      "title": "两封消息",
+      "focus": {
+        "xuan": "收到试工通知",
+        "fan": "收到采访回复",
+        "ma": "收到固定短工机会"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "收到试工通知",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "收到采访回复",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "收到固定短工机会",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "三个人都拥有自己的时间价值",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_041"
+    },
+    {
+      "day": 42,
+      "chapterId": "ch05",
+      "title": "谁来帮这一格",
+      "focus": {
+        "xuan": "准备技术样例",
+        "fan": "列采访设备清单",
+        "ma": "提出能提供的具体帮助"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "准备技术样例",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "列采访设备清单",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "提出能提供的具体帮助",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "马哥不会凭空获得技术技能",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_042"
+    },
+    {
+      "day": 43,
+      "chapterId": "ch05",
+      "title": "请把话说清楚",
+      "focus": {
+        "xuan": "确认是否承担录音预处理",
+        "fan": "确认助手和时间",
+        "ma": "确认是否放弃那格短工"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "确认是否承担录音预处理",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "确认助手和时间",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "确认是否放弃那格短工",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "承诺进入结构化日志",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_043"
+    },
+    {
+      "day": 44,
+      "chapterId": "ch05",
+      "title": "明天下午撞期",
+      "focus": {
+        "xuan": "提前处理旧录音",
+        "fan": "联络备选助手",
+        "ma": "学习携带和看管设备"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "提前处理旧录音",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "联络备选助手",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "学习携带和看管设备",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "第45日冲突前一日预告",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_044"
+    },
+    {
+      "day": 45,
+      "chapterId": "ch05",
+      "title": "两件重要的事",
+      "focus": {
+        "xuan": "连续试工占日间和午后",
+        "fan": "午后采访",
+        "ma": "午后协助采访或履行其他明确约定"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "清洁与试工准备",
+          "连续试工第1格",
+          "连续试工第2格",
+          "休息／说明反馈"
+        ],
+        "fan": [
+          "确认采访对象",
+          "准备已处理的录音与设备",
+          "与马哥完成采访（需D44准备）",
+          "整理采访／休整"
+        ],
+        "ma": [
+          "短程跑腿",
+          "学习设备看管并运送器材",
+          "与凡哥完成采访（放弃本格短工）",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "第三人提供解法，但不免费",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_045"
+    },
+    {
+      "day": 46,
+      "chapterId": "ch05",
+      "title": "不是一句兄弟就算了",
+      "focus": {
+        "xuan": "收试工反馈",
+        "fan": "整理采访素材",
+        "ma": "核算损失的短工收入"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "收试工反馈",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "整理采访素材",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "核算损失的短工收入",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "按真实失约而非分头工作扣关系",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_046"
+    },
+    {
+      "day": 47,
+      "chapterId": "ch05",
+      "title": "他今天话少了",
+      "focus": {
+        "xuan": "认真回应同伴",
+        "fan": "安排支持性长谈",
+        "ma": "完成生活维护"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "认真回应同伴",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "安排支持性长谈",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "完成生活维护",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "允许休息，不强迫烂梗覆盖难过",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_047"
+    },
+    {
+      "day": 48,
+      "chapterId": "ch05",
+      "title": "各自的一点体面",
+      "focus": {
+        "xuan": "交付补充样例",
+        "fan": "做一张想做的画",
+        "ma": "问固定工作细节"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "交付补充样例",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "做一张想做的画",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "问固定工作细节",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "个人愿望与就业并行",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_048"
+    },
+    {
+      "day": 49,
+      "chapterId": "ch05",
+      "title": "同一张桌子",
+      "focus": {
+        "xuan": "分配明天电脑时段",
+        "fan": "确认作品方向",
+        "ma": "分享跑腿信息"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "分配明天电脑时段",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "确认作品方向",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "分享跑腿信息",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "三人讨论限定在同地点会合",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_049"
+    },
+    {
+      "day": 50,
+      "chapterId": "ch05",
+      "title": "三个人的账",
+      "focus": {
+        "xuan": "核收入和照护时间",
+        "fan": "核作品和无收入劳动",
+        "ma": "核工钱和娱乐花费"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "核收入和照护时间",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "核作品和无收入劳动",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "核工钱和娱乐花费",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "照护劳动有记录，不只奖励现金",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_050"
+    },
+    {
+      "day": 51,
+      "chapterId": "ch06",
+      "title": "住久了就会变脏",
+      "focus": {
+        "xuan": "检查工具与储物",
+        "fan": "检查床铺与衣物",
+        "ma": "清理公共垃圾"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "检查工具与储物",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "检查床铺与衣物",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "清理公共垃圾",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "开启更完整的营地卫生维护",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_051"
+    },
+    {
+      "day": 52,
+      "chapterId": "ch06",
+      "title": "衣服还没干",
+      "focus": {
+        "xuan": "安排换洗用品",
+        "fan": "洗衣并选择晾晒地点",
+        "ma": "运送干净寝具"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "安排换洗用品",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "洗衣并选择晾晒地点",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "运送干净寝具",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "干燥与洁净是不同标签",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_052"
+    },
+    {
+      "day": 53,
+      "chapterId": "ch06",
+      "title": "吃进去的也有代价",
+      "focus": {
+        "xuan": "检查食物保质期",
+        "fan": "丢弃或替代可疑食品",
+        "ma": "补安全餐食"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "检查食物保质期",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "丢弃或替代可疑食品",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "补安全餐食",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "食物风险可见，不用随机腐败偷袭",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_053"
+    },
+    {
+      "day": 54,
+      "chapterId": "ch06",
+      "title": "把问题看清楚",
+      "focus": {
+        "xuan": "检查自己状态",
+        "fan": "陪需要的人去诊所",
+        "ma": "顶替一格必要工作"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "检查自己状态",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "陪需要的人去诊所",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "顶替一格必要工作",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "无病则做预防补给，不强制染病",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_054"
+    },
+    {
+      "day": 55,
+      "chapterId": "ch06",
+      "title": "药不是什么都能治",
+      "focus": {
+        "xuan": "按计划护理或常规工作",
+        "fan": "整理治疗与生活清单",
+        "ma": "采购匹配护理品"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "按计划护理或常规工作",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "整理治疗与生活清单",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "采购匹配护理品",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "症状缓解和治疗病因分开",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_055"
+    },
+    {
+      "day": 56,
+      "chapterId": "ch06",
+      "title": "有人休息，有人工作",
+      "focus": {
+        "xuan": "恢复或替代小订单",
+        "fan": "恢复或小型创作",
+        "ma": "稳定短工"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "恢复或替代小订单",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "恢复或小型创作",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "稳定短工",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "按真实病人分配，不固定让凡哥生病",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_056"
+    },
+    {
+      "day": 57,
+      "chapterId": "ch06",
+      "title": "好些了，不是好了",
+      "focus": {
+        "xuan": "复查或完成短单",
+        "fan": "确认未完成的护理计划",
+        "ma": "晾晒寝具"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "复查或完成短单",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "确认未完成的护理计划",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "晾晒寝具",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "中断治疗会按模型继续发展",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_057"
+    },
+    {
+      "day": 58,
+      "chapterId": "ch06",
+      "title": "一直没得到的东西",
+      "focus": {
+        "xuan": "处理积压心愿",
+        "fan": "完成一项替代创作",
+        "ma": "兑现一次陪伴或无赌注娱乐"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "处理积压心愿",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "完成一项替代创作",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "兑现一次陪伴或无赌注娱乐",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "愿望减压不与物理治疗互相替代",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_058"
+    },
+    {
+      "day": 59,
+      "chapterId": "ch06",
+      "title": "把免费办法留下",
+      "focus": {
+        "xuan": "整理可用公共资源",
+        "fan": "绘制清洁点小地图",
+        "ma": "联系服务站时段"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "整理可用公共资源",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "绘制清洁点小地图",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "联系服务站时段",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "没钱也有起码恢复路线",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_059"
+    },
+    {
+      "day": 60,
+      "chapterId": "ch06",
+      "title": "以后每隔几天",
+      "focus": {
+        "xuan": "保存工作和维护日程模板",
+        "fan": "保存创作与洗衣模板",
+        "ma": "保存跑腿与休整模板"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "保存工作和维护日程模板",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "保存创作与洗衣模板",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "保存跑腿与休整模板",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "模板是建议，事件变更时重新校验",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_060"
+    },
+    {
+      "day": 61,
+      "chapterId": "ch07",
+      "title": "一张能关上的门",
+      "focus": {
+        "xuan": "比较住所成本",
+        "fan": "比较工作间和床位",
+        "ma": "比较搬迁路线"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "比较住所成本",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "比较工作间和床位",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "比较搬迁路线",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "长期住所路线开放完整条件",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_061"
+    },
+    {
+      "day": 62,
+      "chapterId": "ch07",
+      "title": "不是有顶就够了",
+      "focus": {
+        "xuan": "核防雨与安全工作位",
+        "fan": "确认寝具与作品空间",
+        "ma": "补缺床位"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "核防雨与安全工作位",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "确认寝具与作品空间",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "补缺床位",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "满员三床，减员按实际人数",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_062"
+    },
+    {
+      "day": 63,
+      "chapterId": "ch07",
+      "title": "还有谁没安排好",
+      "focus": {
+        "xuan": "接确定收入",
+        "fan": "跑场地许可",
+        "ma": "联系临时住宿"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "接确定收入",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "跑场地许可",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "联系临时住宿",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "帮助NPC有成本但非强制人情税",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_063"
+    },
+    {
+      "day": 64,
+      "chapterId": "ch07",
+      "title": "药箱不能只摆着",
+      "focus": {
+        "xuan": "盘点治疗与工具",
+        "fan": "盘点卫生和食物",
+        "ma": "盘点搬运用品"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "盘点治疗与工具",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "盘点卫生和食物",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "盘点搬运用品",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "备品按真实库存，过期不继续有效",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_064"
+    },
+    {
+      "day": 65,
+      "chapterId": "ch07",
+      "title": "这笔钱先不花",
+      "focus": {
+        "xuan": "完成职业单",
+        "fan": "完成商户宣传",
+        "ma": "留应急金或明确个人预算"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "完成职业单",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "完成商户宣传",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "留应急金或明确个人预算",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "娱乐余额与公共保底分开",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_065"
+    },
+    {
+      "day": 66,
+      "chapterId": "ch07",
+      "title": "寒潮的日期写出来了",
+      "focus": {
+        "xuan": "核工作和设备截止",
+        "fan": "核床位和寝具截止",
+        "ma": "核转移路线"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "核工作和设备截止",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "核床位和寝具截止",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "核转移路线",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "公布第71—74日寒潮",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_066"
+    },
+    {
+      "day": 67,
+      "chapterId": "ch07",
+      "title": "白天多做一点",
+      "focus": {
+        "xuan": "完成可在室内继续的准备",
+        "fan": "打包草稿与素材",
+        "ma": "搬第一批寝具"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "完成可在室内继续的准备",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "打包草稿与素材",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "搬第一批寝具",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "准备可降低外出需求",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_067"
+    },
+    {
+      "day": 68,
+      "chapterId": "ch07",
+      "title": "留一套换洗的",
+      "focus": {
+        "xuan": "整理备用设备",
+        "fan": "安排最后一次大洗衣",
+        "ma": "准备干燥换洗衣物"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "整理备用设备",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "安排最后一次大洗衣",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "准备干燥换洗衣物",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "寒潮前生活维护不是装饰",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_068"
+    },
+    {
+      "day": 69,
+      "chapterId": "ch07",
+      "title": "今晚别再赌天气",
+      "focus": {
+        "xuan": "核剩余收入",
+        "fan": "确认剩余许可和床位",
+        "ma": "最后一趟可靠运输"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "核剩余收入",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "确认剩余许可和床位",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "最后一趟可靠运输",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "高风险外出可明确拒绝",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_069"
+    },
+    {
+      "day": 70,
+      "chapterId": "ch07",
+      "title": "每个人都有去处吗",
+      "focus": {
+        "xuan": "执行入住和设备检查",
+        "fan": "执行入住和食物检查",
+        "ma": "执行入住和第三床检查"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "必要收入／生活维护",
+          "执行入住和设备检查",
+          "入住与安全检查",
+          "按存活人数共餐／必要救援"
+        ],
+        "fan": [
+          "必要收入／生活维护",
+          "执行入住和食物检查",
+          "入住与安全检查",
+          "按存活人数共餐／必要救援"
+        ],
+        "ma": [
+          "必要收入／生活维护",
+          "执行入住和第三床检查",
+          "入住与安全检查",
+          "按存活人数共餐／必要救援"
+        ]
+      },
+      "worldNote": "安全清单，仍允许经确认冒险",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_070"
+    },
+    {
+      "day": 71,
+      "chapterId": "ch08",
+      "title": "风真的来了",
+      "focus": {
+        "xuan": "室内维修",
+        "fan": "室内剪辑或速写",
+        "ma": "室内短工或营地整理"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "室内维修",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "室内剪辑或速写",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "室内短工或营地整理",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "按住所和准备结算寒潮",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_071"
+    },
+    {
+      "day": 72,
+      "chapterId": "ch08",
+      "title": "哪家门还开着",
+      "focus": {
+        "xuan": "检查缺料",
+        "fan": "安排护理或恢复",
+        "ma": "去明示营业的店铺采购"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "检查缺料",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "安排护理或恢复",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "去明示营业的店铺采购",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "临时关门公告先于排程，不事后吞钱",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_072"
+    },
+    {
+      "day": 73,
+      "chapterId": "ch08",
+      "title": "把时间给谁",
+      "focus": {
+        "xuan": "工作或支援",
+        "fan": "工作或长谈",
+        "ma": "工作或救援"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "工作或支援",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "工作或长谈",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "工作或救援",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "濒死与崩溃优先显示，但玩家决定",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_073"
+    },
+    {
+      "day": 74,
+      "chapterId": "ch08",
+      "title": "最冷的一夜",
+      "focus": {
+        "xuan": "检查床与安全设备",
+        "fan": "检查饭和药品",
+        "ma": "检查保暖与通道"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "检查床与安全设备",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "检查饭和药品",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "检查保暖与通道",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "不强制有人死亡，风险由状态决定",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_074"
+    },
+    {
+      "day": 75,
+      "chapterId": "ch08",
+      "title": "活过来的人",
+      "focus": {
+        "xuan": "核收支或整理遗物",
+        "fan": "整理作品或逝者画稿",
+        "ma": "整理日程或牌盒"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "核收支或整理遗物",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "整理作品或逝者画稿",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "整理日程或牌盒",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "依据真实生死替换文本与演出",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_075"
+    },
+    {
+      "day": 76,
+      "chapterId": "ch08",
+      "title": "不能永远只睡觉",
+      "focus": {
+        "xuan": "接小单恢复节奏",
+        "fan": "做小画恢复精神",
+        "ma": "短程跑腿"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "接小单恢复节奏",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "做小画恢复精神",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "短程跑腿",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "康复安排与疾病进度匹配",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_076"
+    },
+    {
+      "day": 77,
+      "chapterId": "ch08",
+      "title": "一次不花钱的聚会",
+      "focus": {
+        "xuan": "陪伴与接梗",
+        "fan": "速写与讲片子",
+        "ma": "无赌注纸牌"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "陪伴与接梗",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "速写与讲片子",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "无赌注纸牌",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "兴趣和陪伴提供低成本恢复",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_077"
+    },
+    {
+      "day": 78,
+      "chapterId": "ch08",
+      "title": "欠下的是哪件事",
+      "focus": {
+        "xuan": "处理延期合同",
+        "fan": "处理延期作品",
+        "ma": "处理延期还物"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "处理延期合同",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "处理延期作品",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "处理延期还物",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "临时灾害延期与主动失约区分",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_078"
+    },
+    {
+      "day": 79,
+      "chapterId": "ch08",
+      "title": "一张椅子还在",
+      "focus": {
+        "xuan": "完成必要工作",
+        "fan": "回应愿望或哀伤",
+        "ma": "稳定劳动或支持同伴"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "完成必要工作",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "回应愿望或哀伤",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "稳定劳动或支持同伴",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "不得让死亡造成不可避免的精神连锁",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_079"
+    },
+    {
+      "day": 80,
+      "chapterId": "ch08",
+      "title": "寒冷不是结局",
+      "focus": {
+        "xuan": "确定下阶段收入",
+        "fan": "确定下阶段作品",
+        "ma": "确定下阶段工作"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "确定下阶段收入",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "确定下阶段作品",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "确定下阶段工作",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "阶段收束，继续至100日",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_080"
+    },
+    {
+      "day": 81,
+      "chapterId": "ch09",
+      "title": "想要一个像样的东西",
+      "focus": {
+        "xuan": "重新看耳机或工作位愿望",
+        "fan": "重新看创作愿望",
+        "ma": "重新看稳定生活愿望"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "重新看耳机或工作位愿望",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "重新看创作愿望",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "重新看稳定生活愿望",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "可缩小、替代或明确放下",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_081"
+    },
+    {
+      "day": 82,
+      "chapterId": "ch09",
+      "title": "大愿望分成小事",
+      "focus": {
+        "xuan": "准备岗位材料",
+        "fan": "列作品可交付清单",
+        "ma": "列固定短工条件"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "准备岗位材料",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "列作品可交付清单",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "列固定短工条件",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "长目标不要求一次性付款",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_082"
+    },
+    {
+      "day": 83,
+      "chapterId": "ch09",
+      "title": "不是所有故事都要卖",
+      "focus": {
+        "xuan": "评估工作合作",
+        "fan": "评估成片使用范围",
+        "ma": "评估是否参与商业演绎"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "评估工作合作",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "评估成片使用范围",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "评估是否参与商业演绎",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "商业和创作路线均完整",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_083"
+    },
+    {
+      "day": 84,
+      "chapterId": "ch09",
+      "title": "见面之前先洗把脸",
+      "focus": {
+        "xuan": "生活维护",
+        "fan": "成人约会或友好见面",
+        "ma": "社交或稳定劳动"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "生活维护",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "成人约会或友好见面",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "社交或稳定劳动",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "对方可拒绝，亲密不是生存资源",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_084"
+    },
+    {
+      "day": 85,
+      "chapterId": "ch09",
+      "title": "一个长期机会",
+      "focus": {
+        "xuan": "确认技术工作机会",
+        "fan": "确认展出或委托机会",
+        "ma": "确认固定岗位机会"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "确认技术工作机会",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "确认展出或委托机会",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "确认固定岗位机会",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "三人路线彼此独立",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_085"
+    },
+    {
+      "day": 86,
+      "chapterId": "ch09",
+      "title": "谁留在这里",
+      "focus": {
+        "xuan": "比较通勤与住所",
+        "fan": "比较工作间与创作空间",
+        "ma": "比较工作点与伙伴距离"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "比较通勤与住所",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "比较工作间与创作空间",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "比较工作点与伙伴距离",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "选择不同去向不自动扣关系",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_086"
+    },
+    {
+      "day": 87,
+      "chapterId": "ch09",
+      "title": "牌还可以留着",
+      "focus": {
+        "xuan": "整理收入计划",
+        "fan": "设计小招牌",
+        "ma": "决定怎样保留娱乐预算"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "整理收入计划",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "设计小招牌",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "决定怎样保留娱乐预算",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "不是只有戒赌结局，也不能靠赌保证翻身",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_087"
+    },
+    {
+      "day": 88,
+      "chapterId": "ch09",
+      "title": "确认而不是随便说说",
+      "focus": {
+        "xuan": "确认个人路线",
+        "fan": "确认个人路线",
+        "ma": "确认个人路线"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "确认个人路线",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "确认个人路线",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "确认个人路线",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "多路线满足时由玩家选择",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_088"
+    },
+    {
+      "day": 89,
+      "chapterId": "ch09",
+      "title": "有人记得你",
+      "focus": {
+        "xuan": "回访老周或陈工",
+        "fan": "回访许姐或摊主",
+        "ma": "回访工友与老钱"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "回访老周或陈工",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "回访许姐或摊主",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "回访工友与老钱",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "关系记忆读取真实互动",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_089"
+    },
+    {
+      "day": 90,
+      "chapterId": "ch09",
+      "title": "把名字写进去",
+      "focus": {
+        "xuan": "列交付名单",
+        "fan": "列作品与参与者名单",
+        "ma": "列工作与还物名单"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "列交付名单",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "列作品与参与者名单",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "列工作与还物名单",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "活人和逝者的署名方式区分",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_090"
+    },
+    {
+      "day": 91,
+      "chapterId": "ch10",
+      "title": "还有十天",
+      "focus": {
+        "xuan": "拆分最后合同",
+        "fan": "拆分最后作品",
+        "ma": "拆分最后生活安排"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "拆分最后合同",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "拆分最后作品",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "拆分最后生活安排",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "倒计时展示，不突然加新高价门槛",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_091"
+    },
+    {
+      "day": 92,
+      "chapterId": "ch10",
+      "title": "先把欠的还上",
+      "focus": {
+        "xuan": "完成拖欠的技术片段",
+        "fan": "确认素材和借物",
+        "ma": "归还公物与私人物品"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "完成拖欠的技术片段",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "确认素材和借物",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "归还公物与私人物品",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "不新增强制债务税",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_092"
+    },
+    {
+      "day": 93,
+      "chapterId": "ch10",
+      "title": "能用与想要",
+      "focus": {
+        "xuan": "处理最后设备缺口",
+        "fan": "处理最后创作材料",
+        "ma": "处理最后寝具或日常品"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "处理最后设备缺口",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "处理最后创作材料",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "处理最后寝具或日常品",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "主线必需与个人愿望分开显示",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_093"
+    },
+    {
+      "day": 94,
+      "chapterId": "ch10",
+      "title": "一件事做完就好",
+      "focus": {
+        "xuan": "完成关键修复上半程",
+        "fan": "完成成片或壁画上半程",
+        "ma": "协助布场或正常工作"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "完成关键修复上半程",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "完成成片或壁画上半程",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "协助布场或正常工作",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "多格合同锁设备",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_094"
+    },
+    {
+      "day": 95,
+      "chapterId": "ch10",
+      "title": "剩下的一半",
+      "focus": {
+        "xuan": "完成关键修复下半程",
+        "fan": "完成成片或壁画下半程",
+        "ma": "完成转移和布场准备"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "完成关键修复下半程",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "完成成片或壁画下半程",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "完成转移和布场准备",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "无设备则借工作位或改排，不瞬移",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_095"
+    },
+    {
+      "day": 96,
+      "chapterId": "ch10",
+      "title": "请他看一眼",
+      "focus": {
+        "xuan": "验收工作",
+        "fan": "让有权确认的人看成片",
+        "ma": "确认固定工作后续"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "验收工作",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "让有权确认的人看成片",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "确认固定工作后续",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "AI台词不能伪造验收成功",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_096"
+    },
+    {
+      "day": 97,
+      "chapterId": "ch10",
+      "title": "不是非得全做完",
+      "focus": {
+        "xuan": "舍弃不必要的新需求",
+        "fan": "舍弃不必要的新镜头",
+        "ma": "舍弃最后一场诱惑"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "舍弃不必要的新需求",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "洗漱与洗衣",
+          "舍弃不必要的新镜头",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "舍弃最后一场诱惑",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "放下愿望是可确认的行动，不是失败标签",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_097"
+    },
+    {
+      "day": 98,
+      "chapterId": "ch10",
+      "title": "最后一次大采购",
+      "focus": {
+        "xuan": "核交付与住房余款",
+        "fan": "核食物和生活用品",
+        "ma": "完成确定采购路线"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "核交付与住房余款",
+          "补必要收入／检查设备",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "核食物和生活用品",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "完成确定采购路线",
+          "采购或营地维护",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "要留下明天可执行的资源",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_098"
+    },
+    {
+      "day": 99,
+      "chapterId": "ch10",
+      "title": "灯装好了没",
+      "focus": {
+        "xuan": "检查工作设备",
+        "fan": "准备作品呈现",
+        "ma": "准备床位与晚饭"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "基础维修／回收（按岗位条件替换）",
+          "检查工作设备",
+          "生活维护／资料整理",
+          "整理设备与烂梗／休息"
+        ],
+        "fan": [
+          "早餐帮厨／商户宣传（按时段选）",
+          "整理素材／纸板速写",
+          "准备作品呈现",
+          "纸板速写／同伴夜话"
+        ],
+        "ma": [
+          "跑腿／搬运（按体力选）",
+          "准备床位与晚饭",
+          "休整／必要短工",
+          "无赌注纸牌／休息"
+        ]
+      },
+      "worldNote": "濒死和重症可以优先救助，不强制参加庆祝",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_099"
+    },
+    {
+      "day": 100,
+      "chapterId": "ch10",
+      "title": "今晚终于有答案",
+      "focus": {
+        "xuan": "完成路线收尾",
+        "fan": "完成作品或个人收尾",
+        "ma": "完成工作和生活收尾"
+      },
+      "scheduleSuggestions": {
+        "xuan": [
+          "必要收入／生活维护",
+          "完成路线收尾",
+          "已选路线的收尾",
+          "按存活人数共餐／必要救援"
+        ],
+        "fan": [
+          "必要收入／生活维护",
+          "完成作品或个人收尾",
+          "已选路线的收尾",
+          "按存活人数共餐／必要救援"
+        ],
+        "ma": [
+          "必要收入／生活维护",
+          "完成工作和生活收尾",
+          "已选路线的收尾",
+          "按存活人数共餐／必要救援"
+        ]
+      },
+      "worldNote": "按真实存活者结局；末夜濒死先给救援尾声",
+      "availability": "存活且可行动才使用；濒死先显示救援，死亡转遗物／替代工作；本表不自动执行",
+      "nodeId": "day_100"
+    }
+  ]
+}

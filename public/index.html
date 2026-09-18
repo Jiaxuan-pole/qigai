@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>今晚睡哪儿</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/title.css">
+<link rel="stylesheet" href="/ui/camp-night.css">
+<link rel="stylesheet" href="/ui/saves.css">
+<link rel="stylesheet" href="/ui/work-games.css">
+<link rel="preload" as="image" href="/art/title-wide-20260918.png" media="(min-width:701px)">
+<link rel="preload" as="image" href="/art/title-portrait-20260918.png" media="(max-width:700px)">
+</head>
+<body>
+<div id="title" class="screen title-screen">
+  <div class="title-inner">
+    <div class="title-mark" aria-hidden="true"></div>
+    <div class="eyebrow">THREE LIVES / ONE HUNDRED DAYS</div>
+    <h1>今晚睡哪儿</h1>
+    <p class="subtitle">轩哥、凡哥、马哥 · 三人的街头100日</p>
+    <p class="tagline">活着需要饭、床、干净衣服和药。继续活下去，还需要一点真正想做的事。</p>
+    <div class="title-menu">
+      <button id="btnContinue" class="primary big">继续上次</button>
+      <button id="btnNew" class="big">新开局</button>
+      <button id="btnImport" class="big">导入存档</button>
+      <button id="btnHelp" class="big">玩法说明</button>
+    </div>
+    <div class="title-foot">
+      <span id="titleSaveInfo"></span>
+      <span id="titleAi"></span>
+    </div>
+    <p class="disclaimer">所有数值、药品作用、心理危机和博彩分布都是虚构游戏规则；无充值、无真钱。人物均为虚构成年人。</p>
+  </div>
+</div>
+
+<div id="game" class="screen game-screen hidden">
+  <header class="topbar">
+    <div class="brand"><span class="mark small" aria-hidden="true"></span><strong>今晚睡哪儿</strong></div>
+    <div class="topstats">
+      <div class="stat-chip"><small>日</small><b id="tDay"></b></div>
+      <div class="stat-chip"><small>回合</small><b id="tTurn"></b></div>
+      <div class="stat-chip"><small>时间</small><b id="tSlot"></b></div>
+      <div class="stat-chip"><small>天气</small><b id="tWeather"></b></div>
+      <div class="stat-chip gold"><small>公共现金</small><b id="tCash"></b></div>
+      <div class="stat-chip"><small>有效食物</small><b id="tFood"></b></div>
+      <div class="stat-chip warn" id="tCareChip"><small>待护理</small><b id="tCare"></b></div>
+    </div>
+    <div class="topbtns">
+      <button data-open="chapters">章节</button>
+      <button data-open="help">说明</button>
+      <button data-open="system">存档</button>
+      <button id="btnSound" title="点击切换：关/低/中/高">声音：低</button>
+      <span id="sharedSaveStatus" class="small muted"></span><button id="btnSaves" type="button">存档表</button><button id="btnTitle">标题</button>
+    </div>
+  </header>
+
+  <div class="chapterline" id="chapterLine"></div>
+
+  <main class="workspace">
+    <aside class="characters" id="characters" aria-label="三名主角"></aside>
+
+    <section class="world">
+      <div class="worldhead">
+        <div><h2 id="mapTitle">雾城 · 街区地图</h2><small id="mapHint">点街区安排行动；推进后人物会自己走过去</small></div>
+        <div class="worldbtns">
+          <button id="overviewMode" type="button" aria-pressed="true" aria-label="打开地图总览，快捷键 M">地图 M</button>
+          <button id="planToggle" type="button" aria-controls="plannerWindow" aria-expanded="false" aria-label="为三个人安排行动" title="打开行动安排；地图上也可直接点击人物和地点">安排行动</button>
+          <button id="streetMode" type="button" aria-pressed="false">街道</button>
+          <button data-open="map">地图列表</button>
+          <button data-open="events">热点 <b id="eventCount">0</b></button>
+        </div>
+      </div>
+      <div class="map-wrap" id="mapWrap">
+        <canvas id="map" width="960" height="540" aria-label="像素城市地图"></canvas>
+        <div id="mapOverlay" class="map-overlay"></div>
+        <canvas id="street" width="960" height="540" aria-label="横向街道"></canvas>
+        <div id="streetOverlay" class="street-overlay"></div>
+        <div id="streetTransition" class="street-transition" aria-live="polite"></div>
+      </div>
+      <div id="streetControls" class="street-controls" hidden><label>查看街区 <select id="streetDistrict"></select></label><span id="streetStatus"></span><div class="street-walk"><button id="walkLeft" type="button" aria-label="向左走">← 左行</button><button id="walkRight" type="button" aria-label="向右走">右行 →</button></div><div id="streetExits" class="street-exits"></div></div>
+      <div class="quote"><b id="speaker"></b><span id="quote"></span></div>
+    </section>
+
+  </main>
+
+  <div id="plannerOverlay" class="planner-overlay" hidden>
+    <section id="plannerWindow" class="planner-window" role="dialog" aria-modal="true" aria-labelledby="plannerWindowTitle" tabindex="-1">
+      <header class="planner-window-head"><h2 id="plannerWindowTitle">今天，几个人怎么过？</h2><button id="plannerClose" type="button" aria-label="关闭行动安排">关闭</button></header>
+      <div id="plannerWindowBody" class="planner-window-body">
+    <aside class="drawer" id="drawer" role="region" aria-label="选择下一件事" hidden></aside>
+
+    <section class="planner" id="planner" role="region" aria-label="三人下一件事" hidden>
+      <div class="plan-header">
+        <div><h2>三个人的下一件事</h2><p id="planFocus"></p></div>
+        <div class="plan-tools">
+          <button id="btnAiPlan" type="button" title="只给其他队友建议下一件事">AI安排队友本次</button>
+          <button data-open="inventory">库存</button>
+          <button data-open="wishes">愿望与约定</button>
+          <button data-open="health">健康护理</button>
+        </div>
+      </div>
+      <div id="schedule" class="schedule" aria-label="三个人的下一件事"></div>
+      <div class="plan-footer">
+        <div id="planStatus" class="plan-status"></div>
+        <div class="plan-actions">
+          <button id="btnAdvance" class="primary">开始行动</button><small>开始后时间推进1小时</small>
+        </div>
+      </div>
+    </section>
+      </div>
+    </section>
+  </div>
+
+  <div class="journal" role="status" aria-live="polite"><b>街头记事</b><div id="journal" class="journal-text"></div><button data-open="logs" class="linkbtn">全部</button></div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div id="modalOverlay" class="modal-overlay">
+  <section id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button id="modalClose" class="close" aria-label="关闭">×</button>
+    <div id="modalContent"></div>
+  </section>
+</div>
+<script type="module" src="/ui/app.js"></script>
+</body>
+</html>

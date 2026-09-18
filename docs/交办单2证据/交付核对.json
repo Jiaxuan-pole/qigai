@@ -1,0 +1,10 @@
+{
+  "receiptLinks": "PASS",
+  "protectedNonEngineFiles": "UNCHANGED",
+  "authoredSourceEmoji": "NONE",
+  "engineDriftSinceFinalRun": [
+    "public/game/settle.js"
+  ],
+  "temporaryReceipts": "copied into docs then removed",
+  "mutationDirectoryRemoved": true
+}

@@ -1,0 +1,3 @@
+使用 omo:lsp 技能，调用 mcp__lsp__status 与 mcp__lsp__diagnostics({filePath:"/Users/Admin/Desktop/乞丐模拟器/tests/engine.test.js",severity:"error"})。
+工具均返回：MCP tool call requires approval, but approval policy is never。
+语言服务器未启动，不能声称 LSP clean。未尝试安装、修改配置或绕过审批。九个新增 JavaScript 文件分别通过 node --check，结果保存在语法检查.json。

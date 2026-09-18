@@ -1,0 +1,18 @@
+{
+  "public/game/actions.js": "13a75abb3814645f299c6c6dcbbb3878e56585e689a2623114ff998c5caf9384",
+  "public/game/data.js": "12c6b3d47267775f4005d5ea33ebc4bae10ec79a9b7d64974feae88dedfadf2f",
+  "public/game/engine.js": "c9d6e55853eaed9f8fac139cb0b21ba4a85d3b5406709630a1e3c27a4e90f8f2",
+  "public/game/events.js": "3e419b8d68c66985c7cf63bb2b9a57d504e20b14369e0ae5815e3a1b86cb46ef",
+  "public/game/health.js": "260c2e7c815c2a07db5af812a00b4afcecc1566e3464f445be5c926b010abcf9",
+  "public/game/items.js": "bcb5faaaf14b08893bdcf4b4df66d79de5aa16f4c48dafaa08b244d488c4f7f5",
+  "public/game/npcs.js": "45b6097981379e014243bdb9ef0791dce97f2194773063f1e2ea4961bead725b",
+  "public/game/rng.js": "c7d00b24292d789e007ed3a91b138f2b6fc5c7aa7b3cc1b1679fc7b2cc832eb5",
+  "public/game/rules.js": "9ff6797e743ac4b15050c7e70ddcb0224a41d95c6da373facd502e54a20708f1",
+  "public/game/save.js": "624b92be1c7c4c27f729e0827866ae003ede525693fd315e08e6e8bdd38c260c",
+  "public/game/settle.js": "12bafaec3330199880e3d96142cd4c25229338bed896c75a9a6194c049a98a90",
+  "public/game/shop.js": "3a194ca80915220a6a16ddfa7c2d2eff29b3cb0cb4c412307e2ca7d675b3a58e",
+  "public/game/story.js": "f28181417e424de7b40e7850090f3f91a5f9e3cf7ed0dc826c2b6b0ac139e03a",
+  "public/game/text.js": "931ccf63b8c180da6013ae89288a834200e7cb204ae506445b34a84a8c5b13e9",
+  "public/game/tickets.js": "f26ac932eba19977f5b83e566da5d35dae76a21681dbf9b672ff3b4f7f109e9a",
+  "public/game/wishes.js": "b2a47be215abfafca00e40c6e519338748f5cd94eb455fcfc5dd237c0981e6da"
+}

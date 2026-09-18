@@ -1,0 +1,8 @@
+node_modules/
+.saves/
+.omc/
+.omo/
+.DS_Store
+**/.DS_Store
+*.log
+npm-debug.log*

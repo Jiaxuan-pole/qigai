@@ -1,0 +1,5 @@
+{
+  "command": "npm test",
+  "exitCode": 1,
+  "note": "Rerun after post-simulation concurrent settle.js edit"
+}

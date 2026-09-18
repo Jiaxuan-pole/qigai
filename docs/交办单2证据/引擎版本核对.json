@@ -1,0 +1,5 @@
+{
+  "changedDuringFinalSimulation": [],
+  "engineSnapshot": "sim-engine-snapshot.json",
+  "baselineNote": "Earlier concurrent game-engine edits were preserved; root and its workers did not edit public."
+}

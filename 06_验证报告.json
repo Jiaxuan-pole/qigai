@@ -1,0 +1,155 @@
+{
+  "scope": "设计数据引用、日期覆盖与简化纯函数规则算例；不是正式游戏运行测试",
+  "status": "PASS",
+  "checks": 32,
+  "passed": 32,
+  "failed": 0,
+  "contentCounts": {
+    "districts": 6,
+    "shops": 8,
+    "items": 40,
+    "wishTemplates": 16,
+    "eventTemplates": 32,
+    "chapters": 10,
+    "dailyNodes": 100
+  },
+  "notTested": [
+    "网页UI",
+    "浏览器存档",
+    "v2存档迁移",
+    "真实PI SDK或GLM5.2调用",
+    "模型自然语言事实一致性",
+    "100日经济平衡",
+    "100日成品剧情可玩性"
+  ],
+  "results": [
+    {
+      "name": "100日无缺口、无重复",
+      "status": "PASS"
+    },
+    {
+      "name": "十章恰好覆盖100日",
+      "status": "PASS"
+    },
+    {
+      "name": "每一天包含三人的四格建议",
+      "status": "PASS"
+    },
+    {
+      "name": "马哥第3回合相遇、第4回合可控",
+      "status": "PASS"
+    },
+    {
+      "name": "400回合、1197个人次上限",
+      "status": "PASS"
+    },
+    {
+      "name": "初始低精神保留",
+      "status": "PASS"
+    },
+    {
+      "name": "所有实体ID唯一",
+      "status": "PASS"
+    },
+    {
+      "name": "街区连接互相可达",
+      "status": "PASS"
+    },
+    {
+      "name": "八个商店有位置、时段和合法街区",
+      "status": "PASS"
+    },
+    {
+      "name": "40项物品商店引用与类别一致",
+      "status": "PASS"
+    },
+    {
+      "name": "愿望目标和角色引用合法",
+      "status": "PASS"
+    },
+    {
+      "name": "32个事件地点与时段合法",
+      "status": "PASS"
+    },
+    {
+      "name": "赔率归一、彩票期望与含本金返还正确",
+      "status": "PASS"
+    },
+    {
+      "name": "购票绑定与核销一次写入规则",
+      "status": "PASS"
+    },
+    {
+      "name": "愿望叠加精神损失封顶3",
+      "status": "PASS"
+    },
+    {
+      "name": "精神第一次归零不立即伤害",
+      "status": "PASS"
+    },
+    {
+      "name": "精神连续归零4回合后损失健康8",
+      "status": "PASS"
+    },
+    {
+      "name": "持续最高欲望压力可把健康推到0（简化算例23回合）",
+      "status": "PASS"
+    },
+    {
+      "name": "实际支持可解除崩溃",
+      "status": "PASS"
+    },
+    {
+      "name": "卫生越差风险越高且不超过40%",
+      "status": "PASS"
+    },
+    {
+      "name": "极端污秽确定性阈值与检定去重契约",
+      "status": "PASS"
+    },
+    {
+      "name": "药在库存但未照护不生效",
+      "status": "PASS"
+    },
+    {
+      "name": "错配计划或异地物品不治疗",
+      "status": "PASS"
+    },
+    {
+      "name": "匹配护理与休整可使病情回落",
+      "status": "PASS"
+    },
+    {
+      "name": "重病不处理可把健康推到0",
+      "status": "PASS"
+    },
+    {
+      "name": "远程或关门交易被拒绝（参考函数）",
+      "status": "PASS"
+    },
+    {
+      "name": "马哥首次有额外窗口而第二次没有",
+      "status": "PASS"
+    },
+    {
+      "name": "期限回合先救援后判死",
+      "status": "PASS"
+    },
+    {
+      "name": "D100保留救援尾声而不开放第101日赚钱",
+      "status": "PASS"
+    },
+    {
+      "name": "合法对话结构通过",
+      "status": "PASS"
+    },
+    {
+      "name": "越权数值、未知说话人、过期内容与新选项被拒绝",
+      "status": "PASS"
+    },
+    {
+      "name": "AI配置按用户原文保留且未伪称接通",
+      "status": "PASS"
+    }
+  ]
+}

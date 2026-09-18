@@ -1,0 +1,24 @@
+.fishing-qte-overlay{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:16px;background:#09131de6}
+.fishing-qte-panel{width:min(520px,100%);padding:20px 24px 24px;background:var(--panel);border:2px solid var(--gold);box-shadow:8px 8px 0 var(--shadow);text-align:center;outline:none;overflow:hidden}
+.fishing-qte-river{height:84px;position:relative;overflow:hidden;background:linear-gradient(var(--panel2) 0 36%,#254956 36% 58%,#326574 58% 67%,#214957 67%);image-rendering:pixelated}
+.fishing-qte-bank{position:absolute;left:0;bottom:0;width:44%;height:17px;background:var(--line);box-shadow:0 -7px 0 var(--shadow)}
+.fishing-qte-rod{position:absolute;left:27%;top:0;width:6px;height:80px;background:var(--gold);transform:rotate(67deg);transform-origin:bottom;box-shadow:3px 0 0 var(--shadow)}
+.fishing-qte-line{position:absolute;left:74%;top:28px;width:2px;height:42px;background:var(--paper)}
+.fishing-qte-water{position:absolute;left:67%;bottom:12px;width:38px;height:5px;border-left:4px solid var(--x);border-right:4px solid var(--x)}
+.fishing-qte-title{margin-top:14px;font-size:24px;font-weight:900;letter-spacing:2px;color:var(--gold)}
+.fishing-qte-subtitle{margin:2px 0 12px;color:var(--paper);font-size:15px}
+.fishing-qte-ring{width:min(240px,60vw);aspect-ratio:1;position:relative;margin:0 auto;border-radius:50%;box-shadow:0 0 0 5px var(--shadow),0 0 0 7px var(--paper)}
+.fishing-qte-ring:before{content:"";position:absolute;inset:17px;border-radius:50%;background:var(--panel);box-shadow:inset 0 0 0 4px var(--shadow)}
+.fishing-qte-needle{position:absolute;inset:0;transform:rotate(0deg)}
+.fishing-qte-needle:before{content:"";position:absolute;left:calc(50% - 3px);top:2px;width:6px;height:49%;background:var(--bad);box-shadow:3px 0 0 var(--shadow)}
+.fishing-qte-hub{position:absolute;left:calc(50% - 8px);top:calc(50% - 8px);width:16px;height:16px;background:var(--paper);border:3px solid var(--shadow)}
+.fishing-qte-status{margin-top:15px;min-height:28px;font-weight:800;color:var(--ink)}
+.fishing-qte-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;color:var(--muted);font-size:13px;text-align:left}
+.fishing-qte-button{min-width:140px;min-height:56px;background:var(--gold);border:2px solid var(--shadow);color:var(--shadow);font-weight:900;box-shadow:4px 4px 0 var(--shadow);touch-action:manipulation}
+.fishing-qte-button:disabled{opacity:.65}
+.fishing-qte-hit{border-color:var(--good)}.fishing-qte-hit .fishing-qte-status{color:var(--good)}
+.fishing-qte-miss{border-color:var(--bad)}.fishing-qte-miss .fishing-qte-status{color:var(--bad)}
+.fishing-qte-shake{animation:fishing-qte-shake .28s steps(2,end)}
+@keyframes fishing-qte-shake{25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+@media(max-width:480px){.fishing-qte-panel{padding:14px 16px 18px}.fishing-qte-ring{width:min(220px,60vw)}.fishing-qte-footer{flex-direction:column;align-items:stretch;text-align:center}.fishing-qte-button{width:100%}}
+@media(prefers-reduced-motion:reduce){.fishing-qte-shake{animation:none}}

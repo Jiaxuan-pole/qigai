@@ -1,0 +1,12 @@
+.save-label{display:block;margin:14px 0 6px;color:var(--gold);font-size:14px}
+.save-name-input{width:100%;min-height:44px;padding:9px 12px;background:#17232a;border:1px solid var(--line);color:var(--ink);font:inherit}
+.save-name-input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.save-error{min-height:18px;color:var(--bad)!important}
+.save-table-scroll{overflow-x:auto;margin-top:14px;border:1px solid var(--line)}
+.save-table{width:100%;min-width:560px;border-collapse:collapse;text-align:left;font-size:14px}
+.save-table th,.save-table td{padding:10px 12px;border-bottom:1px solid var(--line)}
+.save-table th{color:var(--gold);background:#17232a;font-weight:600}
+.save-table tbody tr:last-child td{border-bottom:0}
+.save-table td small{display:block;color:var(--muted);font-size:12px}
+.save-table td button{min-height:38px;white-space:nowrap}
+.save-table tr[hidden]{display:none}

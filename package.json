@@ -1,0 +1,16 @@
+{
+  "name": "jinwan-shui-naer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "今晚睡哪儿 - 三人街头100日生存排程游戏（局域网可玩）",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node server/server.js",
+    "test": "node --test tests/*.test.js",
+    "sim": "node scripts/autoplay.js"
+  },
+  "dependencies": {
+    "@earendil-works/pi-ai": "^0.84.2"
+  }
+}

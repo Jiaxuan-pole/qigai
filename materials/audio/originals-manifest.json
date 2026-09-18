@@ -1,0 +1,146 @@
+{
+  "downloadedAt": "2026-09-17T03:32:00.671Z",
+  "audioModified": false,
+  "auditioned": false,
+  "assets": [
+    {
+      "id": "fireplace-sound-loop",
+      "title": "Fireplace Sound Loop",
+      "author": "PagDev",
+      "license": "CC0-1.0",
+      "page": "https://opengameart.org/content/fireplace-sound-loop",
+      "file": "ambience/fireplace-loop.wav",
+      "url": "https://opengameart.org/sites/default/files/fire.wav",
+      "bytes": 10324410,
+      "sha256": "85ca0cc60d0c037fff8b185e31ad1fcdbda6ce45eee17c3ee1318d1b8f59e330",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+      "id": "rain-ambient-short",
+      "title": "Rain Ambient — Short",
+      "author": "Ove Melaa",
+      "license": "CC0-1.0",
+      "page": "https://opengameart.org/content/rain-ambient-not-loopable-2-versions-available",
+      "file": "ambience/rain-short.ogg",
+      "url": "https://opengameart.org/sites/default/files/Ove%20Melaa%20-%20Rainy%20%28NOT%20loopable%29.ogg",
+      "bytes": 1633276,
+      "sha256": "5083851776c2b3ff56b81550672d7f697efcdb88f605f83402d7dfc91c56b476",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+      "id": "rain-ambient-long",
+      "title": "Rain Ambient — Long",
+      "author": "Ove Melaa",
+      "license": "CC0-1.0",
+      "page": "https://opengameart.org/content/rain-ambient-not-loopable-2-versions-available",
+      "file": "ambience/rain-long.ogg",
+      "url": "https://opengameart.org/sites/default/files/Ove%20Melaa%20-%20Rainy%20%28NOT%20loopable%29%20Long%20Version.ogg",
+      "bytes": 5470927,
+      "sha256": "0022bccf5a8ade5fdcbb7e99ca3437ee6520a3951fd1c442298c38d90a05e2a3",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+      "id": "wind-whoosh-loop",
+      "title": "Wind Whoosh Loop",
+      "author": "SketchMan3",
+      "license": "CC0-1.0",
+      "page": "https://opengameart.org/content/wind-whoosh-loop",
+      "file": "ambience/wind-whoosh-loop.ogg",
+      "url": "https://opengameart.org/sites/default/files/wind%20woosh%20loop.ogg",
+      "bytes": 251584,
+      "sha256": "0cfdbd3f21ed449689a9024264edf267d0037a6495813a7010827672ec191dac",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+      "id": "static",
+      "title": "Static",
+      "author": "xhunterko",
+      "license": "CC0-1.0",
+      "page": "https://opengameart.org/content/static",
+      "file": "sfx/radio-static.mp3",
+      "url": "https://opengameart.org/sites/default/files/ScatterNoise1.mp3",
+      "bytes": 481070,
+      "sha256": "712bc6b549d189e112433f609dc0d3a6f07f2d7458f73a08a915c50a1903f124",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+      "id": "a-small-fire-will-do",
+      "title": "A Small Fire Will Do",
+      "author": "Trex0n / Cal McEachern",
+      "license": "CC0-1.0",
+      "page": "https://opengameart.org/content/a-small-fire-will-do-calming-loop",
+      "file": "bgm/a-small-fire-will-do.wav",
+      "url": "https://opengameart.org/sites/default/files/a_small_fire_will_do.wav",
+      "bytes": 16934546,
+      "sha256": "1cb42057e724224d6047f651b95598f5c094caaaba47f6430dd5d540c09c4414",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+      "id": "lofi-again",
+      "title": "Lofi Again",
+      "author": "omfgdude",
+      "license": "CC0-1.0",
+      "page": "https://opengameart.org/content/lofi-again",
+      "file": "bgm/lofi-again.ogg",
+      "url": "https://opengameart.org/sites/default/files/lofiagain.ogg",
+      "bytes": 2419417,
+      "sha256": "d3b3410a186d45dadbcf87a8072b5a7f3b3f5a11fe38d9a7e9bdb3f66d5d86fa",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+      "id": "a-kind-of-hope",
+      "title": "A Kind of Hope",
+      "author": "Scott Buckley",
+      "license": "CC-BY-4.0",
+      "page": "https://www.scottbuckley.com.au/library/a-kind-of-hope/",
+      "file": "bgm/a-kind-of-hope.mp3",
+      "url": "https://www.scottbuckley.com.au/library/wp-content/uploads/2022/10/AKindOfHope.mp3",
+      "bytes": 13708261,
+      "sha256": "d0dc554c0db9ea208b4f59e4f0c1b4446aa7ef622c7bfeffca278130a46c51f1",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+    }
+  ],
+  "sourceSnapshots": [
+    {
+      "url": "https://opengameart.org/content/fireplace-sound-loop",
+      "file": "source-fireplace-sound-loop.html"
+    },
+    {
+      "url": "https://opengameart.org/content/rain-ambient-not-loopable-2-versions-available",
+      "file": "source-rain-ambient-long.html"
+    },
+    {
+      "url": "https://opengameart.org/content/wind-whoosh-loop",
+      "file": "source-wind-whoosh-loop.html"
+    },
+    {
+      "url": "https://opengameart.org/content/static",
+      "file": "source-static.html"
+    },
+    {
+      "url": "https://opengameart.org/content/a-small-fire-will-do-calming-loop",
+      "file": "source-a-small-fire-will-do.html"
+    },
+    {
+      "url": "https://opengameart.org/content/lofi-again",
+      "file": "source-lofi-again.html"
+    },
+    {
+      "url": "https://www.scottbuckley.com.au/library/a-kind-of-hope/",
+      "file": "source-a-kind-of-hope.html"
+    },
+    {
+      "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "file": "CC0-1.0.html"
+    },
+    {
+      "url": "https://creativecommons.org/licenses/by/4.0/",
+      "file": "CC-BY-4.0.html"
+    },
+    {
+      "url": "https://www.scottbuckley.com.au/library/using-this-music/",
+      "file": "scott-buckley-using-this-music.html"
+    }
+  ],
+  "errors": []
+}

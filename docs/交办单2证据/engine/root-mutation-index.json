@@ -1,0 +1,186 @@
+{
+  "temporaryDirectory": "/var/folders/bk/qyw5zwn53pjdp16kys_dtmg80000gp/T/engine-contract-probes-xKHucZ",
+  "cleaned": true,
+  "cases": [
+    {
+      "id": "energy",
+      "pattern": "preflight energy",
+      "file": "settle.js",
+      "from": "if (p.energy < energyCost(s, m, a))",
+      "to": "if (false && p.energy < energyCost(s, m, a))",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    },
+    {
+      "id": "mind",
+      "pattern": "preflight complex mind",
+      "file": "settle.js",
+      "from": "if (a.complex && p.mind < 20)",
+      "to": "if (a.complex && p.mind < 0)",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    },
+    {
+      "id": "intox",
+      "pattern": "preflight intoxicated gambling",
+      "file": "settle.js",
+      "from": "if (a.gamble && p.intox > 0)",
+      "to": "if (false && a.gamble && p.intox > 0)",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    },
+    {
+      "id": "computer",
+      "pattern": "preflight unique computer",
+      "file": "settle.js",
+      "from": "if (equip.has(e))",
+      "to": "if (false && equip.has(e))",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    },
+    {
+      "id": "jobs",
+      "pattern": "preflight daily job limit",
+      "file": "settle.js",
+      "from": "if (a.limit && counts[t.id] > a.limit)",
+      "to": "if (false && a.limit && counts[t.id] > a.limit)",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    },
+    {
+      "id": "deadline",
+      "pattern": "downed deadlines",
+      "file": "settle.js",
+      "from": "p.deadline = r.deadline;",
+      "to": "p.deadline = r.deadline + 1;",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    },
+    {
+      "id": "teaching",
+      "pattern": "teaching protection",
+      "file": "settle.js",
+      "from": "if (turn <= 3)",
+      "to": "if (turn <= 2)",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    },
+    {
+      "id": "buycap",
+      "pattern": "ticket and shopping validation",
+      "file": "engine.js",
+      "from": "if (gambleLines > 0 && input.daily.bets + 1 > rules.gambling.paidActionsTeamDailyCap)",
+      "to": "if (false && gambleLines > 0 && input.daily.bets + 1 > rules.gambling.paidActionsTeamDailyCap)",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    },
+    {
+      "id": "claimlocation",
+      "pattern": "ticket claim requires",
+      "file": "shop.js",
+      "from": "const open = here.find((s) => !shopClosedReason(state, s.id, state.slot));",
+      "to": "const open = here.find((s) => !shopClosedReason(state, s.id, state.slot)) || { name: 'mutation' };",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    },
+    {
+      "id": "refusal",
+      "pattern": "begging shares",
+      "file": "npcs.js",
+      "from": "const already = state.daily.refusalLoss[actorId] || 0;",
+      "to": "const already = 0;",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    },
+    {
+      "id": "crisis",
+      "pattern": "four real settlements",
+      "file": "health.js",
+      "from": "p.crisis = r.crisis;",
+      "to": "p.crisis = false;",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    },
+    {
+      "id": "hygiene",
+      "pattern": "eight critical-hygiene",
+      "file": "health.js",
+      "from": "if (!got && p.dirtyStreak >=",
+      "to": "if (false && !got && p.dirtyStreak >=",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    },
+    {
+      "id": "nightdeadline",
+      "pattern": "a new night down",
+      "file": "settle.js",
+      "from": "setDowned(s, id, s.turn, '夜间饥寒', events);",
+      "to": "setDowned(s, id, s.turn + 1, '夜间饥寒', events);",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    },
+    {
+      "id": "ending",
+      "pattern": "day 100 enters",
+      "file": "settle.js",
+      "from": "if (!alive(s).some((id) => s.actors[id].life === 'downed') || T >= R().rescue.tailMaxGlobalTurn)",
+      "to": "if (false && (!alive(s).some((id) => s.actors[id].life === 'downed') || T >= R().rescue.tailMaxGlobalTurn))",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    },
+    {
+      "id": "selfaid",
+      "pattern": "all-downed parties",
+      "file": "settle.js",
+      "from": "p.life = 'active'; p.health = R().rescue.restoredHealth;",
+      "to": "if (active(s).length) p.life = 'active'; p.health = R().rescue.restoredHealth;",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    },
+    {
+      "id": "deadfilter",
+      "pattern": "dead actors leave",
+      "file": "engine.js",
+      "from": "['active', 'downed'].includes(s.actors[id].life)",
+      "to": "['active', 'downed', 'dead'].includes(s.actors[id].life)",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    },
+    {
+      "id": "deadchoice",
+      "pattern": "a dead actor cannot choose",
+      "file": "events.js",
+      "from": "if (!p || p.life !== 'active')",
+      "to": "if (!p)",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    },
+    {
+      "id": "determinism",
+      "pattern": "JSON roundtrips",
+      "file": "settle.js",
+      "from": "s.lastTx = `${s.seed}:${T}`;",
+      "to": "s.lastTx = `${s.seed}:${T}:${Math.random()}`;",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    }
+  ]
+}

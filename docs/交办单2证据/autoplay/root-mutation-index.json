@@ -1,0 +1,23 @@
+{
+  "cases": [
+    {
+      "id": "seed",
+      "pattern": "三种策略严格共用",
+      "from": "1000 + index",
+      "to": "1001 + index",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    },
+    {
+      "id": "dedupe",
+      "pattern": "疾病和断供统计",
+      "from": "if (seen.has(key)) continue;",
+      "to": "if (false && seen.has(key)) continue;",
+      "redExit": 1,
+      "redAssertion": true,
+      "greenExit": 0
+    }
+  ],
+  "cleaned": true
+}

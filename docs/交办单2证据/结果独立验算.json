@@ -1,0 +1,84 @@
+{
+  "status": "PASS",
+  "games": 600,
+  "elapsedMs": 65139.140708,
+  "engineStable": true,
+  "checks": [
+    "paired seeds",
+    "terminal phase and turn cap",
+    "D100 completion",
+    "survival/death reconciliation",
+    "preflight counter reconciliation",
+    "death day consistency",
+    "daily counter bounds",
+    "independent report cash and survival verification"
+  ],
+  "strategies": [
+    {
+      "strategy": "conservative",
+      "runs": 200,
+      "survivalCounts": [
+        137,
+        6,
+        21,
+        36
+      ],
+      "survivalRates": [
+        68.5,
+        3,
+        10.5,
+        18
+      ],
+      "cash": {
+        "p10": 0,
+        "p50": 10,
+        "p90": 366
+      },
+      "completed100": 64
+    },
+    {
+      "strategy": "balanced",
+      "runs": 200,
+      "survivalCounts": [
+        2,
+        5,
+        24,
+        169
+      ],
+      "survivalRates": [
+        1,
+        2.5,
+        12,
+        84.5
+      ],
+      "cash": {
+        "p10": 963,
+        "p50": 6470,
+        "p90": 7688
+      },
+      "completed100": 198
+    },
+    {
+      "strategy": "gambler",
+      "runs": 200,
+      "survivalCounts": [
+        200,
+        0,
+        0,
+        0
+      ],
+      "survivalRates": [
+        100,
+        0,
+        0,
+        0
+      ],
+      "cash": {
+        "p10": 0,
+        "p50": 3,
+        "p90": 7
+      },
+      "completed100": 0
+    }
+  ]
+}
