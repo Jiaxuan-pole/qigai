@@ -146,7 +146,7 @@ test('行动抽屉使用引擎预估显示工资加成后的完整收支', async
   Object.assign(UI.sel, { actor: 'xuan', hour: 6, action: 'repair', zone: null, duration: 2, cart: [], targets: [] });
   try {
     renderDrawer(state);
-    assert.match(drawer.innerHTML, /预计变化：精神 \+0（待结算 -2）·体力 -40·现金 \+60/);
+    assert.match(drawer.innerHTML, /预计变化：精神 \+0（待结算 -2）·体力 -40·现金 \+30/);
     assert.match(drawer.innerHTML, /每小时基础耗材：<b>零件1<\/b>/);
   } finally { globalThis.document = before; UI.sel.duration = undefined; }
 });
@@ -180,9 +180,9 @@ test('行动抽屉将资源不足的部分预估标为未完整执行', async ()
   Object.assign(UI.sel, { actor: 'xuan', hour: 6, action: 'repair', zone: null, duration: 2, cart: [], targets: [] });
   try {
     renderDrawer(state);
-    assert.match(drawer.innerHTML, /仅完成1\/2小时：精神 \+0（待结算 -1）·体力 -20·现金 \+26/);
+    assert.match(drawer.innerHTML, /仅完成1\/2小时：精神 \+0（待结算 -1）·体力 -20·现金 \+13/);
     assert.match(drawer.innerHTML, /后续未执行：零件不足/);
-    assert.doesNotMatch(drawer.innerHTML, /预计变化：精神 \+0（待结算 -1）·体力 -20·现金 \+26/);
+    assert.doesNotMatch(drawer.innerHTML, /预计变化：精神 \+0（待结算 -1）·体力 -20·现金 \+13/);
   } finally { globalThis.document = before; UI.sel.duration = undefined; }
 });
 

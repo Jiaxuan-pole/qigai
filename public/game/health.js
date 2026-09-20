@@ -8,6 +8,7 @@ export const DISEASES = {
   skin: { name: '卫生相关皮肤感染', basic: ['cleaning_care'], matching: ['cleaning_care', 'care_course'], hint: '清洁护理包可护理；保持卫生≥40，否则每回合多+2' },
   wound: { name: '未护理伤口感染', basic: ['bandage', 'cleaning_care'], matching: ['bandage', 'cleaning_care', 'care_course'], hint: '绷带只对重度以下有效；重度需诊所计划' },
   chill: { name: '受寒虚弱', basic: [], matching: [], hint: '暖处休整与干燥床位能压下去；症状缓解包减轻惩罚' },
+  cough: { name: '呼吸道不适', basic: [], matching: [], hint: '少抽烟，暖处休整能压下去；症状缓解包减轻惩罚' },
 };
 
 export function addDisease(state, actorId, kind, severity, cause, events) {
@@ -15,7 +16,7 @@ export function addDisease(state, actorId, kind, severity, cause, events) {
   if (p.diseases.some((d) => d.kind === kind)) return null;
   if (p.diseases.length >= 2) return null;
   state.diseaseSeq = (state.diseaseSeq || 0) + 1;
-  const d = { uid: 'd' + state.diseaseSeq, kind, severity: clamp(severity, 1, 100), known: kind === 'chill' || kind === 'wound', plan: false, startDay: state.day, cause, reliefUntil: 0 };
+  const d = { uid: 'd' + state.diseaseSeq, kind, severity: clamp(severity, 1, 100), known: ['chill', 'wound', 'cough'].includes(kind), plan: false, startDay: state.day, cause, reliefUntil: 0 };
   p.diseases.push(d);
   events.push(`${state.names[actorId]}${d.known ? '出现' + DISEASES[kind].name : '身体不对劲（' + cause + '），需要诊所评估'}。`);
   return d;
@@ -35,7 +36,7 @@ export function progressDiseases(state, actorId, flags, events) {
   const rules = getData().rules;
   let total = 0;
   for (const d of p.diseases) {
-    const matching = flags.cared?.has(d.uid) || (d.kind === 'chill' && flags.rested && flags.warmPlace);
+    const matching = flags.cared?.has(d.uid) || (['chill', 'cough'].includes(d.kind) && flags.rested && flags.warmPlace);
     const r = diseaseStep(d.severity, p.health, { dirty: flags.dirty && d.kind !== 'chill', matchingCare: matching, rest: flags.rested, safeSleep: flags.safeSleep }, rules);
     let damage = r.damage;
     if (d.supportUntil && state.turn <= d.supportUntil) damage = Math.max(0, damage - 3);

@@ -36,60 +36,69 @@
 </div>
 
 <div id="game" class="screen game-screen hidden">
-  <header class="topbar">
-    <div class="brand"><span class="mark small" aria-hidden="true"></span><strong>今晚睡哪儿</strong></div>
-    <div class="topstats">
-      <div class="stat-chip"><small>日</small><b id="tDay"></b></div>
-      <div class="stat-chip"><small>回合</small><b id="tTurn"></b></div>
-      <div class="stat-chip clock-chip"><small id="clockStatus">时间流逝</small><b id="tSlot"></b></div>
-      <div class="stat-chip"><small>天气</small><b id="tWeather"></b></div>
-      <div class="stat-chip gold"><small>公共现金</small><b id="tCash"></b></div>
-      <div class="stat-chip"><small>有效食物</small><b id="tFood"></b></div>
-      <div class="stat-chip warn" id="tCareChip"><small>待护理</small><b id="tCare"></b></div>
+  <!-- 街景铺满视口，其余信息全部以 HUD 面板叠在画面四角；热点按百分比定位，所以 overlay 必须与画布同在 .stage-view 里 -->
+  <div class="map-wrap stage" id="mapWrap">
+    <div class="stage-view">
+      <canvas id="map" width="960" height="540" aria-label="像素城市地图"></canvas>
+      <div id="mapOverlay" class="map-overlay"></div>
+      <canvas id="street" width="960" height="540" aria-label="横向街道"></canvas>
+      <div id="streetOverlay" class="street-overlay"></div>
+      <div id="streetTransition" class="street-transition" aria-live="polite"></div>
     </div>
-    <div class="topbtns">
-      <button data-open="chapters">章节</button>
-      <button data-open="help">说明</button>
-      <button data-open="system">存档</button>
-      <button id="btnSound" title="点击切换：关/低/中/高">声音：低</button>
-      <span id="sharedSaveStatus" class="small muted"></span><button id="btnSaves" type="button">存档表</button><button id="btnTitle">标题</button>
+
+    <div class="hud hud-place">
+      <h2 id="mapTitle">雾城 · 街区地图</h2>
+      <small id="mapHint">点街区安排行动；推进后人物会自己走过去</small>
+      <div class="hud-place-btns">
+        <button id="overviewMode" type="button" aria-pressed="true" aria-label="打开地图总览，快捷键 M">地图 M</button>
+        <button id="streetMode" type="button" aria-pressed="false">街道</button>
+        <button data-open="events">热点 <b id="eventCount">0</b></button>
+      </div>
+      <div class="chapterline" id="chapterLine"></div>
+      <div id="taskStrip" class="task-strip" aria-label="当前任务"></div>
     </div>
-  </header>
 
-  <div class="chapterline" id="chapterLine"></div>
-  <div id="taskStrip" class="task-strip" aria-label="当前任务"></div>
-
-  <main class="workspace">
-    <aside class="characters" id="characters" aria-label="三名主角"></aside>
-
-    <section class="world">
-      <div class="worldhead">
-        <div><h2 id="mapTitle">雾城 · 街区地图</h2><small id="mapHint">点街区安排行动；推进后人物会自己走过去</small></div>
-        <div class="worldbtns">
-          <button id="overviewMode" type="button" aria-pressed="true" aria-label="打开地图总览，快捷键 M">地图 M</button>
-          <button id="planToggle" type="button" aria-controls="plannerWindow" aria-expanded="false" aria-label="为三个人安排行动" title="打开行动安排；地图上也可直接点击人物和地点">安排行动</button>
-          <button id="streetMode" type="button" aria-pressed="false">街道</button>
-          <button data-open="map">地图列表</button>
-          <button data-open="events">热点 <b id="eventCount">0</b></button>
-          <button data-open="tasks">任务</button>
-        </div>
+    <div class="hud hud-clock">
+      <div class="topstats">
+        <div class="stat-chip"><small>日</small><b id="tDay"></b></div>
+        <div class="stat-chip"><small>回合</small><b id="tTurn"></b></div>
+        <div class="stat-chip clock-chip"><small id="clockStatus">时间流逝</small><b id="tSlot"></b></div>
+        <div class="stat-chip"><small>天气</small><b id="tWeather"></b></div>
+        <div class="stat-chip gold"><small>公共现金</small><b id="tCash"></b></div>
+        <div class="stat-chip"><small>有效食物</small><b id="tFood"></b></div>
+        <div class="stat-chip warn" id="tCareChip"><small>待护理</small><b id="tCare"></b></div>
       </div>
-      <div class="map-wrap" id="mapWrap">
-        <canvas id="map" width="960" height="540" aria-label="像素城市地图"></canvas>
-        <div id="mapOverlay" class="map-overlay"></div>
-        <canvas id="street" width="960" height="540" aria-label="横向街道"></canvas>
-        <div id="streetOverlay" class="street-overlay"></div>
-        <div id="streetTransition" class="street-transition" aria-live="polite"></div>
+      <div class="hud-sys">
+        <button id="btnMenu" type="button">菜单 E</button>
+        <button id="btnSound" title="点击切换：关/低/中/高">声音：低</button>
+        <button id="btnSaves" type="button">存档表</button>
+        <button id="btnTitle">标题</button>
+        <span id="sharedSaveStatus" class="small muted"></span>
       </div>
-      <div id="streetControls" class="street-controls" hidden><label>查看街区 <select id="streetDistrict"></select></label><span id="streetStatus"></span><div class="street-walk"><button id="walkLeft" type="button" aria-label="向左走" title="向左走">←</button><button id="walkUp" type="button" aria-label="向上走" title="向上走">↑</button><button id="walkDown" type="button" aria-label="向下走" title="向下走">↓</button><button id="walkRight" type="button" aria-label="向右走" title="向右走">→</button></div><div id="streetExits" class="street-exits"></div></div>
-      <div class="quote"><b id="speaker"></b><span id="quote"></span></div>
-    </section>
+    </div>
 
-  </main>
+    <aside class="hud hud-party" id="characters" aria-label="三名主角"></aside>
+
+    <div class="hud hud-bottom">
+      <div class="hud-talk">
+        <div class="quote"><b id="speaker"></b><span id="quote"></span></div>
+        <div class="journal" role="status" aria-live="polite"><b>街头记事</b><div id="journal" class="journal-text"></div><button data-open="logs" class="linkbtn">全部</button></div>
+      </div>
+      <div id="hotbar" class="hud-hotbar" aria-label="快捷物品"></div>
+      <div class="hud-actions">
+        <button id="btnAiPlan" type="button" title="给其他队友排满今天余下的每个小时，让他们自己行动">AI安排队友全天</button>
+        <button id="planToggle" type="button" aria-controls="plannerWindow" aria-expanded="false" aria-label="为三个人安排行动" title="打开行动安排；地图上也可直接点击人物和地点">安排行动</button>
+        <button id="btnAdvance" class="primary" title="立即完成当前一小时">开始行动</button>
+        <button id="btnEndDay" type="button" title="所有人余下的小时自动随机安排，直接过到夜里">结束今天</button>
+      </div>
+    </div>
+
+    <div id="streetControls" class="hud hud-walk" hidden><label>查看街区 <select id="streetDistrict"></select></label><span id="streetStatus"></span><div class="street-walk"><button id="walkLeft" type="button" aria-label="向左走" title="向左走">←</button><button id="walkUp" type="button" aria-label="向上走" title="向上走">↑</button><button id="walkDown" type="button" aria-label="向下走" title="向下走">↓</button><button id="walkRight" type="button" aria-label="向右走" title="向右走">→</button></div><div id="streetExits" class="street-exits"></div></div>
+  </div>
 
   <div id="plannerOverlay" class="planner-overlay" hidden>
     <section id="plannerWindow" class="planner-window" role="dialog" aria-modal="true" aria-labelledby="plannerWindowTitle" tabindex="-1">
-      <header class="planner-window-head"><h2 id="plannerWindowTitle">今天，几个人怎么过？</h2><button id="plannerClose" type="button" aria-label="关闭行动安排">关闭</button></header>
+      <header class="planner-window-head"><h2 id="plannerWindowTitle">今天，几个人怎么过？</h2><nav class="menu-tabs" data-menu-nav><button type="button" data-menu-tab="plan">排程</button><button type="button" data-menu-tab="inventory">库存</button><button type="button" data-menu-tab="wishes">愿望</button><button type="button" data-menu-tab="health">健康</button><button type="button" data-menu-tab="tasks">任务</button><button type="button" data-menu-tab="map">地图</button><button type="button" data-menu-tab="camp">营地</button><button type="button" data-menu-tab="chapters">章节</button><button type="button" data-menu-tab="system">存档</button><button type="button" data-menu-tab="help">说明</button></nav><button type="button" class="primary" data-advance title="立即完成当前一小时">开始行动</button><button id="plannerClose" type="button" aria-label="关闭行动安排">关闭</button></header>
       <div id="plannerWindowBody" class="planner-window-body">
     <aside class="drawer" id="drawer" role="region" aria-label="选择下一件事" hidden></aside>
 
@@ -97,7 +106,6 @@
       <div class="plan-header">
         <div><h2>三个人的下一件事</h2><p id="planFocus"></p></div>
         <div class="plan-tools">
-          <button id="btnAiPlan" type="button" title="只给其他队友建议下一件事">AI安排队友本次</button>
           <button data-open="inventory">库存</button>
           <button data-open="wishes">愿望与约定</button>
           <button data-open="health">健康护理</button>
@@ -106,22 +114,18 @@
       <div id="schedule" class="schedule" aria-label="三个人的下一件事"></div>
       <div class="plan-footer">
         <div id="planStatus" class="plan-status"></div>
-        <div class="plan-actions">
-          <button id="btnAdvance" class="primary" title="立即完成当前一小时">开始行动</button>
-        </div>
       </div>
     </section>
       </div>
     </section>
   </div>
-
-  <div class="journal" role="status" aria-live="polite"><b>街头记事</b><div id="journal" class="journal-text"></div><button data-open="logs" class="linkbtn">全部</button></div>
 </div>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <div id="modalOverlay" class="modal-overlay">
   <section id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <button id="modalClose" class="close" aria-label="关闭">×</button>
+    <nav id="modalTabs" class="menu-tabs" hidden><button type="button" data-menu-tab="plan">排程</button><button type="button" data-menu-tab="inventory">库存</button><button type="button" data-menu-tab="wishes">愿望</button><button type="button" data-menu-tab="health">健康</button><button type="button" data-menu-tab="tasks">任务</button><button type="button" data-menu-tab="map">地图</button><button type="button" data-menu-tab="camp">营地</button><button type="button" data-menu-tab="chapters">章节</button><button type="button" data-menu-tab="system">存档</button><button type="button" data-menu-tab="help">说明</button></nav>
     <div id="modalContent"></div>
   </section>
 </div>

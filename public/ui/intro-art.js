@@ -384,7 +384,7 @@ export function person(c, x, y, who, pose = 'stand', frame = 0, opts = {}) {
   } else {
     leftArm(swing); rightArm(-swing);
   }
-  // 头：头发、脸、眼镜或胡茬；抬头低头只动一两像素，像素画里够用了。
+  // 头：头发、脸、胡茬（轩哥脸干净）；抬头低头只动一两像素，像素画里够用了。
   px(c, 5 + hx, 5 + hy, 14, 10, skin);
   px(c, 5 + hx, 12 + hy, 14, 3, skinD);
   px(c, 4 + hx, 0 + hy, 16, 6, hair);

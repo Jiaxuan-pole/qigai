@@ -71,6 +71,23 @@ test('相遇前的桶边和冲过去两拍都保留三个人与行李', () => {
   }
 });
 
+test('相遇场景有亮着的路灯与落地桥墩，翻桶那拍桶盖掀开露出桶口', () => {
+  const walk = fakeContext();
+  drawMeetingScene(walk, { beat: 'walk', tick: 8, choreo: meetingChoreo(1500, 8) });
+  assert.ok(walk.pixels.some((pixel) => pixel.color === '#e3bb72'), '路灯亮面应可见');
+  assert.ok(walk.pixels.some((pixel) => pixel.color === '#647477' && pixel.h > 100), '桥墩应从桥面一直落到地面');
+  assert.ok(!walk.pixels.some((pixel) => pixel.color === '#2b3537'), '还没掀盖时看不到桶口');
+
+  const bin = fakeContext();
+  drawMeetingScene(bin, { beat: 'bin', tick: 8, choreo: meetingChoreo(4500, 8) });
+  const key = (pixel) => `${pixel.x},${pixel.y},${pixel.w},${pixel.h}`;
+  const closedLid = new Set(walk.pixels.filter((pixel) => pixel.color === '#8a9693').map(key));
+  const openLid = bin.pixels.filter((pixel) => pixel.color === '#8a9693' && !closedLid.has(key(pixel)));
+  assert.ok(openLid.length > 0, '翻桶时桶盖应掀到合盖时没有的位置');
+  assert.ok(openLid.some((pixel) => pixel.y < 170), '掀开的桶盖应竖起高过桶身');
+  assert.ok(bin.pixels.some((pixel) => pixel.color === '#2b3537'), '掀盖后应露出桶口');
+});
+
 test('相遇字幕在 1× 留出自然阅读时间，拥抱至少三秒', () => {
   const ends = MEETING_BEATS.map((beat) => beat.end);
   const spans = ends.map((end, index) => end - (ends[index - 1] || 0));

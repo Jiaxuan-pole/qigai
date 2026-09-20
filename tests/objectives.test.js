@@ -376,7 +376,8 @@ test('任务面板把安排交给集成回调，并通过引擎接取委托', as
     return [];
   } };
   const plain = { classList: { add() {}, remove() {}, toggle() {} }, style: {}, querySelector: () => null };
-  const cells = { taskStrip: content, modalContent: content, toast: plain, modal: plain, modalOverlay: plain, modalClose: {} };
+  // 任务条按钮分发前会查弹层开没开：假 DOM 给 modalOverlay 一个永远关闭的 classList。
+  const cells = { taskStrip: content, modalContent: content, toast: plain, modal: plain, modalOverlay: { ...plain, classList: { contains: () => false, add() {}, remove() {} } }, modalClose: {} };
   const previousDocument = globalThis.document;
   globalThis.document = { getElementById: (id) => cells[id], body: { style: {} }, activeElement: null };
   const oldState = UI.state;
@@ -385,6 +386,8 @@ test('任务面板把安排交给集成回调，并通过引擎接取委托', as
   const oldActor = UI.sel.actor;
   try {
     UI.state = fresh(907);
+    // 前三天有引导步骤时任务条会自动展开；这里测的是没有引导时默认收起，所以先关掉引导。
+    UI.state.flags.guideOff = true;
     UI.state.pendingMorning = null;
     UI.night = null;
     UI.render = () => {};

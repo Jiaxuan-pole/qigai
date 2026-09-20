@@ -26,7 +26,7 @@ test('摆摊与事件按实际工资创建一局', () => {
     const r = settle(s, { controlledActorId: actor });
     assert.equal(r.error, undefined);
     const roll = rng(s.seed, `busk:${s.turn + 1}:${actor}`);
-    const pay = action === 'phonestall' ? 8 + Math.floor(roll * 8) : roll < 0.2 ? 0 : 6 + Math.floor(roll * 15);
+    const pay = action === 'phonestall' ? 4 + Math.floor(roll * 4) : roll < 0.2 ? 0 : 3 + Math.floor(roll * 8);
     assert.equal(r.state.cash, s.cash + pay);
     assert.equal(r.state.pending.workGames.length, 1);
     assert.equal(r.state.pending.workGames[0].variant, action);
@@ -63,8 +63,8 @@ test('夜班加成进入短工基价且队友自动不弹', () => {
   s.flags.chenNightWatch = true;
   const r = settle(s, { controlledActorId: 'ma' });
   assert.equal(r.error, undefined);
-  assert.equal(r.state.pending.workGames[0].basePay, 41);
-  assert.equal(r.state.cash, s.cash + 41);
+  assert.equal(r.state.pending.workGames[0].basePay, 36);
+  assert.equal(r.state.cash, s.cash + 36);
   const other = settle(s, { controlledActorId: 'xuan' });
   assert.equal(other.error, undefined);
   assert.equal(other.state.pending.workGames?.length ?? 0, 0);

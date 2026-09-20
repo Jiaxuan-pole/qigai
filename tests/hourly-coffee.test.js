@@ -82,7 +82,7 @@ test('速溶四次或现制两次才各获得一次行动额度，混喝连续�
 
 test('五次标准劳动后两杯咖啡可支付第六次标准劳动', () => {
   let state = start(99);
-  for (const [actionId, options] of [['scavenge', {}], ['scavenge', {}], ['scavenge', {}], ['bottles', { zone: 'market' }], ['bottles', { zone: 'market' }]]) {
+  for (const [actionId, options] of [['scavenge', {}], ['scavenge', {}], ['carry', {}], ['bottles', { zone: 'market' }], ['bottles', { zone: 'market' }]]) {
     const assigned = assign(state, 'xuan', state.hour, actionId, options);
     assert.equal(assigned.error, undefined, actionId);
     const result = settle(assigned.state);

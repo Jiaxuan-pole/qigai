@@ -11,6 +11,7 @@ import { wishSummary, activeWishes } from '../game/wishes.js';
 import { diseaseLabel, DISEASES } from '../game/health.js';
 import { wishStage, diseaseStage } from '../game/rules.js';
 import { PACKS } from '../game/events.js';
+import { windowLabel } from '../game/headlines.js';
 import { STYLES } from '../game/tickets.js';
 import { mountScratch } from './scratch.js';
 import { itemArtMarkup, mountItemArt } from './item-art.js';
@@ -50,7 +51,7 @@ export function showShop(shopId, actorId, mode, slotOverride = null) {
   const render = (restore = null) => {
     const total = Object.entries(cart.lines).reduce((t, [id, q]) => t + UI.data.items.find((i) => i.id === id).price * q, 0);
     const body = `<p>${esc(def.position)} · 营业：${def.openSlots.map((x) => SLOTS[x]).join('/')} · ${closed ? '<span class="bad">' + esc(closed) + '</span>' : '<span class="good">营业中</span>'}</p>
-    <p class="small">执行者：<b>${NAMES[actorId]}</b>（现在在${zoneName(p.location)}）${canNow ? ' · 人在店里，可以直接买（本时段附带采买一次）' : mode === 'now' ? ' · 人不在这里：只能列清单加入采买路线' : ' · 清单会随「到店采买」在结算时购买'}</p>
+    <p class="small">执行者：<b>${NAMES[actorId]}</b>（现在在${zoneName(p.location)}）${canNow ? ' · 人在店里，可以直接买（钱够、有货就能一直买）' : mode === 'now' ? ' · 人不在这里：只能列清单加入采买路线' : ' · 清单会随「到店采买」在结算时购买'}</p>
     <div class="shop-grid">${items.map((it) => { const n = stock[it.id] || 0; const q = cart.lines[it.id] || 0; return `<div class="shopitem ${n <= 0 ? 'out' : ''}">${itemArtMarkup(it.id)}<div class="item-copy"><strong>${esc(it.name)} <span class="muted small">${CAT[it.category] || ''}</span></strong><span class="price">¥${it.price}${it.uses > 1 ? ' / ' + it.uses + '格' : ''}${it.shelfLifeDays ? ' · 保质' + it.shelfLifeDays + '天' : ''}</span><span class="eff">${esc(it.effectText)}</span><span class="eff">库存 ${n}</span><div class="qty"><button data-dec="${it.id}" ${q <= 0 ? 'disabled' : ''}>−</button><b data-qty="${it.id}" tabindex="-1">${q}</b><button data-inc="${it.id}" ${q >= n ? 'disabled' : ''}>＋</button></div></div></div>`; }).join('')}</div>
     <div class="cart-summary"><span>清单合计 <b>¥${total}</b>，购买后现金 <b>${s.cash - total}</b>，饭钱保护 <b>${reserve(s)}</b>${Object.keys(cart.lines).some((id) => itemDef(id)?.category === 'lottery') ? '，今日付费博彩 ' + s.daily.bets + '/2（购票占一次）' : ''}</span><span>${shopId === 'furniture_store' ? '家具统一快递到营地包裹，回营拆包后才能摆放。' : `送到：<label><input type="radio" name="dest" value="self" ${cart.dest !== 'camp' ? 'checked' : ''}> 带在身上</label> <label><input type="radio" name="dest" value="camp" ${cart.dest === 'camp' ? 'checked' : ''}> 送回营地箱（需之后回营地）</label>${Object.keys(cart.lines).some((id) => isFurniture(id)) ? ' · 家具单独快递到营地包裹' : ''}`}</span></div>
     <div class="modalbuttons">${canNow ? `<button class="primary" id="buyNow" ${total <= 0 ? 'disabled' : ''}>现在就买 ¥${total}</button>` : ''}<button id="toPlan" ${total <= 0 ? 'disabled' : ''}>加入${NAMES[actorId]}${String(UI.sel.hour).padStart(2, '0')}:00的采买路线</button><button onclick="document.getElementById('modalClose').click()">关闭</button></div>`;
@@ -242,12 +243,13 @@ export function showEvents() {
 export function eventCard(s, e) {
   const pack = PACKS[e.templateId];
   const cast = e.cast ? e.cast.filter((id) => s.actors[id].life === 'active') : active(s);
-  const meta = zoneName(e.district) + ' · 还剩' + (e.expiresTurn - s.turn) + '回合' + (e.major ? ' · 主要事件' : '') + (e.status === 'reserved' ? ' · 已由' + NAMES[e.reserved.actorId] + '预约' : '');
+  const meta = zoneName(e.district) + ' · ' + windowLabel(e, s) + (e.major ? ' · 主要事件' : '') + (e.status === 'reserved' ? ' · 已由' + NAMES[e.reserved.actorId] + '预约' : '');
   let html = `<div class="evcard" data-ev="${e.uid}"><h4>${esc(e.title)}</h4><p>${esc(e.setup)}</p><div class="meta">${meta}</div>`;
   html += `<label class="choice-label">谁来处理<select data-evactor="${e.uid}">`;
   for (const id of cast) html += `<option value="${id}" ${UI.sel.actor === id ? 'selected' : ''}>${NAMES[id]}（在${zoneName(s.actors[id].location)}）</option>`;
   html += '</select></label><div class="choices">';
-  for (const c of pack.choices) html += `<button data-evchoice="${c.id}" data-evuid="${e.uid}">${esc(c.label)}${c.kind === 'book' ? ' · 占本小时' : c.kind === 'present' ? ' · 需在场' : ''}</button>`;
+  const early = Boolean(e.window) && s.hour < e.window.from;
+  for (const c of pack.choices) html += `<button data-evchoice="${c.id}" data-evuid="${e.uid}" ${early ? 'disabled' : ''}>${esc(c.label)}${c.kind === 'book' ? ' · 占本小时' : c.kind === 'present' ? ' · 需在场' : ''}${early ? `（${e.window.from}点开始）` : ''}</button>`;
   html += '</div></div>';
   return html;
 }
@@ -264,13 +266,19 @@ export function showEvent(uid) {
   bindEventCards();
 }
 
-export function showNpcs(district) {
+// focusId：街景里点到的那个人，只列他一个；其余路人仍可从「问路人」看全表。
+// 街上点到路人要能当场求助：app.js 把「立即执行一小时」的入口挂在这里，弹层自己不碰时钟。
+export const npcHandlers = {};
+
+export function showNpcs(district, focusId = null) {
   const s = UI.state;
-  const list = passersby(s, district, s.slot);
+  const everyone = passersby(s, district, s.slot);
+  const list = focusId ? everyone.filter((n) => n.id === focusId) : everyone;
   let body = `<p class="small">${zoneName(district)} · ${SLOTS[s.slot]}。乞讨要占一个主行动（最多问3人）；短聊每人每天一次，精神+2，不给钱。</p>`;
+  if (focusId && !list.length) body += '<p class="muted">这个人已经走远了。</p>';
   for (const n of list) {
     const tag = (n.regular ? ' <span class="gold small">熟人' + (n.trust ? '·信任' + n.trust : '') + '</span>' : '');
-    body += `<div class="npcrow"><div><b>${esc(n.name)}</b>${tag} <span class="tags">${esc(n.job || '')} · ${esc(n.mood.label)}${n.tags.length ? ' · ' + n.tags.map(esc).join('/') : ''}${n.asked ? ' · 今天全队已问过' : ''}</span></div><div><button data-chat="${n.id}">${NAMES[UI.sel.actor]}短聊</button></div></div>`;
+    body += `<div class="npcrow"><div><b>${esc(n.name)}</b>${tag} <span class="tags">${esc(n.job || '')} · ${esc(n.mood.label)}${n.tags.length ? ' · ' + n.tags.map(esc).join('/') : ''}${n.asked ? ' · 今天全队已问过' : ''}</span></div><div><button data-beg="${n.id}" ${n.asked || !npcHandlers.begNow ? 'disabled' : ''}>${NAMES[UI.sel.actor]}向他求助 · 占一小时</button><button data-chat="${n.id}">${NAMES[UI.sel.actor]}短聊</button></div></div>`;
     if (n.regular) {
       const st = favorStatus(s, n.id);
       if (st && st.active) { const need = st.step.kind === 'count' ? st.step.need : 1; body += `<div class="small" style="margin:-2px 0 8px 10px">委托中：「${esc(st.step.title)}」 ${st.active.progress}/${need}，第${st.active.deadline}天前${st.step.kind === 'deliver' ? ` <button data-deliver="${n.id}" style="min-height:30px;padding:2px 8px">交付${esc(itemDef(st.step.item).name)}</button>` : ''}</div>`; }
@@ -280,14 +288,15 @@ export function showNpcs(district) {
     }
   }
   if (district === 'market' && s.flags.project && s.flags.project.stage === 3) body += `<div class="notebox">宣传片成品已剪好，第${s.flags.project.deadline}天前交给刘姐。<button id="deliverProject" style="margin-left:8px;min-height:32px">${NAMES[UI.sel.actor]}交付</button></div>`;
-  body += `<div class="modalbuttons"><button class="primary" id="begHere">安排${NAMES[UI.sel.actor]}在这里乞讨</button></div>`;
-  showModal('路人 · ' + zoneName(district), body);
+  body += `<div class="modalbuttons"><button class="primary" id="begHere">${npcHandlers.begNow ? `${NAMES[UI.sel.actor]}在这里向路人求助（最多三人，占一小时）` : `安排${NAMES[UI.sel.actor]}在这里乞讨`}</button></div>`;
+  showModal((focusId && list[0] ? list[0].name : '路人') + ' · ' + zoneName(district), body);
   $('modalContent').querySelectorAll('[data-chat]').forEach((b) => { b.onclick = () => { if (apply(chat(UI.state, UI.sel.actor, b.dataset.chat))) toast('聊了两句，精神+2。'); }; });
-  $('modalContent').querySelectorAll('[data-borrow]').forEach((b) => { b.onclick = () => { if (apply(borrowFrom(UI.state, b.dataset.borrow, UI.sel.actor))) { toast(UI.state.log[0]); showNpcs(district); } }; });
-  $('modalContent').querySelectorAll('[data-accept]').forEach((b) => { b.onclick = () => { if (apply(acceptFavor(UI.state, b.dataset.accept, UI.sel.actor))) { toast(UI.state.log[0]); showNpcs(district); } }; });
-  $('modalContent').querySelectorAll('[data-deliver]').forEach((b) => { b.onclick = () => { if (apply(deliverFavor(UI.state, b.dataset.deliver, UI.sel.actor))) { toast('送到了，推进后结算。'); showNpcs(district); } }; });
+  $('modalContent').querySelectorAll('[data-borrow]').forEach((b) => { b.onclick = () => { if (apply(borrowFrom(UI.state, b.dataset.borrow, UI.sel.actor))) { toast(UI.state.log[0]); showNpcs(district, focusId); } }; });
+  $('modalContent').querySelectorAll('[data-accept]').forEach((b) => { b.onclick = () => { if (apply(acceptFavor(UI.state, b.dataset.accept, UI.sel.actor))) { toast(UI.state.log[0]); showNpcs(district, focusId); } }; });
+  $('modalContent').querySelectorAll('[data-deliver]').forEach((b) => { b.onclick = () => { if (apply(deliverFavor(UI.state, b.dataset.deliver, UI.sel.actor))) { toast('送到了，推进后结算。'); showNpcs(district, focusId); } }; });
   if ($('deliverProject')) $('deliverProject').onclick = () => { if (apply(deliverProject(UI.state, UI.sel.actor, { controlledActorId: UI.sel.actor }))) { closeModal(); toast(UI.state.log[0]); showPendingWorkGame(); } };
-  $('begHere').onclick = () => { UI.sel.zone = district; UI.sel.action = 'beg'; closeModal(); UI.render(); };
+  $('modalContent').querySelectorAll('[data-beg]').forEach((b) => { b.onclick = () => { closeModal(); npcHandlers.begNow?.(district, b.dataset.beg); }; });
+  $('begHere').onclick = () => { closeModal(); if (npcHandlers.begNow) npcHandlers.begNow(district); else { UI.sel.zone = district; UI.sel.action = 'beg'; UI.render(); } };
 }
 
 export function showMapList() {
@@ -312,7 +321,7 @@ export function showChapters() {
 
 export function showHelp() {
   showModal('玩法说明', `<h3>06:00—22:00，三个人同一时钟</h3><p>点人物或排程格选人，右侧选行动，或直接点地图上的街区/店铺。推进一次经过一小时。每人每小时可行动、睡眠或等待；标准行动消耗20体力，睡一小时恢复20。10、14、18、22点结算饥寒与病情等生存变化；10点和22点按存活人数吃饭，22点之后结算过夜。</p>
-  <h3>店在哪，人就得在哪</h3><p>购物要人在店所在街区且店开门。安排「到店采买」推进后人会走过去，到店当场买；如果人已经在那个街区，可以直接买（每小时一次附带采买）。彩票购买即锁结果，自己刮开，在售票点核销一次。</p>
+  <h3>店在哪，人就得在哪</h3><p>购物要人在店所在街区且店开门。安排「到店采买」推进后人会走过去，到店当场买；如果人已经在那个街区，可以直接买，次数不限。彩票购买即锁结果，自己刮开，在售票点核销一次。</p>
   <h3>工作挑战与人物日报</h3><p>只对当前操控的人弹工作挑战，基础收入保留，表现最多加25%；随时可放弃奖金。队友自动工作，日终可展开人物日报查看收入、指标与愿望。日报的自动收入不含尚未领取的玩家奖金。</p>
   <h3>咖啡与醉意</h3><p>便利店速溶咖啡每杯加1份提神值，咖啡店现制咖啡每杯加2份；每积满4份增加20点独立的当日行动额度，不计入基础体力条。两种咖啡合计杯数，第6杯起每杯须先确认游戏内死亡风险；达到醉意2时，次日基础体力最多80。</p>
   <h3>愿望、精神、疾病、卫生</h3><p>人物会有愿望，不回应会积压并扣精神；精神连续4回合归零进入崩溃并掉健康。卫生低、吃来路不明的东西、伤口不护理会在夜里染病；病要诊所建计划，用品要护理时够得着。护理只减增量，不是回血药。</p>

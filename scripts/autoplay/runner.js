@@ -339,7 +339,11 @@ export async function runGame({ seed, strategyId, maxDays = 100, initialState = 
       continue;
     }
     if (state.pendingMorning) {
-      const result = morningChoice(state, chooseMorning(observeState(state)));
+      // 首选项可能要现金（占地费、修相机等），付不起就按顺序换下一个能选的。
+      const preferred = chooseMorning(observeState(state));
+      const ids = [preferred, ...state.pendingMorning.choices.map((choice) => choice.id).filter((id) => id !== preferred)];
+      let result = null;
+      for (const id of ids) { result = morningChoice(state, id); if (!result.error) break; }
       if (result.error) throw new Error(result.error);
       state = result.state;
       continue;

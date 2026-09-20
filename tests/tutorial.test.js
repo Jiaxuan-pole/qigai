@@ -1,12 +1,14 @@
-// 引导的纯逻辑：步骤表的目标选择器必须在页面标记里真的存在；阶段只在第 1 回合与第 1 回合结算后出现。
+// 导览的纯逻辑：步骤表的目标选择器必须在页面标记里真的存在；阶段只在第 1 回合与第 1 回合结算后出现。
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { STEPS, prepareTutorialTarget, stepsFor, stageOf } from '../public/ui/tutorial.js';
+import { STEPS, CONTEXT_GUIDES, prepareTutorialTarget, stepsFor, stageOf } from '../public/ui/tutorial.js';
 
 const markup = readFileSync(new URL('../public/index.html', import.meta.url), 'utf8')
   + readFileSync(new URL('../public/ui/render.js', import.meta.url), 'utf8')
-  + readFileSync(new URL('../public/ui/app.js', import.meta.url), 'utf8');
+  + readFileSync(new URL('../public/ui/app.js', import.meta.url), 'utf8')
+  // 战斗引导锚在战斗弹层自己的标记上
+  + readFileSync(new URL('../public/ui/combat.js', import.meta.url), 'utf8');
 
 function tokenExists(sel) {
   const id = sel.match(/#([\w-]+)/);
@@ -19,12 +21,30 @@ function tokenExists(sel) {
 }
 
 test('每一步的目标选择器都能在页面标记里找到对应的 id/class/data-open', () => {
+  assert.equal(stepsFor(1).length, 6, '第一组恰好六步');
+  assert.equal(stepsFor(2).length, 3, '第二组恰好三步');
   for (const stage of [1, 2]) {
-    assert.ok(stepsFor(stage).length >= 5, `第${stage}组至少五步`);
     for (const step of stepsFor(stage)) assert.ok(tokenExists(step.sel), `${step.sel} 在 index.html/render.js/app.js 里不存在`);
+  }
+  // 情境引导锚在排程窗内部的按钮上时，窗没开就是 0x0 的空洞，卡片会压到左上角的引导条；一律锚到常显的 HUD 节点。
+  for (const [id, steps] of Object.entries(CONTEXT_GUIDES)) for (const step of steps) {
+    assert.ok(tokenExists(step.sel), `${id}: ${step.sel} 在页面标记里不存在`);
+    assert.ok(!step.openDrawer, `${id}: ${step.sel} 不该依赖打开排程窗`);
+    assert.ok(!/data-open="(health|wishes|inventory)"|#schedule|#nightSpot/.test(step.sel), `${id}: ${step.sel} 藏在排程窗里`);
   }
   assert.deepEqual(Object.keys(STEPS), ['1', '2']);
   assert.deepEqual(stepsFor(3), []);
+});
+
+test('每步标题不超过 10 字、正文不超过 55 字，全部收起抽屉、没有展开抽屉的步', () => {
+  for (const stage of [1, 2]) {
+    for (const step of stepsFor(stage)) {
+      assert.ok(step.title.length <= 10, `${step.title} 标题过长`);
+      assert.ok(step.text.length <= 55, `${step.title} 正文过长：${step.text.length}`);
+      assert.equal(step.closeDrawer, true, `${step.title} 应收起抽屉`);
+      assert.equal(step.openDrawer, undefined, `${step.title} 不该展开抽屉`);
+    }
+  }
 });
 
 test('阶段判断：第 1 回合第一组，结算一次后第二组，之后或已完成就没有', () => {
@@ -50,35 +70,28 @@ test('前两章在需要时给出情境引导，看过的不会重复', () => {
   assert.equal(stageOf({ ...base, day: 9, items: [{ itemId: 'fishing_rod', container: 'ma' }] }, 'done'), 'fishing');
 });
 
-test('新增玩法引导覆盖长期任务、人物展开、时长成本、移动与物品动作', () => {
+test('第一组对着 HUD 讲：顶栏、人物卡、街景、引导条、快捷栏、底部四个按钮', () => {
   const first = stepsFor(1);
-  assert.ok(first.some(step => step.sel === '#taskStrip' && /长期/.test(step.text)));
-  assert.ok(first.some(step => /展开/.test(step.text) && /人物/.test(step.title)));
-  assert.ok(first.some(step => step.sel === '#durationPick' && /精神/.test(step.text)));
-  assert.ok(first.some(step => /左右.*朝向/.test(step.text)));
-  assert.ok(first.some(step => /抽烟.*喝酒.*动作/.test(step.text)));
-  assert.ok(first.some(step => step.sel === '#tSlot' && /自动/.test(step.text)));
-  assert.ok(stepsFor('combat').some(step => /防守.*撤离/.test(step.text)));
+  assert.deepEqual(first.map((step) => step.sel), ['.topstats', '#characters', '.stage-view', '#taskStrip', '#hotbar', '.hud-actions']);
+  assert.ok(first.some((step) => step.sel === '#taskStrip' && /引导/.test(step.text)));
+  assert.ok(first.some((step) => step.sel === '#characters' && /展开/.test(step.text)));
+  assert.ok(first.some((step) => step.sel === '.stage-view' && /热点/.test(step.text)));
+  assert.ok(first.some((step) => step.sel === '.hud-actions' && /结束今天/.test(step.text)));
+  assert.deepEqual(stepsFor(2).map((step) => step.sel), ['.journal', '#btnMenu', '[data-open="events"]']);
+  assert.ok(stepsFor(2).some((step) => step.sel === '#btnMenu' && /库存/.test(step.text)));
+  assert.ok(stepsFor('combat').some((step) => /防守.*撤离/.test(step.text)));
 });
 
-test('引导先提示地图栏按钮，再展开行动抽屉定位具体步骤', () => {
+test('收起抽屉的步会先把展开的抽屉关上，再定位目标', () => {
   const first = stepsFor(1);
-  const buttonIndex = first.findIndex((step) => step.sel === '#planToggle');
-  const drawerIndex = first.findIndex((step) => step.sel === '#drawer .ctx');
-  assert.ok(buttonIndex >= 0 && drawerIndex > buttonIndex);
-  assert.ok(first.find((step) => step.sel === '#schedule')?.openDrawer);
-  assert.ok(first.find((step) => step.sel === '#mapWrap')?.closeDrawer);
-  assert.ok(first.find((step) => step.sel === '#btnAdvance')?.openDrawer);
-  assert.ok(stepsFor(2).find((step) => step.sel === '#planStatus')?.openDrawer);
-  assert.ok(stepsFor(2).find((step) => step.sel === '#nightSpot')?.openDrawer);
-  const toggle = { expanded: false, getAttribute() { return this.expanded ? 'true' : 'false'; }, click() { this.expanded = !this.expanded; } };
-  const drawer = { id: 'drawer' };
+  const toggle = { expanded: true, getAttribute() { return this.expanded ? 'true' : 'false'; }, click() { this.expanded = !this.expanded; } };
+  const stage = { className: 'stage-view' };
   const priorDocument = globalThis.document;
-  globalThis.document = { getElementById: () => toggle, querySelector: (sel) => sel === '#drawer .ctx' && toggle.expanded ? drawer : sel === '#mapWrap' && !toggle.expanded ? {} : null };
+  globalThis.document = { getElementById: () => toggle, querySelector: (sel) => sel === '.stage-view' && !toggle.expanded ? stage : null };
   try {
-    assert.equal(prepareTutorialTarget(first[drawerIndex]), drawer);
-    assert.equal(toggle.expanded, true);
-    assert.ok(prepareTutorialTarget(first.find((step) => step.sel === '#mapWrap')));
+    assert.equal(prepareTutorialTarget(first.find((step) => step.sel === '.stage-view')), stage);
+    assert.equal(toggle.expanded, false);
+    assert.equal(prepareTutorialTarget(first.find((step) => step.sel === '.stage-view')), stage, '已收起时不再点开关');
     assert.equal(toggle.expanded, false);
   } finally {
     globalThis.document = priorDocument;

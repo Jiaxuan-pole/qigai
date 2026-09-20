@@ -20,7 +20,7 @@ test('新档次均有商品、实际库存和像素图登记', () => {
   for (const id of IDS) { assert.ok(itemDef(id)); assert.ok(s.shops.convenience.stock[id] > 0); }
 });
 
-test('多档烟酒扣款、扣库存、用量与状态，沿用每日限制', () => {
+test('多档烟酒扣款、扣库存、用量与状态，不设每日次数上限', () => {
   for (const [id, price, uses, mind, intox] of [
     ['cigarette_regular', 20, 8, 5, 0], ['cigarette_premium', 32, 10, 6, 0],
     ['beer_bottle', 10, 2, 5, 1], ['baijiu', 18, 3, 6, 2], ['vodka', 28, 3, 6, 2],
@@ -36,7 +36,7 @@ test('多档烟酒扣款、扣库存、用量与状态，沿用每日限制', ()
     assert.equal(u.state.actors.xuan.mind, 30 + mind);
     assert.equal(u.state.actors.xuan.intox, intox);
     assert.equal(u.state.items.find((x) => x.uid === r.made[0].uid)?.uses, uses - 1);
-    if (intox === 2) assert.match(useItem(u.state, 'xuan', r.made[0].uid).error, /饮酒上限/);
+    if (intox === 2) { const more = useItem(u.state, 'xuan', r.made[0].uid); assert.equal(more.error, undefined, id); assert.equal(more.state.actors.xuan.intox, 2); assert.equal(more.state.actors.xuan.drinks, 2); }
   }
 });
 

@@ -85,7 +85,8 @@ export function showModal(title, body, opts = {}) {
   document.body.style.overflow = 'hidden';
   UI.modalLock = Boolean(opts.lock);
   $('modalClose').disabled = UI.modalLock;
-  const first = $('modal').querySelector(opts.focus || 'button:not(:disabled):not(.close)');
+  // 只在内容区里找初始焦点：#modal 里还有默认隐藏的菜单 tab 栏，聚不上会让焦点留在触发按钮上。
+  const first = $('modal').querySelector(opts.focus || '#modalContent button:not(:disabled)');
   if (first) first.focus();
 }
 
@@ -95,6 +96,7 @@ export function closeModal(force = false) {
   globalThis.window?.jwsnAudio?.cancelScope?.('card-table');
   UI.modalLock = false;
   $('modalOverlay').classList.remove('open');
+  $('modalTabs')?.setAttribute('hidden', '');
   document.body.style.overflow = '';
   UI.lastFocus?.focus?.();
 }

@@ -3,7 +3,7 @@ import { $, esc, UI, toast, showModal, closeModal, apply } from './core.js';
 import { NAMES, IDS, alive, active, meet, morningChoice, activeWishes } from '../game/engine.js';
 import { templateOf, wishSummary } from '../game/wishes.js';
 import { talkLines, nightLine } from '../game/text.js';
-import { chapterOf, weatherOf } from '../game/story.js';
+import { chapterOf, weatherOf, morningRequires } from '../game/story.js';
 import { requestDialogue } from './ai.js';
 import { zoneName } from './render.js';
 import { bridgeScene, screeningScene, bigPortrait, moodOf } from './pixel.js';
@@ -44,7 +44,7 @@ export function showMorning() {
   const ch = chapterOf(s.day);
   const isChapterStart = UI.data.chapters.some((c) => c.startDay === s.day);
   const tag = isChapterStart ? `第${ch.number}章 · ${ch.title}` : `D${s.day} / 100`;
-  const body = `<p>${esc(node.text)}</p><div class="meeting-options">${node.choices.map((c) => { const err = c.requires ? c.requires(s) : null; return `<button data-mc="${c.id}" ${err ? 'disabled' : ''}>${esc(c.label)}${err ? '（' + esc(err) + '）' : ''}</button>`; }).join('')}</div>`;
+  const body = `<p>${esc(node.text)}</p><div class="meeting-options">${node.choices.map((c) => { const err = morningRequires(s, node, c.id); return `<button data-mc="${c.id}" ${err ? 'disabled' : ''}>${esc(c.label)}${err ? '（' + esc(err) + '）' : ''}</button>`; }).join('')}</div>`;
   showModal(node.title, body, { lock: true, tag });
   $('modalContent').querySelectorAll('[data-mc]').forEach((b) => { b.onclick = () => { if (apply(morningChoice(UI.state, b.dataset.mc))) { closeModal(true); UI.render(); } }; });
 }

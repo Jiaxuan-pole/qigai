@@ -166,7 +166,7 @@ export function collectBottles(state, actorId, district, events) {
   const key = `bottles:${state.day}:${district}`;
   const times = state.daily[key] || 0;
   state.daily[key] = times + 1;
-  let n = intBetween(rng(state.seed, key + ':' + times), 3, 8);
+  let n = intBetween(rng(state.seed, key + ':' + times), 2, 5);
   n = Math.max(1, n - times * 2);
   state.bottles = (state.bottles || 0) + n;
   events.push(`${state.names[actorId]}在${districtName(district)}捡了${n}个瓶罐（共${state.bottles}）。`);

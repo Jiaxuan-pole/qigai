@@ -21,7 +21,7 @@ test('四种主动交易原收入只入账一次，各建一局待办', () => {
       const [s, uid] = setup();
       return [s, (v) => fn === sellFish ? fn(v, 'xuan', uid, { controlledActorId: 'xuan' }) : fn(v, uid, 'sell', { actorId: 'xuan', controlledActorId: 'xuan' }), pay, variant];
     }),
-    [projected(), (s) => deliverProject(s, 'xuan', { controlledActorId: 'xuan' }), 90, 'deliverProject'],
+    [projected(), (s) => deliverProject(s, 'xuan', { controlledActorId: 'xuan' }), 45, 'deliverProject'],
   ];
   for (const [beforeState, act, pay, variant] of cases) {
     const out = act(beforeState);
@@ -49,7 +49,7 @@ test('非受控交易与送礼不建待办，非法交易保持原错误和状�
     [bottled(), (s) => sellBottles(s, 'xuan', { controlledActorId: 'fan' }), 5],
     [fish, (s) => sellFish(s, 'xuan', fishUid, { controlledActorId: 'fan' }), 14],
     [old, (s) => salvageDispose(s, oldUid, 'sell', { actorId: 'xuan', controlledActorId: 'fan' }), 24],
-    [projected(), (s) => deliverProject(s, 'xuan', { controlledActorId: 'fan' }), 90],
+    [projected(), (s) => deliverProject(s, 'xuan', { controlledActorId: 'fan' }), 45],
   ];
   for (const [beforeState, act, pay] of cases) {
     const out = act(beforeState);

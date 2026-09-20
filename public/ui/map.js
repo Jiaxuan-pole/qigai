@@ -10,8 +10,15 @@ import { sleepSurfaceFor, furnitureRect } from '../game/furniture.js';
 import { drawSleepers, drawFloorBubble } from './sleep-scene.js';
 import { STREET_OBJECTS } from './street-props.js';
 import { drawFurnitureOverview } from './furniture-store-art.js';
+import { passersby } from '../game/npcs.js';
 
-export const DISTRICT_POS = { recycle: [170, 122], service: [790, 122], camp: [150, 330], market: [480, 290], station: [800, 330], cinema: [480, 470], river: [352, 130], cafe: [270, 445], cardhall: [700, 475], furniture: [570, 122] };
+// 街景里路人的落点，与 street-art 画路人的位置一致（那边只在这个基础上左右晃动）。
+const STREET_NPC_X = [145, 800, 550, 350, 888, 65];
+// 营地与三处室内场景（咖啡馆、棋牌馆、家具城）不画路人，也就没有热点。
+export const streetNpcSpots = (state, district) => ['camp', 'cafe', 'cardhall', 'furniture'].includes(district) || !state.daily?.begged || !state.relations ? [] : passersby(state, district, state.slot).map((npc, i) => ({ npc, x: STREET_NPC_X[i], y: 359 + i % 2 * 8 }));
+
+// 三排街区都收在画布 y<=490 以内：底部一排不再被 HUD 底栏盖住，卡片贴在各自的人行道带上。
+export const DISTRICT_POS = { recycle: [170, 122], service: [790, 122], camp: [150, 300], market: [480, 285], station: [800, 300], cinema: [480, 425], river: [352, 130], cafe: [285, 425], cardhall: [700, 432], furniture: [570, 122] };
 const NEIGHBORS = neighbors;
 export const SHOP_POS = { convenience: [548, 262], lottery_kiosk: [862, 296], recycle_shop: [176, 96], pharmacy: [736, 96], bathhouse: [846, 96], art_hardware: [396, 452], tavern: [746, 388], clinic: [792, 168], coffee_shop: [286, 421], furniture_store: [570, 94] };
 const SPOT_POS = { breakfast: [416, 262], water: [724, 168], wall: [566, 452], cards: [726, 296], board: [206, 306], box: [96, 372], studio: [480, 522], fishing: [398, 156], cardhall: [700, 475] };
@@ -227,7 +234,8 @@ export function routeFor(state, actorId, district) {
   return { error: '这条路现在走不通。' };
 }
 
-async function startRoute(district) {
+// enterFrom：从哪个路口走出来的，到了下一条街就从对面路口进场，而不是凭空出现在街中央。
+async function startRoute(district, enterFrom = null) {
   const plan = routeFor(M.state, M.selectedActor, district);
   if (plan.error || M.route) return false;
   if (!plan.steps.length) return true;
@@ -242,6 +250,8 @@ async function startRoute(district) {
       M.streetDistrict = next;
       M.streetEdge = null;
       setMapMode('street');
+      // 落点离对面路口留足距离：按住方向键的自动重复不会立刻把人又推回上一条街。
+      if (enterFrom) { placeStreetActor(M.selectedActor, next, enterFrom === 'right' ? (next === 'camp' ? 300 : 230) : (next === 'camp' ? 1300 : 730)); M.streetPositions[M.selectedActor].facing = enterFrom === 'right' ? 1 : -1; }
       updateStreetOverlay(M.state, M.shops, M.events);
       await showStreetTransition(next);
     }
@@ -274,7 +284,7 @@ function loop() {
       if (M.actions[M.selectedActor] === 'fish') delete M.actions[M.selectedActor];
       delete M.actorPose[M.selectedActor]; delete M.itemAnimations[M.selectedActor];
       M.sleeping = M.sleeping.filter(id => id !== M.selectedActor);
-      if (M.streetEdge !== next.edge) { M.streetEdge = next.edge; refreshStreetUI(); }
+      if (M.streetEdge !== next.edge) { M.streetEdge = next.edge; if (!autoCrossEdge(streetState, next.edge)) refreshStreetUI(); }
     }
     stepStreetTravel(now);
     for (const [id, action] of Object.entries(M.actions)) {
@@ -361,6 +371,34 @@ function finishStreetTravel(travel, snap = false) {
   if (snap) placeStreetActor(travel.actorId, travel.district, travel.toX, travel.toY);
   M.streetTravel = null;
   travel.resolve();
+}
+
+// 点了就响应：人物同时走过去只是演出；上一段没走完就先落位再走新的，不再吞掉点击。
+function walkToward(district, x, y, duration = null) {
+  const actor = M.state?.actors?.[M.selectedActor];
+  if (actor?.location !== district || actor.life !== 'active') return;
+  if (M.streetTravel) finishStreetTravel(M.streetTravel, true);
+  const from = positionFor();
+  const target = walkStreetPosition({ ...from, x, y }, { x: 0, y: 0 }, 0);
+  void walkStreetSegment(district, from.x, target.x, duration ?? Math.min(850, Math.max(180, Math.hypot(target.x - from.x, target.y - from.y) * 1.2)), target.y);
+}
+
+// 走到街口自然过渡：朝这个方向最顺路的相邻街区（按总览图坐标，越接近水平越优先，再看距离）。
+export function edgeNeighbor(district, edge) {
+  const [x, y] = DISTRICT_POS[district] || [];
+  const sign = edge === 'right' ? 1 : edge === 'left' ? -1 : 0;
+  if (!sign) return null;
+  const options = (NEIGHBORS[district] || []).map((id) => ({ id, dx: DISTRICT_POS[id][0] - x, dy: DISTRICT_POS[id][1] - y })).filter((o) => Math.sign(o.dx) === sign && Math.abs(o.dx) >= Math.abs(o.dy) * 0.6);
+  options.sort((a, b) => Math.abs(a.dy) / Math.abs(a.dx) - Math.abs(b.dy) / Math.abs(b.dx) || Math.abs(a.dx) - Math.abs(b.dx));
+  return options[0]?.id || null;
+}
+
+function autoCrossEdge(state, edge) {
+  const target = edge && M.nightDay === null && !M.route ? edgeNeighbor(M.streetDistrict, edge) : null;
+  if (!target || routeFor(state, M.selectedActor, target).error) return false;
+  stopStreetWalking();
+  void startRoute(target, edge);
+  return true;
 }
 
 function walkStreetSegment(district, fromX, toX, duration = 500, toY = positionFor().y) {
@@ -627,40 +665,31 @@ export function updateOverlay(state, sel, shopsMeta, districtsMeta, events) {
   if (streetSelect) streetSelect.innerHTML = districtsMeta.map((d) => `<option value="${d.id}" ${d.id === M.streetDistrict ? 'selected' : ''}>${esc(d.name)} · 查看</option>`).join('');
   const ov = $('mapOverlay');
   const pct = (x, y) => `left:${(x / 960 * 100).toFixed(2)}%;top:${(y / 540 * 100).toFixed(2)}%`;
+  // 总览只做导航：每个街区一张卡（名字 + 路程），人在哪、街上有什么热点。店铺和地点在街景里点，不再堆到总览上。
   let html = '';
   const actor = state.actors[sel.actor];
   for (const d of districtsMeta) {
     const [x, y] = DISTRICT_POS[d.id];
     const route = routeFor(state, sel.actor, d.id);
     const current = actor?.location === d.id;
-    const disabled = Boolean(route.error || current || M.route);
-    const reason = current ? '已在这里' : M.route ? '正在前往其他街区' : route.error || '';
-    const label = current ? '已在此' : route.error ? '不能前往' : `前往 · ${route.steps.length}街 · 体力${route.cost}`;
-    html += `<button class="hot district ${sel.zone === d.id ? 'selected-district' : ''}" style="${pct(x, y + 58)}" data-district="${d.id}">${esc(d.name)}</button><button class="hot travel-district" style="${pct(x, y + 84)}" data-travel-district="${d.id}" ${disabled ? 'disabled' : ''} title="${esc(reason)}" aria-label="${esc(`${d.name}：${reason || label}`)}">${esc(label)}</button>`;
+    const blocked = Boolean(route.error || M.route) && !current;
+    const sub = current ? '已在此 · 点击看街景' : M.route ? '正在赶路' : route.error ? route.error : `前往 · ${route.steps.length}街 · 体力${route.cost}`;
+    html += `<button class="hot district${current ? ' here' : ''}${sel.zone === d.id ? ' selected-district' : ''}" style="${pct(x, y + 40)}" data-travel-district="${d.id}" ${blocked ? 'aria-disabled="true"' : ''} aria-label="${esc(`${d.name}：${sub}`)}"><b>${esc(d.name)}</b><small>${esc(sub)}</small></button>`;
   }
   for (const [id, person] of Object.entries(state.actors)) {
     if (person.life === 'dead' || person.life === 'unrecruited') continue;
     const [x, y] = anchor(person.location, id);
     html += `<button class="hot actor-marker" style="${pct(x + 4, y - 30)};--actor-color:${id === 'xuan' ? '#6fa9cf' : id === 'fan' ? '#bd715f' : '#6fa876'}" data-actor-select="${id}" aria-label="选择${NAMES[id]}，现在在${esc(STREET_NAMES[person.location])}">${esc(NAMES[id])}</button>`;
   }
-  for (const s of shopsMeta) {
-    const [x, y] = SHOP_POS[s.id];
-    if (state.day < s.unlockDay) continue;
-    const closed = s.closed;
-    html += `<button class="hot shop" style="${pct(x, y)}" data-shop="${s.id}" title="${esc(closed || '营业中')}">${esc(s.name)}${closed ? '·关' : ''}</button>`;
-  }
-  const spots = [['breakfast', '阿梅早餐摊', 'market'], ['water', '公共水点', 'service'], ['wall', '许可涂鸦墙', 'cinema'], ['board', '愿望板', 'camp'], ['box', '物资箱', 'camp'], ['studio', '许姐工作间', 'cinema'], ['fishing', '河岸钓位', 'river'], ['cardhall', '入馆选桌 · 1小时 · 未下注', 'cardhall']];
-  for (const [k, name, d] of spots) { const [x, y] = SPOT_POS[k]; html += `<button class="hot spot" style="${pct(x, y)}" data-spot="${k}" data-district="${d}">${esc(name)}</button>`; }
+  const stacked = {};
   for (const ev of events) {
     const [x, y] = DISTRICT_POS[ev.district];
-    html += `<button class="hot event" style="${pct(x - 60 + (ev.i % 2) * 120, y - 92)}" data-event="${ev.uid}">${esc(ev.title)} · 剩${ev.left}回合</button>`;
+    const row = stacked[ev.district] = (stacked[ev.district] || 0) + 1;
+    html += `<button class="hot event" style="${pct(x, y - 66 - row * 20)}" data-event="${ev.uid}" title="${esc(ev.left)}">${esc(ev.title)}<small>${esc(ev.left)}</small></button>`;
   }
   ov.innerHTML = html;
-  ov.querySelectorAll('[data-district]:not([data-spot])').forEach((b) => { b.onclick = () => M.handlers.onDistrict(b.dataset.district); });
-  ov.querySelectorAll('[data-travel-district]').forEach((b) => { b.onclick = () => travelFromOverview(b.dataset.travelDistrict); });
+  ov.querySelectorAll('[data-travel-district]').forEach((b) => { b.onclick = () => { if (b.getAttribute?.('aria-disabled') === 'true') return false; if (state.actors[M.selectedActor]?.location === b.dataset.travelDistrict) { viewStreet(b.dataset.travelDistrict); return true; } return travelFromOverview(b.dataset.travelDistrict); }; });
   ov.querySelectorAll('[data-actor-select]').forEach((b) => { b.onclick = () => M.handlers.onActorSelect?.(b.dataset.actorSelect); });
-  ov.querySelectorAll('[data-shop]').forEach((b) => { b.onclick = () => M.handlers.onShop(b.dataset.shop); });
-  ov.querySelectorAll('[data-spot]').forEach((b) => { b.onclick = () => M.handlers.onSpot(b.dataset.spot, b.dataset.district); });
   ov.querySelectorAll('[data-event]').forEach((b) => { b.onclick = () => M.handlers.onEvent(b.dataset.event); });
   updateStreetOverlay(state, shopsMeta, events);
   refreshStreetUI();
@@ -693,28 +722,24 @@ function updateStreetOverlay(state, shopsMeta, events) {
     ...(!['camp', 'cafe', 'cardhall', 'furniture'].includes(district) ? [`<button class="street-hot spot" style="${pointStyle(104, 240)}" data-spot="tasks" data-object-x="104" data-object-y="398">街头告示</button>`] : []),
     ...streetEvents.map((event, i) => `<button class="street-hot event" style="${pointStyle(190 + i % 3 * 270, 180 + i % 3 * 60)}" data-event="${event.uid}" data-event-x="${190 + i % 3 * 270}" data-event-y="${420 + i % 3 * 32}">${esc(event.title)}</button>`),
     ...actors.map(([id]) => `<button type="button" class="street-actor" data-street-actor="${id}" aria-label="${NAMES[id]}，随身物品" title="${NAMES[id]} · 随身物品"><span class="sr-only">${NAMES[id]}</span></button>`),
+    ...streetNpcSpots(state, district).map(({ npc, x, y }) => `<button type="button" class="street-npc" style="left:${(x - 22) / 960 * 100}%;top:${(y - 6) / 540 * 100}%;width:${82 / 960 * 100}%;height:${74 / 540 * 100}%" data-street-npc="${esc(npc.id)}" data-object-x="${x + 19}" data-object-y="${y + 40}" title="${esc(npc.name)}${npc.job ? ' · ' + esc(npc.job) : ''} · ${esc(npc.mood.label)}" aria-label="和${esc(npc.name)}说话"><span class="street-npc-name">${esc(npc.name)}</span></button>`),
   ].join('');
   if (district === 'camp') layoutCampHotspots(root);
   root.querySelectorAll('[data-shop]').forEach((button) => { button.onclick = () => M.handlers.onShop(button.dataset.shop); });
-  root.querySelectorAll('[data-spot]').forEach((button) => { button.onclick = async () => {
+  root.querySelectorAll('[data-spot]').forEach((button) => { button.onclick = () => {
+    if (interactionBlocked()) return;
     const id = button.dataset.spot;
-    const actorId = M.selectedActor;
-    if (state.actors[actorId]?.location === district && (button.dataset.objectX || district === 'camp' && ['bed', 'table', 'furniture', 'parcel', 'storage'].includes(id))) {
-      if (M.streetTravel || interactionBlocked()) return;
-      const target = walkStreetPosition({ ...positionFor(), x: Number(button.dataset.objectX || button.dataset.worldX), y: Number(button.dataset.objectY || button.dataset.worldY) + 24 }, { x: 0, y: 0 }, 0);
-      await walkStreetSegment(district, positionFor().x, target.x, Math.min(850, Math.max(180, Math.hypot(target.x - positionFor().x, target.y - positionFor().y) * 1.2)), target.y);
-      if (M.selectedActor !== actorId || M.streetDistrict !== district) return;
-    }
-    M.handlers.onSpot(id, district);
+    if (button.dataset.objectX || district === 'camp' && ['bed', 'table', 'furniture', 'parcel', 'storage'].includes(id)) walkToward(district, Number(button.dataset.objectX || button.dataset.worldX), Number(button.dataset.objectY || button.dataset.worldY) + 24);
+    M.handlers.onSpot(id, district, { immediate: true });
   }; });
-  root.querySelectorAll('[data-event]').forEach((button) => { button.onclick = async () => {
-    const actorId = M.selectedActor;
-    if (state.actors[actorId]?.location === district && state.actors[actorId]?.life === 'active') {
-      if (M.streetTravel || interactionBlocked()) return;
-      const target = walkStreetPosition({ ...positionFor(), x: Number(button.dataset.eventX), y: Number(button.dataset.eventY) }, { x: 0, y: 0 }, 0);
-      await walkStreetSegment(district, positionFor().x, target.x, 420, target.y);
-      if (M.selectedActor !== actorId || M.streetDistrict !== district) return;
-    }
+  root.querySelectorAll('[data-street-npc]').forEach((button) => { button.onclick = () => {
+    if (interactionBlocked()) return;
+    walkToward(district, Number(button.dataset.objectX) - 30, Number(button.dataset.objectY) + 24);
+    M.handlers.onNpc?.(button.dataset.streetNpc, district);
+  }; });
+  root.querySelectorAll('[data-event]').forEach((button) => { button.onclick = () => {
+    if (interactionBlocked()) return;
+    walkToward(district, Number(button.dataset.eventX), Number(button.dataset.eventY), 420);
     M.handlers.onEvent(button.dataset.event);
   }; });
   root.querySelectorAll('[data-street-actor]').forEach((button) => { button.onclick = () => { if (!interactionBlocked()) M.handlers.onActorUse?.(button.dataset.streetActor); }; });

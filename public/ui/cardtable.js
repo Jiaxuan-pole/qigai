@@ -25,7 +25,9 @@ export function offerCardNight() {
   return new Promise((resolve) => {
     const s = UI.state;
     if (s.pending?.cards) { ui = { lastSeq: 0, busy: false, resolve }; if (s.pending.cards.game === 'blackjack') showNightBlackjack(); else showTable(); return; }
-    if (!canCardNight(s, 'free').ok) return resolve();
+    // 条件不够时要说出原因：以前静默返回，玩家点了「打两手」以为按钮坏了。
+    const free = canCardNight(s, 'free');
+    if (!free.ok) { toast('今晚打不了牌：' + free.reason); return resolve(); }
     const cashOk = canCardNight(s, 'cash');
     const who = ['xuan', 'fan', 'ma'].map((id) => `<option value="${id}" ${id === 'ma' ? 'selected' : ''}>${NAMES[id]}</option>`).join('');
     showModal('今晚打牌吗？', `<p class="small">马哥把那副旧扑克拍在纸箱上：“三个人，正好。”火柴棍当筹码不伤钱；来真钱的，每人从公共现金拿 10 块当本钱，占全队一次博彩额度。</p>

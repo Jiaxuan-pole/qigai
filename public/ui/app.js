@@ -7,7 +7,7 @@ import { validateSave } from '../game/save.js';
 import { ACTIONS } from '../game/actions.js';
 import { plannerToggleOwnsSpace, renderAll, setDrawerExpanded, zoneName } from './render.js';
 import { initMap, animateMoves, showWalkNote, viewStreet } from './map.js';
-import { showShop, showTicket, showInventory, showWishes, showHealth, showEvents, showEvent, showNpcs, showMapList, showChapters, showHelp, showBegSession, showBinBoard, showCamp } from './modals.js';
+import { showShop, showTicket, showInventory, showWishes, showHealth, showEvents, showEvent, showNpcs, showMapList, showChapters, showHelp, showBegSession, showBinBoard, showCamp, npcHandlers } from './modals.js';
 import { showMeeting, showMorning, showResults, showNight, showScreening, eveningTalk, showEnding } from './flow.js';
 import { playIntro } from './intro.js';
 import { offerCardNight } from './cardtable.js';
@@ -19,7 +19,7 @@ import { readNightCheckpoint, clearNightCheckpoint } from './night-state.js';
 import { triggerCampNightActivity } from './camp-night.js';
 import { prepareNamedGame, importNamedState, openSavedGames } from './save-flow.js';
 import { getActiveSharedSave, onSharedSaveStatus } from './saves-client.js';
-import { autoArrangeTeammates } from './autoplan.js';
+import { autoArrangeTeammates, fillTeammatesNow, planLocally, repairHour, remainingHours } from './autoplan.js';
 import { queueItemWishes, cancelItemWishes } from './wish-flow.js';
 import { DAY_END_HOUR, planIndex } from '../game/clock.js';
 import { showCooking } from './cooking-modal.js';
@@ -32,10 +32,14 @@ import { startLiveClock, encounteredEvent } from './live-clock.js';
 import { showCombat } from './combat.js';
 import { showQuickItems } from './quick-items.js';
 import { configureTasks, renderTaskStrip, showTasks } from './tasks.js';
+import { initMenu } from './menu.js';
 
 let busy = false;
+let skipping = false;
 let planningRequest = null;
 let liveClock = null;
+// 街道热点直接对应的一小时行动；其余热点仍是弹层。
+const SPOT_ACTIONS = { bed: ['sleep', 'camp'], bins: ['bins', null], bottles: ['bottles', null], fishing: ['fish', 'river'], cardhall: ['casino', 'cardhall'], water: ['wash', 'service'], wall: ['graffiti', 'cinema'], breakfast: ['kitchen', 'market'] };
 
 function phaseDialog() {
   if (UI.night) return;
@@ -133,14 +137,15 @@ function assignNow(skipRisk = false) {
     return;
   }
   const r = assign(s, UI.sel.actor, UI.sel.hour, UI.sel.action, opts);
-  if (apply(r)) { if (liveClock?.paused) liveClock.restart(); setDrawerExpanded(false); toast(`已安排：${NAMES[UI.sel.actor]}「${a.name}」连续${opts.duration}小时，至${String(UI.sel.hour + opts.duration).padStart(2, '0')}:00。`); }
+  // 排完一件事窗口留着：玩家通常要接着给下一个小时或另一个人排，关窗再开太折腾。
+  if (apply(r)) { if (liveClock?.paused) liveClock.restart(); toast(`已安排：${NAMES[UI.sel.actor]}「${a.name}」连续${opts.duration}小时，至${String(UI.sel.hour + opts.duration).padStart(2, '0')}:00。`); }
 }
 
-async function advance(force = false, automatic = false) {
+async function advance(force = false, automatic = false, opts = {}) {
   cancelItemWishes();
   planningRequest?.abort();
   if (UI.night) { toast('先结束这一晚，再安排明天。'); return false; }
-  if (busy) return false;
+  if (busy || (skipping && !opts.skip)) return false;
   const s = UI.state;
   if (s.pending?.combat) { void showCombat(); return false; }
   if (s.phase !== 'planning' && s.phase !== 'tail') { phaseDialog(); return false; }
@@ -159,7 +164,8 @@ async function advance(force = false, automatic = false) {
     return false;
   }
   const settledHour = s.hour, settledDay = s.day;
-  const controlledActorId = UI.sel.actor;
+  // 跳过整天时没有人被操控：小游戏、收竿、翻桶全按队友方式自动结算。
+  const controlledActorId = opts.controlledActorId === undefined ? UI.sel.actor : opts.controlledActorId;
   const result = settle(s, { controlledActorId });
   if (result.error) { liveClock?.pause(); toast(result.error + (result.error.includes('体力不足') ? ' 睡1小时恢复20；便利店速溶4杯或咖啡店现制2杯补20（混饮累计）。' : '')); if (result.at) { UI.errAt = result.at; UI.sel.actor = result.at.actorId; UI.sel.hour = result.at.hour; } render(); return false; }
   setDrawerExpanded(false);
@@ -172,10 +178,10 @@ async function advance(force = false, automatic = false) {
   if (!alive(UI.state).includes(UI.sel.actor)) UI.sel.actor = alive(UI.state)[0] || UI.sel.actor;
   renderAll();
   // 人物自己走过去
-  if (result.moves.length) showWalkNote(`${String(settledHour).padStart(2, '0')}:00：` + result.moves.map((m) => NAMES[m.actorId] + '→' + zoneName(m.to)).join('，'));
+  if (result.moves.length && !opts.instant) showWalkNote(`${String(settledHour).padStart(2, '0')}:00：` + result.moves.map((m) => NAMES[m.actorId] + '→' + zoneName(m.to)).join('，'));
   // settle 已前进时段甚至换日，动作仍须读取结算前的任务。
   const executed = Object.fromEntries(IDS.map((id) => [id, s.plan[id][currentIndex]]));
-  await animateMoves(UI.state, result.moves, executed);
+  if (!opts.instant) await animateMoves(UI.state, result.moves, executed);
   const cookedUid = executed[UI.sel.actor]?.id === 'cook' ? executed[UI.sel.actor].targets?.[0] : null;
   if (cookedUid && s.items.find((item) => item.uid === cookedUid)?.itemId !== UI.state.items.find((item) => item.uid === cookedUid)?.itemId) {
     globalThis.window?.jwsnAudio?.play?.('cook_sizzle', { scope: 'cooking' });
@@ -183,8 +189,8 @@ async function advance(force = false, automatic = false) {
   showWalkNote(null);
   render();
   busy = false;
-  // 到店的人：当场买
-  for (const ar of result.arrivals) {
+  // 到店的人：当场买。跳过整天时不停下来逛店，清单里的东西结算时已经买好。
+  for (const ar of opts.skip ? [] : result.arrivals) {
     if (ar.kind && ar.kind !== 'shop') continue;
     if (UI.state.actors[ar.actorId].life !== 'active') continue;
     const shop = UI.data.shops.find((sh) => sh.district === ar.zone && !shopClosedReason(UI.state, sh.id, ar.slot) && UI.state.day >= sh.unlockDay);
@@ -323,18 +329,56 @@ async function newGame(skipIntro = false) {
 
 async function arrangeTeammates() {
   cancelItemWishes();
-  if (busy || UI.night || modalOpen()) return;
+  if (busy || skipping || UI.night || modalOpen()) return;
   planningRequest?.abort();
   const ctrl = new AbortController(); planningRequest = ctrl;
   const state = UI.state, selected = UI.sel.actor;
-  const button = $('btnAiPlan'); button.disabled = true; button.textContent = '正在安排队友…';
+  const button = $('btnAiPlan'); button.disabled = true; button.textContent = '正在安排队友全天…';
   try {
     const result = await autoArrangeTeammates(state, selected, { signal: ctrl.signal, stillCurrent: () => !ctrl.signal.aborted && UI.state === state && UI.state.seed === state.seed && UI.state.hour === state.hour && UI.state.hourTick === state.hourTick && UI.state.turn === state.turn && UI.state.stateRevision === state.stateRevision && UI.sel.actor === selected && !UI.night });
     if (ctrl.signal.aborted) return;
     if (result.error) return toast(result.error);
-    if (apply(result)) toast((result.source === 'local' ? 'AI暂不可用，使用本地建议。' : 'AI已安排队友。') + result.summary);
+    if (apply(result)) toast((result.source === 'local' ? 'AI暂不可用，本地建议已排到21:00。' : 'AI已把队友排到21:00。') + result.summary, 7000);
   } catch (error) { if (!ctrl.signal.aborted) toast('这次没安排上：' + error.message); }
-  finally { if (planningRequest === ctrl) { planningRequest = null; button.disabled = false; button.textContent = 'AI安排队友本次'; } }
+  finally { if (planningRequest === ctrl) { planningRequest = null; button.disabled = false; button.textContent = 'AI安排队友全天'; } }
+}
+
+// 街道模式：点了地点就立刻做这一小时；空闲队友没安排的格随机补一件事，然后直接结算。
+// 返回 false 表示这个人此刻做不了（职业/时段/装备不符），调用方回落到旧的安排面板让玩家自己看原因。
+async function actNow(actionId, zone, opts = {}) {
+  if (busy || skipping || UI.night || modalOpen()) return true;
+  const s = UI.state, id = UI.sel.actor, a = ACTIONS[actionId];
+  if (!a || s.phase !== 'planning') { toast('现在不能直接行动，先处理当前画面。'); return true; }
+  const planned = assign(s, id, s.hour, actionId, { zone, duration: 1, ...opts });
+  if (planned.error) { toast(planned.error); return false; }
+  const filled = fillTeammatesNow(planned.state, id);
+  if (filled.error) { toast(filled.error); return true; }
+  if (!apply(filled, { noRender: true })) return true;
+  toast(`${NAMES[id]}：${a.name}` + (filled.filled.length ? '；' + filled.filled.map((f) => `${NAMES[f.actorId]}去${ACTIONS[f.actionId].name}`).join('、') : ''));
+  await advance(false, true);
+  return true;
+}
+
+// 结束今天：所有人余下的空格随机排满，然后无人操控地逐小时结算到夜里；需要玩家决定的画面（濒死、相遇、夜结算）照常弹出并停下。
+async function endDay() {
+  cancelItemWishes();
+  if (busy || skipping || UI.night || modalOpen() || UI.state.phase !== 'planning') return;
+  if (UI.state.pendingMorning) return toast('先处理今天的晨间节点。');
+  planningRequest?.abort();
+  const startDay = UI.state.day;
+  skipping = true;
+  const button = $('btnEndDay'); button.disabled = true;
+  try {
+    const planned = planLocally(UI.state, active(UI.state).filter((id) => !UI.state.busy?.[id]), remainingHours(UI.state));
+    if (planned.filled.length) { planned.state.stateRevision += 1; apply({ state: planned.state }, { noRender: true }); }
+    toast(`结束今天：${planned.filled.length ? '补排了' + planned.filled.length + '格，' : ''}三个人自己过完今天。`);
+    while (UI.state.phase === 'planning' && UI.state.day === startDay && !UI.night && !UI.state.pendingMorning) {
+      const fixed = repairHour(UI.state);
+      if (fixed.error) { toast(fixed.error); if (fixed.at) { UI.errAt = fixed.at; UI.sel.actor = fixed.at.actorId; } break; }
+      if (fixed.state !== UI.state) apply(fixed, { noRender: true });
+      if (!await advance(false, true, { skip: true, controlledActorId: null, instant: true })) break;
+    }
+  } finally { skipping = false; button.disabled = false; render(); }
 }
 
 async function boot() {
@@ -350,6 +394,18 @@ async function boot() {
     onNpcs: showNpcs,
     onInventory: showInventory,
     onEvent: showEvent,
+    // 引导按钮和街景热点一样立刻做这一小时；这个人此刻做不了才退回排程窗口让玩家看原因。
+    onGuidePlan: async ({ actorId, actionId, zone }) => {
+      chooseHour(actorId, UI.state.hour);
+      if (!(await actNow(actionId, zone))) {
+        UI.sel.action = actionId; UI.sel.zone = zone; UI.sel.duration = undefined;
+        setDrawerExpanded(true); render();
+      }
+    },
+    onCamp: showCamp,
+    onEndDay: endDay,
+    onShop: (shopId, actorId) => showShop(shopId, actorId, 'now'),
+    onWishes: showWishes,
   });
   bindPlannerWindow();
   new MutationObserver(() => { if (!modalOpen()) queueItemWishes(() => !busy && !planningRequest); }).observe($('modalOverlay'), { attributes: true, attributeFilter: ['class'] });
@@ -366,8 +422,10 @@ async function boot() {
     },
     onDistrict: (id) => { if (UI.night) return; UI.sel.zone = UI.sel.zone === id ? null : id; UI.sel.targets = []; setDrawerExpanded(true); render(); },
     onShop: (shopId) => { if (UI.night) return toast('夜深了，明天再去店里。'); showShop(shopId, UI.sel.actor, 'now'); },
-    onSpot: (spot, district) => {
+    onNpc: (npcId, district) => { if (UI.night) return toast('夜深了，明天再找人说话。'); showNpcs(district, npcId); },
+    onSpot: async (spot, district, opts = {}) => {
       if (UI.night && district === 'camp') { void triggerCampNightActivity(spot); return; }
+      if (opts.immediate && SPOT_ACTIONS[spot] && !UI.night) { const [actionId, zone] = SPOT_ACTIONS[spot]; if (await actNow(actionId, zone || district)) return; }
       if (spot === 'storage' || spot === 'box') return showInventory();
       if (spot === 'furniture' || spot === 'parcel' || spot === 'table') return showFurniture(UI.sel.actor);
       if (spot === 'workbench' || spot === 'tv') return showCamp();
@@ -391,9 +449,11 @@ async function boot() {
   $('btnImport').onclick = importSave;
   $('btnHelp').onclick = showHelp;
   initAudio();
-  liveClock = startLiveClock(() => advance(false, true), () => busy || planningRequest || Boolean(UI.state?.pending?.combat) || Boolean(pendingWorkGame()));
+  liveClock = startLiveClock(() => advance(false, true), () => busy || skipping || planningRequest || Boolean(UI.state?.pending?.combat) || Boolean(pendingWorkGame()));
+  initMenu({ plan: () => {}, inventory: showInventory, wishes: showWishes, health: showHealth, tasks: showTasks, map: () => {}, camp: showCamp, chapters: showChapters, system: showSystem, help: showHelp });
   $('btnSaves').onclick = () => openSavedGames(enterGame);
   $('btnAiPlan').onclick = arrangeTeammates;
+  $('btnEndDay').onclick = endDay;
   $('planToggle').onclick = (event) => { event.stopPropagation(); setDrawerExpanded($('planToggle').getAttribute('aria-expanded') !== 'true'); };
   $('planToggle').onkeydown = (event) => { if (event.code === 'Space') event.stopPropagation(); };
   onSharedSaveStatus(({ status, detail, active }) => {
@@ -404,6 +464,8 @@ async function boot() {
   });
   $('btnTitle').onclick = goTitle;
   $('btnAdvance').onclick = () => advance();
+  // 排程窗盖在 HUD 上，窗内镜像一个「开始行动」，不必先关窗。
+  document.querySelectorAll('[data-advance]').forEach((b) => { b.onclick = () => advance(); });
   document.querySelectorAll('[data-open]').forEach((b) => { b.onclick = () => { if (UI.night && ['map', 'events', 'camp'].includes(b.dataset.open)) return toast('今晚留在营地，物件就在街景里。'); return ({ tasks: showTasks, camp: showCamp, chapters: showChapters, help: showHelp, system: showSystem, map: showMapList, events: showEvents, inventory: showInventory, wishes: showWishes, health: showHealth, logs: () => showModal('街头记事', UI.state.log.map((x) => `<div class="logitem">${esc(x)}</div>`).join(''), { wide: true }) }[b.dataset.open])(); }; });
   $('modalClose').onclick = () => closeModal();
   $('modalOverlay').onclick = (e) => { if (e.target === $('modalOverlay')) closeModal(); };
@@ -432,6 +494,9 @@ async function boot() {
 }
 
 // 调试与自动化 QA 入口：只读状态与安全的状态替换，不绕过引擎校验。
-window.jwsn = { get state() { return UI.state; }, UI, setState(s) { const v = validateSave(s); if (!v.ok) throw new Error(v.reason); UI.state = s; save(); render(); phaseDialog(); }, advance, render };
+// 路人面板：点到某个路人就向他一个人求助，底部按钮问在场的最多三人；都是当场占一小时，和街景热点一个路子。
+npcHandlers.begNow = (district, npcId) => { if (UI.night) return toast('夜深了，明天再找人说话。'); void actNow('beg', district, npcId ? { targets: [npcId] } : {}); };
+
+window.jwsn = { get state() { return UI.state; }, UI, setState(s) { const v = validateSave(s); if (!v.ok) throw new Error(v.reason); UI.state = s; save(); render(); phaseDialog(); }, advance, render, actNow, endDay };
 
 boot().catch((e) => { console.error(e); document.body.insertAdjacentHTML('afterbegin', `<div style="padding:20px;color:#e57e6b">启动失败：${esc(e.message)}</div>`); });

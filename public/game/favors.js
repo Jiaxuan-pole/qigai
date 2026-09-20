@@ -10,9 +10,9 @@ export const FAVORS = {
     { id: 'liu3', title: '给王叔送一份热汤', text: '“服务站那老王胃不好，替我带一份。”', kind: 'deliver', item: 'hot_soup', to: 'reg_wang', days: 3, trustMin: 2, reward: { trust: 1, flag: 'liuSecondShift', text: '刘姐介绍了第二个帮厨位：早餐帮厨每天可安排两人。' } },
   ] },
   reg_chen: { name: '老陈', steps: [
-    { id: 'chen1', title: '站口跑三趟腿', text: '“先看看你稳不稳。”', kind: 'count', actions: ['run'], need: 3, days: 4, trustMin: 0, reward: { trust: 1, flag: 'chenCart', text: '老陈的推车可以借了（搬运收入+6）。' } },
-    { id: 'chen2', title: '接一单工友的搬箱活', text: '“有人找我要人，我先推你。”', kind: 'count', actions: ['oddjob', 'carry'], need: 1, days: 3, trustMin: 1, reward: { trust: 1, flag: 'chenFixedRun', text: '站口固定跑腿位：跑腿每单+3。' } },
-    { id: 'chen3', title: '请老陈喝一罐', text: '“不图你的，图个交情。”', kind: 'deliver', item: 'beer', to: 'reg_chen', days: 3, trustMin: 2, reward: { trust: 1, flag: 'chenNightWatch', text: '老陈介绍了看仓夜班：马哥晚间在站前街可接“临时短工”热点时收入+10。' } },
+    { id: 'chen1', title: '站口跑三趟腿', text: '“先看看你稳不稳。”', kind: 'count', actions: ['run'], need: 3, days: 4, trustMin: 0, reward: { trust: 1, flag: 'chenCart', text: '老陈的推车可以借了（搬运收入+3）。' } },
+    { id: 'chen2', title: '接一单工友的搬箱活', text: '“有人找我要人，我先推你。”', kind: 'count', actions: ['oddjob', 'carry'], need: 1, days: 3, trustMin: 1, reward: { trust: 1, flag: 'chenFixedRun', text: '站口固定跑腿位：跑腿每单+2。' } },
+    { id: 'chen3', title: '请老陈喝一罐', text: '“不图你的，图个交情。”', kind: 'deliver', item: 'beer', to: 'reg_chen', days: 3, trustMin: 2, reward: { trust: 1, flag: 'chenNightWatch', text: '老陈介绍了看仓夜班：马哥晚间在站前街可接“临时短工”热点时收入+5。' } },
   ] },
   reg_lu: { name: '鲁叔', steps: [
     { id: 'lu1', title: '回收巷做三次分类', text: '“先把手练熟。”', kind: 'count', actions: ['scavenge'], need: 3, days: 4, trustMin: 0, reward: { trust: 1, flag: 'luToolkit', text: '鲁叔的工具箱可以借了（每天一次维修不耗零件）。' } },
@@ -22,7 +22,7 @@ export const FAVORS = {
   reg_xu: { name: '许姐', steps: [
     { id: 'xu1', title: '交两张街头速写', text: '“画得像不像不重要，像街就行。”', kind: 'count', actions: ['sketch', 'graffiti'], need: 2, days: 4, trustMin: 0, reward: { trust: 1, flag: 'xuStudio', text: '许姐的工作位可以借了（剪辑不占唯一电脑）。' } },
     { id: 'xu2', title: '剪出一段能放的东西', text: '“素材再多不剪也是素材。”', kind: 'count', actions: ['edit'], need: 2, days: 6, trustMin: 1, reward: { trust: 1, flag: 'xuVenue', text: '许姐的工作间可以放片了（放映事件更常出现）。' } },
-    { id: 'xu3', title: '拍一单商户宣传给她看成品', text: '“有人问我要会拍的人。”', kind: 'count', actions: ['shoot'], need: 1, days: 5, trustMin: 2, reward: { trust: 1, flag: 'xuContract', text: '许姐介绍了商拍合同：商户宣传拍摄每单+8。' } },
+    { id: 'xu3', title: '拍一单商户宣传给她看成品', text: '“有人问我要会拍的人。”', kind: 'count', actions: ['shoot'], need: 1, days: 5, trustMin: 2, reward: { trust: 1, flag: 'xuContract', text: '许姐介绍了商拍合同：商户宣传拍摄每单+4。' } },
   ] },
   reg_wang: { name: '王叔', steps: [
     { id: 'wang1', title: '把自己收拾干净三次', text: '“先照顾好自己，再说别的。”', kind: 'count', actions: ['wash', 'warm', 'bath'], need: 3, days: 5, trustMin: 0, reward: { trust: 1, flag: 'wangShelter', text: '服务站临时过夜区对你们随时开放。' } },

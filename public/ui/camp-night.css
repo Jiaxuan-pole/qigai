@@ -1,9 +1,10 @@
 .camp-night-bar{display:grid;gap:8px;padding:12px 14px;border-top:1px solid var(--line);background:var(--panel)}
-.camp-night-heading{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
-.camp-night-heading strong{color:var(--gold);font-size:17px}
-.camp-night-heading span{color:var(--muted);font-size:13px}
+.camp-night-heading{display:grid;gap:2px;min-width:0}
+.camp-night-heading strong{color:var(--gold);font-size:15px;white-space:nowrap}
+.camp-night-heading span{color:var(--muted);font-size:12px;line-height:1.35;max-width:220px}
 .camp-night-actors,.camp-night-actions{display:flex;gap:6px;flex-wrap:wrap}
-.camp-night-actors button{min-width:72px}
+.camp-night-actors button{min-width:64px;min-height:36px}
+.camp-night-actions button{min-height:36px}
 .camp-night-actors [aria-pressed="true"]{border-color:var(--gold);color:var(--gold);background:#37443e}
 .camp-night-actions button{flex:1 1 auto}
 @media(max-width:600px){.camp-night-bar{padding:10px}.camp-night-actions button{flex-basis:calc(50% - 6px)}}

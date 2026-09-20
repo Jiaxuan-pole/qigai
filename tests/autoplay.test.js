@@ -423,7 +423,7 @@ test('真实结算统计劳动、实际吃餐和20日阶段', () => {
   state = assign(state, 'xuan', 6, 'kitchen').state;
   state = assign(state, 'fan', 6, 'rest').state;
   let measured = measureStatisticsSettlement(state);
-  assert.deepEqual(measured.breakdown.work, { actorSlots: 1, cash: 12, mealGrants: 2 });
+  assert.deepEqual(measured.breakdown.work, { actorSlots: 1, cash: 6, mealGrants: 1 });
   assert.deepEqual(measured.stages['D1-20'].work, measured.breakdown.work);
 
   state = fresh(2003);
@@ -748,7 +748,7 @@ test('委托奖励餐进入原工作餐账本，新增精神损失记录实际cl
   assert.equal(result.error, undefined);
   const breakdown = createBreakdown();
   recordSettledMetrics(breakdown.breakdown,breakdown.stages,planned,result,[planned.plan.fan[0],planned.plan.xuan[0]]);
-  assert.equal(breakdown.breakdown.work.mealGrants, 3);
+  assert.equal(breakdown.breakdown.work.mealGrants, 2);
   const interaction = await import('../scripts/autoplay/interaction-metrics.js');
   const pending = fresh(1000);
   pending.actors.xuan.mind = 1;

@@ -38,7 +38,7 @@ test('长任务只扣一次并在第三小时完成', () => {
 test('合作完成只计一次收入与材料、两人各耗20', () => {
   let s=start(); const cash=s.cash, parts=s.parts, battery=s.battery;
   s=schedule(s,'xuan','coop'); s=step(s);
-  assert.equal(s.cash,cash+66); assert.equal(s.parts,parts-1); assert.equal(s.battery,battery-1);
+  assert.equal(s.cash,cash+33); assert.equal(s.parts,parts-1); assert.equal(s.battery,battery-1);
   assert.equal(s.actors.xuan.energy,80); assert.equal(s.actors.fan.energy,80);
   assert.equal(s.actionCount,2); assert.equal(s.hourTick,1);
 });

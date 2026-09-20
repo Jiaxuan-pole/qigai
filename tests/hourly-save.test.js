@@ -48,7 +48,13 @@ test('v3四槽只迁移当前及未来预约，旧经济物品愿望和票锁不
   assert.equal(s.daily.errands['xuan:2'], true);
   for (const hour of [14, 15, 16, 17]) assert.equal(s.daily.errands[`xuan:${hour}`], true);
   const beforeBuy = structuredClone(s);
-  assert.match(buyNow(s, 'xuan', [{ shopId: 'convenience', itemId: 'meal', qty: 1 }]).error, /已用过/);
+  s.actors.xuan.location = 'market';
+  const first = buyNow(s, 'xuan', [{ shopId: 'convenience', itemId: 'meal', qty: 1 }]);
+  assert.equal(first.error, undefined, '旧档的附带采买标记不再限制即时购买');
+  const second = buyNow(first.state, 'xuan', [{ shopId: 'convenience', itemId: 'meal', qty: 1 }]);
+  assert.equal(second.error, undefined, '人还在店旁就能继续买');
+  assert.equal(second.state.cash, s.cash - first.total - second.total);
+  s.actors.xuan.location = beforeBuy.actors.xuan.location;
   assert.deepEqual(s, beforeBuy);
   assert.equal(validateSave(s).ok, true);
   assert.deepEqual(normalizeSave(s), s);

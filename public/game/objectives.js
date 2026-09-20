@@ -5,6 +5,7 @@ import { FAVORS } from './favors.js';
 import { itemDef } from './items.js';
 import { districtName, REGULARS } from './npcs.js';
 import { dayNode, routeDone, routeLabel, routeProgress } from './story.js';
+import { windowLabel } from './headlines.js';
 import { currentTask } from './clock.js';
 import { preflight } from './settle.js';
 import { survivalStageObjective } from './survival-objectives.js';
@@ -153,6 +154,14 @@ export function objectives(state) {
   const ended = ['ending', 'gameover'].includes(state.phase);
   const favors = favorObjectives(state);
   const tasks = [survivalStageObjective(state, plan, favors), ...favors];
+  // 今日事的定时热点是今天最该盯的事：排在生存目标之后、章节之前，窗口关了就从列表里消失。
+  for (const event of state.events || []) {
+    if (!event.window || event.day !== state.day || !['open', 'reserved'].includes(event.status)) continue;
+    const who = event.cast?.length ? `，只能${event.cast.map((id) => names(state, id)).join('/')}去` : '';
+    tasks.push({ id: `headline:${event.uid}`, kind: 'headline', status: event.status === 'reserved' ? 'active' : 'available', priority: 8,
+      title: `今日事：${event.title}`, detail: `${districtName(event.district)}，${windowLabel(event, state)}${who}。`, location: districtName(event.district), progress: null, target: null,
+      cta: state.hour >= event.window.from ? { kind: 'event', eventUid: event.uid, label: event.status === 'reserved' ? '查看预约' : '去处理' } : null });
+  }
   for (const chapter of getData().chapters.filter((entry) => entry.startDay <= day)) {
     const target = chapter.endDay - chapter.startDay + 1;
     const progress = Math.min(target, Math.max(0, survived - chapter.startDay + 1));
@@ -188,7 +197,7 @@ export function actionHints(state) {
   for (const event of state.events || []) {
     if (!['open', 'reserved'].includes(event.status) || event.expiresTurn <= state.turn) continue;
     tasks.push({ id: `event:${event.uid}`, kind: 'event', title: event.title, status: event.status === 'reserved' ? 'active' : 'available', priority: 35,
-      detail: `${event.status === 'reserved' ? '已预约' : '待决定'}，还剩${event.expiresTurn - state.turn}回合。`,
+      detail: `${event.status === 'reserved' ? '已预约' : '待决定'}，${windowLabel(event, state)}。`,
       location: districtName(event.district), progress: 0, target: 1,
       cta: { kind: 'event', eventUid: event.uid, label: event.status === 'reserved' ? '查看预约' : '查看并决定' } });
   }

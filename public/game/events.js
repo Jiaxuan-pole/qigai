@@ -8,6 +8,7 @@ import { relation } from './npcs.js';
 import { pickFilm, canScreen, screenFilm } from './screening.js';
 import { resolveConfrontation, alliesAt, C as TROUBLE } from './trouble.js';
 import { beginCombat, combatPending } from './combat.js';
+import { TIMED_PACKS, TIMED_TEMPLATES } from './headline-pool.js';
 
 const R = getData; // 缩写：规则与模板都从设计数据取
 
@@ -39,12 +40,12 @@ export const PACKS = {
     { id: 'ask_supply', label: '顺口问他有没有用不上的纸笔', kind: 'present', effect: (s, ev, a, ev2) => { if (rng(s.seed, 'artist:' + ev.uid) < 0.5) { makeItem(s, 'paper_set', a); ev2.push('对方掏出一套没用完的纸笔。'); } else { s.cash += 5; s.ledger.income += 5; ev2.push('对方留下5块钱走了。'); } } },
     { id: 'pass', label: '不打扰', kind: 'instant' },
   ] },
-  repair_request: { major: true, cond: (s) => s.actors.xuan.life === 'active', cast: ['xuan'], title: '路边坏掉的扫码设备', setup: '摊主的扫码牌黑了屏，急得直拍。修好给30，要一块零件。', choices: [
-    { id: 'take', label: '轩哥接下这单（零件-1，收入30）', kind: 'book', action: 'oddjob', pay: 30, cost: { parts: 1 }, zoneOverride: 'market' },
+  repair_request: { major: true, cond: (s) => s.actors.xuan.life === 'active', cast: ['xuan'], title: '路边坏掉的扫码设备', setup: '摊主的扫码牌黑了屏，急得直拍。修好给15，要一块零件。', choices: [
+    { id: 'take', label: '轩哥接下这单（零件-1，收入15）', kind: 'book', action: 'oddjob', pay: 15, cost: { parts: 1 }, zoneOverride: 'market' },
     { id: 'decline', label: '手上有别的活', kind: 'instant' },
   ] },
-  carry_boxes: { major: true, title: '散在地上的箱子', setup: '一车货翻在路边，老板喊着找人搬，给22。', choices: [
-    { id: 'take', label: '接下搬运（收入22，体力16）', kind: 'book', action: 'oddjob', pay: 22 },
+  carry_boxes: { major: true, title: '散在地上的箱子', setup: '一车货翻在路边，老板喊着找人搬，给11。', choices: [
+    { id: 'take', label: '接下搬运（收入11，体力20）', kind: 'book', action: 'oddjob', pay: 11 },
     { id: 'decline', label: '不接', kind: 'instant' },
   ] },
   free_wall: { major: true, cond: (s) => s.actors.fan.life === 'active' && !s.flags.wallPermit, cast: ['fan'], title: '愿意借墙的店主', setup: '店主指着侧墙说：画点好看的，随你。', choices: [
@@ -55,8 +56,8 @@ export const PACKS = {
     { id: 'sit', label: '坐一会儿', kind: 'present', effect: (s, ev, a, ev2) => { s.actors[a].mind = clamp(s.actors[a].mind + 2); s.actors[a].warmth = clamp(s.actors[a].warmth + 6); ev2.push(`${s.names[a]}喝了杯热水，精神+2、保暖+6。`); } },
     { id: 'pass', label: '不了，赶路', kind: 'instant' },
   ] },
-  old_customer: { major: true, cond: (s) => anyRegularTrust(s, 3), title: '认出你的老客户', setup: '有人认出了你们，说手上有个活，想找靠谱的人，给36。', choices: [
-    { id: 'take', label: '接下这单（收入36）', kind: 'book', action: 'oddjob', pay: 36 },
+  old_customer: { major: true, cond: (s) => anyRegularTrust(s, 3), title: '认出你的老客户', setup: '有人认出了你们，说手上有个活，想找靠谱的人，给18。', choices: [
+    { id: 'take', label: '接下这单（收入18）', kind: 'book', action: 'oddjob', pay: 18 },
     { id: 'decline', label: '这次接不了', kind: 'instant' },
   ] },
   clothes_rain: { cond: (s) => Object.values(s.actors).some((p) => p.clothes.wet), title: '晾晒前下雨', setup: '天色不对，晾着的衣服还没干。', choices: [
@@ -99,8 +100,8 @@ export const PACKS = {
     { id: 'read', label: '捡起来看看', kind: 'present', effect: (s, ev, a, ev2) => { if (rng(s.seed, 'note:' + ev.uid) < 0.35) { s.cash += 3; s.ledger.income += 3; ev2.push('纸条里夹着3块钱。'); } else ev2.push('只是一张购物清单：肥皂、面包、给孩子的糖。'); } },
     { id: 'ignore', label: '不管', kind: 'instant' },
   ] },
-  job_tip: { major: true, title: '还有一班短工', setup: '告示上写着：临时缺人，给26。', choices: [
-    { id: 'take', label: '接这班短工（收入26）', kind: 'book', action: 'oddjob', pay: 26 },
+  job_tip: { major: true, title: '还有一班短工', setup: '告示上写着：临时缺人，给13。', choices: [
+    { id: 'take', label: '接这班短工（收入13）', kind: 'book', action: 'oddjob', pay: 13 },
     { id: 'pass', label: '不去', kind: 'instant' },
   ] },
   market_close: { title: '今天提前收摊', setup: '便利店门口贴了条：下一时段盘点，暂停营业。', choices: [
@@ -146,12 +147,14 @@ export const EXTRA_TEMPLATES = [
   { id: 'street_thugs', name: '拦路的小混混', category: 'risk', districtIds: ['station', 'market'], openSlots: [3], effectPolicy: '给烟/给钱/说话/跑/硬顶', constraint: '不做通缉与坐牢', defaultExpiresAfterTurns: 1, requiresActivePresentActor: true, aiMode: 'text_or_bounded_assembly', forbiddenAiFields: [], repeatCooldownDays: 4 },
   { id: 'chengguan_sweep', name: '城管清街', category: 'risk', districtIds: ['market', 'station', 'cinema'], openSlots: [1, 2], effectPolicy: '收拾走人/交罚款/讲理/硬顶', constraint: '白天，针对摆摊乞讨的人；不做拘留', defaultExpiresAfterTurns: 1, requiresActivePresentActor: true, aiMode: 'text_or_bounded_assembly', forbiddenAiFields: [], repeatCooldownDays: 5 },
 ];
-PACKS.promo_project = { major: true, cond: (s) => s.day >= 15 && !s.flags.project && s.actors.fan.life === 'active', cast: ['fan', 'xuan', 'ma'], title: '商户想要一支宣传片', setup: '市场口的几家店凑钱要一支两分钟的宣传片：拍摄、剪辑、六天内交到刘姐手上，给90。', choices: [
+PACKS.promo_project = { major: true, cond: (s) => s.day >= 15 && !s.flags.project && s.actors.fan.life === 'active', cast: ['fan', 'xuan', 'ma'], title: '商户想要一支宣传片', setup: '市场口的几家店凑钱要一支两分钟的宣传片：拍摄、剪辑、六天内交到刘姐手上，给45。', choices: [
   { id: 'accept', label: '接下（六天内：凡哥拍摄→剪辑→有人送到老街）', kind: 'instant', effect: (s, ev, a, ev2) => { s.flags.project = { id: 'promo', stage: 1, deadline: s.day + 6, acceptedDay: s.day }; ev2.push('接下了宣传片：第一步凡哥安排「商户宣传拍摄」或「许可采访」，第二步「剪辑小委托」出成品，第三步任何人带成品到老街交付。'); } },
   { id: 'decline', label: '现在接不了', kind: 'instant' },
 ] };
 // 街头冲突走 trouble.js 的模型：和平四种、打架看战力，受伤分三档；同街区同时段的队友算帮手。
 const confront = (kind, choice) => (s, ev, a, ev2) => { const r = resolveConfrontation(s, { kind, actorId: a, choice, key: ev.uid, allies: alliesAt(s, a, ev.district) }, ev2); if (r.error) ev2.push(`「${ev.title}」没处理成：${r.error}`); };
+Object.assign(PACKS, TIMED_PACKS);
+EXTRA_TEMPLATES.push(...TIMED_TEMPLATES);
 PACKS.street_thugs = { major: false, cond: (s) => s.day >= 5 && !((s.flags.thugRespect || 0) > s.day), title: '拦路的小混混', setup: '两个穿连帽衫的堵在巷口：“兄弟，身上有烟没？”', choices: [
   { id: 'smoke', label: '递根烟打发（需自己包里有烟）', kind: 'present', requires: (s, a) => (s.items.some((x) => x.itemId === 'cigarette' && x.container === a && x.uses > 0) ? null : '包里没烟'), effect: confront('thugs', 'smoke') },
   { id: 'pay', label: '给几块钱了事（5—10，会被记住）', kind: 'present', requires: (s) => (s.cash >= TROUBLE.payRange[1] ? null : '现金不足' + TROUBLE.payRange[1]), effect: confront('thugs', 'pay') },
@@ -209,6 +212,20 @@ function spawnOne(state, tplId, district, events, forced = false) {
   return ev;
 }
 
+// 今日事的定时热点：当天 window.from 到 window.to 之间可处理，窗口关了由 headlines.expireTimedEvents 收尾。
+// expiresTurn 推到两天后，只是为了不让按回合的过期先把它剪掉。
+export function spawnTimedEvent(state, tplId, district, window, events, extra = {}) {
+  const ev = spawnOne(state, tplId, district, events, true);
+  ev.window = { from: window.from, to: Math.min(22, window.to) };
+  ev.day = state.day;
+  ev.expiresTurn = state.turn + 8;
+  if (extra.cast) ev.cast = extra.cast;
+  if (extra.target) ev.target = extra.target;
+  if (extra.headlineId) ev.headlineId = extra.headlineId;
+  events[events.length - 1] = `今日事热点：${ev.title}（${districtLabel(district)}，${window.from}—${window.to}点）`;
+  return ev;
+}
+
 function districtLabel(id) {
   return R().districts.find((d) => d.id === id)?.name || id;
 }
@@ -263,7 +280,7 @@ export function directorTick(state, events) {
     if (openEvents(state).some((e) => e.district === district)) continue;
     if (rng(state.seed, `spawn:${state.turn}:${district}`) >= rules.locationSpawnProbabilityPerEligibleSlot) continue;
     const cands = allTemplates().filter((t) => {
-      if (NO_SPAWN.has(t.id) || !PACKS[t.id]) return false;
+      if (NO_SPAWN.has(t.id) || !PACKS[t.id] || PACKS[t.id].timed) return false;
       if (!t.districtIds.includes(district) || !t.openSlots.includes(state.slot)) return false;
       if ((state.eventCooldown[t.id] || 0) > state.day) return false;
       const pack = PACKS[t.id];
@@ -292,6 +309,8 @@ export function chooseEvent(state, uid, choiceId, actorId) {
   if (combatPending(state)) return { error: '先处理眼前的战斗。' };
   const ev = state.events.find((e) => e.uid === uid);
   if (!ev || (ev.status !== 'open' && ev.status !== 'reserved')) return { error: '这个机会已经不在了' };
+  if (ev.window && state.hour < ev.window.from) return { error: `${ev.window.from}点才开始` };
+  if (ev.window && (state.hour >= ev.window.to || ev.day !== state.day)) return { error: '这件事已经过了时间' };
   const pack = PACKS[ev.templateId];
   const choice = pack.choices.find((c) => c.id === choiceId);
   if (!choice) return { error: '没有这个选项' };
@@ -323,14 +342,18 @@ export function releaseEvent(state, uid) {
 }
 
 // 结算时执行 present 类预约：执行者本格必须在事件街区。
-export function settleReserved(state, actorZones, events) {
+export function settleReserved(state, actorZones, events, bookedDone = new Set()) {
   for (const ev of state.events) {
     if (ev.status !== 'reserved' || !ev.reserved) continue;
     const { actorId, choiceId, kind } = ev.reserved;
+    // 占本小时的预约只有对应任务真做完才算处理；那一格被改掉了就放回 open，窗口到期时才能执行 miss。
+    if (kind === 'book' && !bookedDone.has(ev.uid)) { ev.status = 'open'; ev.reserved = null; continue; }
     const pack = PACKS[ev.templateId];
     const choice = pack.choices.find((c) => c.id === choiceId);
     if (kind === 'present') {
-      if (actorZones[actorId] !== ev.district || state.actors[actorId].life !== 'active') {
+      // 本小时有任务的人按任务地点算；没排任务的人就在他站着的街区，街道模式里走过去点热点也算在场。
+      const zone = actorZones[actorId] || state.actors[actorId].location;
+      if (zone !== ev.district || state.actors[actorId].life !== 'active') {
         events.push(`「${ev.title}」没有处理：${state.names[actorId]}本格不在${districtLabel(ev.district)}。`);
         ev.status = 'open'; ev.reserved = null;
         continue;

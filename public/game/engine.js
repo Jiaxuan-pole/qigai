@@ -15,7 +15,7 @@ import { fulfillItemWish, fulfillReachedItemWishes } from './item-wishes.js';
 import { careMatches } from './health.js';
 import { passersby, binsAvailable, chatWith } from './npcs.js';
 import { directorTick, chooseEvent, releaseEvent } from './events.js';
-import { weatherOf, morningNode, applyMorningChoice, computeEnding } from './story.js';
+import { weatherOf, morningNode, applyMorningChoice, computeEnding, morningRequires } from './story.js';
 import { chooseOpening as begOpening, ask as begAsk, finishSession as begFinish, autoResolve as begAuto } from './beg.js';
 import { acceptFavor as favAccept, deliverFavor as favDeliver, favorStatus, activeFavors } from './favors.js';
 import { revealCell, forfeit, boardSummary } from './bins.js';
@@ -60,7 +60,7 @@ function actorFrom(init, life, id) {
     health: init.health, food: init.food, energy: 100, warmth: init.warmth, mind: init.mind, hygiene: init.hygiene, fishingSkill: FISHING_SKILL_DEFAULT[id],
     life, location: 'camp', joinedTurn: life === 'unrecruited' ? null : 0,
     downedAt: null, deadline: null, deathTurn: null, deathCause: null, gritUsed: false, careProtect: false,
-    intox: 0, smokes: 0, jokeUsed: false, grief: 0, coffeeCredit: 0, hangoverDay: null,
+    intox: 0, smokes: 0, drinks: 0, jokeUsed: false, grief: 0, coffeeCredit: 0, hangoverDay: null,
     zeroTurns: 0, crisis: false, dirtyStreak: 0,
     clothes: { dirty: false, wet: false, dirtyDays: 0 },
     diseases: [], exposure: { dirtyFood: false, wound: false, woundCovered: false, cared: false },
@@ -69,7 +69,7 @@ function actorFrom(init, life, id) {
 }
 
 export function freshDaily() {
-  return { bets: 0, orders: {}, misfortune: [], begged: {}, refusalLoss: {}, chatted: {}, bins: {}, majorEvents: 0, errands: {}, talked: false, tableMeals: { xuan: 0, fan: 0, ma: 0 }, coffeeCups: { xuan: 0, fan: 0, ma: 0 }, coffeeUnits: { xuan: 0, fan: 0, ma: 0 } };
+  return { bets: 0, orders: {}, misfortune: [], begged: {}, refusalLoss: {}, chatted: {}, bins: {}, majorEvents: 0, errands: {}, purchases: 0, talked: false, tableMeals: { xuan: 0, fan: 0, ma: 0 }, coffeeCups: { xuan: 0, fan: 0, ma: 0 }, coffeeUnits: { xuan: 0, fan: 0, ma: 0 } };
 }
 
 export function fresh(seed = 260916) {
@@ -226,15 +226,13 @@ export function setCare(input, patientId, hour, choice) {
   return { state: s };
 }
 
-// 即时购买：人此刻就在店所在街区且店开门，每人每格一次附带采买。
+// 即时购买：人此刻就在店所在街区且店开门；钱够、有货就能一直买。
 export function buyNow(input, actorId, cart, destination = 'self', slotOverride = null) {
   if (pendingWorkError(input)) return pendingWorkError(input);
   if (!['planning', 'arrival'].includes(input.phase)) return { error: '现在不能购物', state: input };
   const p = input.actors[actorId];
   if (!p || p.life !== 'active') return { error: '这个人现在不能购物', state: input };
   const slot = slotOverride ?? input.slot;
-  const key = actorId + ':' + input.hour;
-  if (input.daily.errands[key]) return { error: NAMES[actorId] + '本时段的附带采买已用过，下一时段再来' , state: input };
   const v = validateCart(input, actorId, p.location, slot, cart);
   if (v.error) return { error: v.error, state: input };
   const rules = getData().rules;
@@ -259,7 +257,8 @@ export function buyNow(input, actorId, cart, destination = 'self', slotOverride 
     if (it.itemId === 'shoes' && actorId === 'ma') fulfillWish(s, 'ma', 'ma_shoes', 'exact', []);
     if (it.container === actorId || (it.container === 'camp' && s.actors[actorId].location === 'camp')) fulfillItemWish(s, actorId, it.itemId, 'obtain');
   }
-  s.daily.errands[key] = true;
+  // 引擎不再限制每小时购买次数；这个标记只给自动对局策略用，避免同一小时反复采买。
+  s.daily.errands[`${actorId}:${input.hour}`] = true;
   s.stateRevision += 1;
   const names = cart.map((l) => indexById(getData().items)[l.itemId].name + '×' + l.qty).join('、');
   s.log.unshift(`${NAMES[actorId]}在${indexById(getData().districts)[p.location]?.name || p.location}买了${names}，支出${v.total}${parcelId ? '，家具送到营地包裹' + parcelId : ''}。`);
@@ -290,7 +289,6 @@ export function useItem(input, actorId, uid, options = {}) {
   switch (id) {
     case 'cigarette': case 'cigarette_regular': case 'cigarette_premium': {
       if (!accessibleItems(s, actorId, 'lighter').length && !s.items.some((x) => x.itemId === 'lighter' && x.container === 'camp' && q.location === 'camp')) return { error: '没有火：打火机不在手边', state: input };
-      if (q.smokes >= 2) return { error: '今天已经抽了两次，再抽不加精神', state: input };
       const gain = q.smokes === 0 ? (id === 'cigarette_premium' ? 6 : id === 'cigarette_regular' ? 5 : 4) : 1;
       need(1); q.mind = clamp(q.mind + gain); q.energy = clamp(q.energy - 2); q.smokes += 1;
       fulfillWish(s, actorId, 'quiet_smoke', 'exact', ev); ev.push(`${NAMES[actorId]}用了${itemDef(id).name}一格：精神+${gain}、体力-2。`); break;
@@ -301,10 +299,10 @@ export function useItem(input, actorId, uid, options = {}) {
       fulfillWish(s, actorId, 'quiet_smoke', 'partial', ev); ev.push(`${NAMES[actorId]}抽了半截捡来的烟：精神+2、卫生-3。`); break;
     }
     case 'beer': case 'beer_bottle': case 'spirit': case 'baijiu': case 'vodka': {
-      if (q.intox >= 2) return { error: '本日饮酒上限已到', state: input };
       const beer = id === 'beer' || id === 'beer_bottle';
-      const gain = beer ? 5 : 6;
-      need(1); q.mind = clamp(q.mind + gain); q.intox = Math.min(2, q.intox + (beer ? 1 : 2));
+      // 和抽烟一样：第一口给足，之后每杯只剩 1，钱买不到无限精神。
+      const gain = q.drinks ? 1 : beer ? 5 : 6;
+      need(1); q.mind = clamp(q.mind + gain); q.drinks = (q.drinks || 0) + 1; q.intox = Math.min(2, q.intox + (beer ? 1 : 2));
       fulfillWish(s, actorId, 'evening_drink', 'exact', ev); ev.push(`${NAMES[actorId]}用了${itemDef(id).name}一格：精神+${gain}、醉意${q.intox}。`); break;
     }
     case 'tea': {
@@ -458,7 +456,8 @@ export function morningChoice(input, choiceId) {
   const node = input.pendingMorning;
   const c = node.choices.find((x) => x.id === choiceId);
   if (!c) return { state: input, error: '无效选项' };
-  if (c.requires) { const err = c.requires(input); if (err) return { state: input, error: err }; }
+  const err = morningRequires(input, node, c.id);
+  if (err) return { state: input, error: err };
   const s = copy(input);
   const ev = [];
   applyMorningChoice(s, choiceId, ev);
@@ -557,14 +556,14 @@ export function deliverProject(input, actorId, options = {}) {
   if (!item) return { state: input, error: '成品不在这个人包里' };
   const s = copy(input);
   s.items = s.items.filter((x) => x.uid !== item.uid);
-  s.cash += 90; s.ledger.income += 90;
+  s.cash += 45; s.ledger.income += 45;
   s.flags.fixedJobs = (s.flags.fixedJobs || 0) + 1;
   s.flags.projectsDone = (s.flags.projectsDone || 0) + 1;
   s.flags.project = null;
   const rel = s.relations.reg_liu || (s.relations.reg_liu = { trust: 0, helped: 0, refused: 0, jobs: 0, lastDay: 0 });
   rel.trust = clamp(rel.trust + 1, 0, 5); rel.jobs += 1;
   s.stateRevision += 1;
-  s.log.unshift(`${NAMES[actorId]}把宣传片交给了刘姐：收入90，三个人的活。`);
+  s.log.unshift(`${NAMES[actorId]}把宣传片交给了刘姐：收入45，三个人的活。`);
   return finishImmediateIncome(input, s, actorId, options.controlledActorId ?? null, 'deliverProject', `project-${item.uid}`, '交付宣传片');
 }
 

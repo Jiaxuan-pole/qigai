@@ -1,5 +1,5 @@
-// 新手引导：第 1 回合讲界面，第 1 回合结算后讲结果与晚上。遮罩挖洞高亮目标，卡片说一两句就走，随时可跳过。
-// 纯逻辑（步骤表、阶段判断）与 DOM 分开，前者给 node 测试用。
+// 新手导览：第 1 回合用六步认一遍 HUD，第 1 回合结算后三步讲记事、菜单与热点；按天做事的引导链在 guide.js/tasks.js。
+// 遮罩挖洞高亮目标，卡片说一两句就走，随时可跳过。纯逻辑（步骤表、阶段判断）与 DOM 分开，前者给 node 测试用。
 
 const KEY = 'jwsn.tutorial';
 
@@ -12,36 +12,28 @@ export function prepareTutorialTarget(step) {
 
 export const STEPS = {
   1: [
-    { sel: '.topstats', closeDrawer: true, title: '顶上这一排', text: '日、回合、时间、天气，右边是三个人共用的钱包和几份饭。饭按份算：每人一天两份，钱先留饭钱。' },
-    { sel: '#characters .char-card', closeDrawer: true, title: '人物状态', text: '人物栏平时收起，点展开查看完整状态。健康、饱食、体力、精神各自独立，异常时先照顾身体。' },
-    { sel: '#taskStrip', closeDrawer: true, title: '这段日子要奔向哪里', text: '长期生存目标每10天一阶段：先稳住吃住，再准备暴雨、早寒和寒潮。点任务进度，看还缺哪些准备、下一步去哪做；熟人委托、章节和人生出路继续跨天积累。' },
-    { sel: '#planToggle', closeDrawer: true, title: '安排行动入口', text: '地图 M 旁点「安排行动」打开完整安排窗口。点下一步会帮你打开；关窗就回地图。' },
-    { sel: '#drawer .ctx', openDrawer: true, title: '选择下一件事', text: '在窗口里给当前人物选行动和街区，体力不够就安排睡眠或补给。' },
-    { sel: '#durationPick', openDrawer: true, title: '一件事可以做几个小时', text: '每种活动有建议时长，也能调整连续小时数。确认结束时间、精神变化、体力和费用后再安排；中途遇事会停下来处理。' },
-    { sel: '#schedule', openDrawer: true, title: '三个人的下一件事', text: '每件事可以选择持续时间；所有人共用时钟，按小时获得收入和承受消耗。' },
-    { sel: '#btnAdvance', openDrawer: true, title: '执行当前安排', text: '想直接看到这一小时的结果，也可以按开始行动。剩余安排会继续保留。' },
-    { sel: '#mapWrap', closeDrawer: true, title: '走进街道', text: '方向键或街道方向按钮可以上下左右走，左右会改变朝向。切换人物保留各自位置；沿街能找到路人、告示、店铺和随机事件。' },
-    { sel: '#mapWrap', closeDrawer: true, title: '点人物用随身物品', text: '点街上的人物打开快捷物品。抽烟、喝酒后会播放动作，次数按使用者单独计算。涂鸦与钓鱼要先带齐用具，再到对应地点安排行动。' },
-    { sel: '#tSlot', closeDrawer: true, title: '街上的时间', text: '站着时，时间会自动流逝；事件与安排窗口会暂时停下时钟。' },
-    { sel: '[data-open="events"]', closeDrawer: true, title: '热点与愿望', text: '街上会冒出热点，只持续有限时间。第 1 天清晨老街有个免费赠餐的教学热点，可以让人去领。人也会冒愿望，不理会积压扣精神。' },
+    { sel: '.topstats', closeDrawer: true, title: '顶上这一排', text: '日、时间、天气，右边是三个人共用的现金和有效食物。饭钱先留出来。' },
+    { sel: '#characters', closeDrawer: true, title: '三张人物卡', text: '点卡换人操控，点箭头展开完整状态。谁不舒服先照顾谁。' },
+    { sel: '.stage-view', closeDrawer: true, title: '街景', text: '点街上的热点：垃圾桶、瓶罐、水点、早餐摊，立刻就做这件事。走到路口自动到下一条街。' },
+    { sel: '#taskStrip', closeDrawer: true, title: '跟着引导走', text: '前三天左上角有一步一步的引导，按钮直接执行。之后是每10天一阶段的长期目标。' },
+    { sel: '#hotbar', closeDrawer: true, title: '快捷物品', text: '随身物品一格一种，点一下就用；抽烟、喝酒会播放动作。' },
+    { sel: '.hud-actions', closeDrawer: true, title: '底部四个按钮', text: '安排行动排整天，开始行动结算这一小时，AI安排队友全天，结束今天让剩下的小时自动过。' },
   ],
   2: [
-    { sel: '.journal', closeDrawer: true, title: '刚才发生了什么', text: '行动后弹出收入、消耗和事件；关掉后街头记事还能翻，点「全部」看完整日志。' },
-    { sel: '#planStatus', openDrawer: true, title: '饭钱保护', text: '这一行是本小时预算：收入、支出、剩多少。饭钱先留出来（每人两份），不够饭钱的花销会被拦下。' },
-    { sel: '#nightSpot', openDrawer: true, title: '晚间和过夜', text: '晚间也可给每人安排睡眠或爱好（讲段子、速写、无赌注纸牌）。今晚睡哪儿在这里选：营地床位、服务站、候车室，各有代价。' },
-    { sel: '#mapWrap', closeDrawer: true, title: '走进街里', text: '街道可以上下左右走，路边有告示、物品与热点。走到路口可去相邻街区，每次花少量体力。' },
-    { sel: '[data-open="help"]', closeDrawer: true, title: '随时能看', text: '顶上「说明」随时能看规则。引导就到这儿，剩下的自己摸。' },
+    { sel: '.journal', closeDrawer: true, title: '刚才发生了什么', text: '行动后这里记收入、消耗和事件，点「全部」看完整日志。' },
+    { sel: '#btnMenu', closeDrawer: true, title: '菜单 E', text: '库存、愿望、健康、任务、章节、存档、说明都在这，按 E 也能开。' },
+    { sel: '[data-open="events"]', closeDrawer: true, title: '热点', text: '街上的机会限时几回合，点开看清条件再决定；有些可以说不。' },
   ],
 };
 
 export const CONTEXT_GUIDES = {
   combat: [{ sel: '.combat-actions', title: '先看对方的动作', text: '攻击削弱对方架势；防守减轻伤害、寻找反击空当；撤离尝试脱身。每次选择推进一个短回合，受伤会影响健康和精神。' }],
-  company: [{ sel: '#characters', closeDrawer: true, title: '多一双手，也多一张嘴', text: '点人物卡换人。每个人有拿手活，新伙伴也要吃饭、要有地方睡。先看他的背包和熟练度，再安排今天。' }, { sel: '#schedule', openDrawer: true, title: '各做各的，一起过日子', text: '三人下一件事仍共用时钟。别让大家都出去挣钱，却没人给今晚备饭。' }],
-  weather: [{ sel: '#nightSpot', openDrawer: true, title: '雨来的时候，先想晚上', text: '营地要有挡雨的棚和干床。没准备好时可选服务站或候车室过夜；别穿着湿衣一直硬扛。' }],
-  health: [{ sel: '[data-open="health"]', openDrawer: true, title: '不舒服就先看清原因', text: '卫生低先去水点，病了去诊所做评估。药和绷带放在包里不会自己起效，要给当前行动安排护理。' }],
-  wishes: [{ sel: '[data-open="wishes"]', openDrawer: true, title: '话里还有没说出口的事', text: '留意人物的小气泡。想画画、想聊聊和想休息都是愿望；留一点时间做喜欢的事，比一直硬熬有用。' }],
-  fishing: [{ sel: '#mapWrap', closeDrawer: true, title: '带着鱼竿去河边', text: '把鱼竿和鱼饵带在要钓鱼的人身上，在河岸安排钓鱼。当前操控角色咬钩后完成收线 QTE，队友自动收线，判定区会随熟练度变宽；马哥熟手，其他人也能慢慢练。' }, { sel: '[data-open="inventory"]', openDrawer: true, title: '这条鱼怎么用', text: '生鱼不能直接吃，须回营地用一份木炭加工，或带去老街便利店换钱。马哥三连空钩会偶尔跳河，衣服湿了也不会白送鱼。' }],
-  chapter2: [{ sel: '[data-open="events"]', closeDrawer: true, title: '街上的事，不会一直等着', text: '热点有剩余时间，也有地点和条件。点开先读清楚，赶得上再答应；有些事可以说不。' }, { sel: '#mapWrap', closeDrawer: true, title: '记住这些门面', text: '店要开门、人要到场，才能买东西。认识熟面孔后，聊天和帮忙可能带来新的活。' }],
+  company: [{ sel: '#characters', closeDrawer: true, title: '多一双手，也多一张嘴', text: '点人物卡换人。每个人有拿手活，新伙伴也要吃饭、要有地方睡。先看他的背包和熟练度，再安排今天。' }, { sel: '.hud-actions', closeDrawer: true, title: '各做各的，一起过日子', text: '三人共用时钟：「安排行动」排整天，「AI安排队友全天」让其他人自己动。别让大家都出去挣钱，却没人给今晚备饭。' }],
+  weather: [{ sel: '#taskStrip', closeDrawer: true, title: '雨来的时候，先想晚上', text: '营地要有挡雨的棚和干床，长期目标里能看到防雨进度。没准备好时夜里选服务站或候车室过夜；别穿着湿衣一直硬扛。' }],
+  health: [{ sel: '#characters', closeDrawer: true, title: '不舒服就先看清原因', text: '人物卡上会标出异常。卫生低先去水点，病了去诊所做评估；药和绷带放在包里不会自己起效，要在菜单「健康护理」里安排。' }],
+  wishes: [{ sel: '#characters', closeDrawer: true, title: '话里还有没说出口的事', text: '留意人物卡上的小气泡。想画画、想聊聊和想休息都是愿望；留一点时间做喜欢的事，比一直硬熬有用。' }],
+  fishing: [{ sel: '.stage-view', closeDrawer: true, title: '带着鱼竿去河边', text: '把鱼竿和鱼饵带在要钓鱼的人身上，在河岸安排钓鱼。当前操控角色咬钩后完成收线 QTE，队友自动收线，判定区会随熟练度变宽；马哥熟手，其他人也能慢慢练。' }, { sel: '#hotbar', closeDrawer: true, title: '这条鱼怎么用', text: '生鱼不能直接吃，须回营地用一份木炭加工，或带去老街便利店换钱。马哥三连空钩会偶尔跳河，衣服湿了也不会白送鱼。' }],
+  chapter2: [{ sel: '[data-open="events"]', closeDrawer: true, title: '街上的事，不会一直等着', text: '热点有剩余时间，也有地点和条件。点开先读清楚，赶得上再答应；有些事可以说不。' }, { sel: '.stage-view', closeDrawer: true, title: '记住这些门面', text: '店要开门、人要到场，才能买东西。认识熟面孔后，聊天和帮忙可能带来新的活。' }],
 };
 
 export function stepsFor(stage) {

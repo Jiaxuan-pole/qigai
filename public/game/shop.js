@@ -92,6 +92,8 @@ export function validateCart(state, actorId, districtId, slot, cart) {
 
 // 执行购买：扣库存、生成实例、彩票锁结果。返回生成的实例列表。
 export function executeCart(state, actorId, cart, destination) {
+  // 当日购物次数：账本支出还包含澡堂、诊所、罚款，分不出「到店买过东西」，引导要这个更窄的证据。
+  if (state.daily) state.daily.purchases = (state.daily.purchases || 0) + 1;
   const made = [];
   const furnitureUids = [];
   for (const line of cart) {

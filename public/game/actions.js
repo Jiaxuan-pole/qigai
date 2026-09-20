@@ -5,24 +5,24 @@ const act = (id, name, zone, energy, extra = {}) => ({ id, name, zone, energy, h
 
 export const ACTIONS = {
   // 工作
-  scavenge: act('scavenge', '分类回收', 'recycle', 14, { cash: 10, gain: { parts: 1, wood: 1 }, hygiene: -8, mind: -1, work: true, dirty: true, limit: 3, skill: 'scav', note: '收入10，零件+1、木料+1，卫生-8、精神-1。每天最多3个岗位。' }),
-  kitchen: act('kitchen', '早餐帮厨', 'market', 16, { cash: 12, foodGain: 2, mind: -1, work: true, allowed: [0], limit: 1, note: '收入12、得2份正餐（进营地箱）。仅清晨，全队每天1个岗位。' }),
+  scavenge: act('scavenge', '分类回收', 'recycle', 14, { cash: 5, gain: { parts: 1, wood: 1 }, hygiene: -8, mind: -1, work: true, dirty: true, limit: 2, skill: 'scav', note: '收入5，零件+1、木料+1，卫生-8、精神-1。每天最多2个岗位。' }),
+  kitchen: act('kitchen', '早餐帮厨', 'market', 16, { cash: 6, foodGain: 1, mind: -1, work: true, allowed: [0], limit: 1, note: '收入6、得1份正餐（进营地箱）。仅清晨，全队每天1个岗位。' }),
   beg: act('beg', '路边乞讨', 'pick', 8, { begging: true, limit: 3, skill: 'beg', note: '选一个街区，最多向3位路人求助。同一路人全队每天只问一次。' }),
-  bottles: act('bottles', '捡瓶罐', 'pick', 8, { bottles: true, hygiene: -4, limit: 3, skill: 'scav', note: '沿街捡饮料瓶和易拉罐（3—8个），到老周回收铺按1元/个卖。卫生-4，不占岗位。' }),
+  bottles: act('bottles', '捡瓶罐', 'pick', 8, { bottles: true, hygiene: -4, limit: 3, skill: 'scav', note: '沿街捡饮料瓶和易拉罐（2—5个），到老周回收铺按1元/个卖。卫生-4，不占岗位。' }),
   fish: act('fish', '河岸钓鱼', 'river', 20, { fishing: true, limit: 4, note: '河岸一小时，消耗1份鱼饵与20体力；当前操控角色咬钩后完成收线 QTE，队友自动收线，熟练度、鱼竿和天气影响咬钩。' }),
   cook: act('cook', '篝火加工', 'camp', 20, { cooking: true, note: '在营地用1份木炭加工1份生鱼或加热1份食物；从自己包或营地箱选原料。' }),
   soup: act('soup', '服务站免费餐', 'service', 4, { freeMeal: true, allowed: [0, 3], limit: 2, mind: -1, indoor: true, note: '排队领一份免费餐进自己包（全队每天2份），排队有点磨人：精神-1。' }),
   bins: act('bins', '翻垃圾桶', 'pick', 12, { bins: true, hygiene: -10, work: true, dirty: true, limit: 2, skill: 'scav', note: '市场/站前/回收巷可翻。可能翻到食物（不洁）、零件、布料，也可能空手。卫生-10。' }),
-  repair: act('repair', '基础维修', 'recycle', 18, { who: 'xuan', cash: 26, cost: { parts: 1 }, mind: -1, work: true, indoor: true, limit: 2, note: '收入26，零件-1、精神-1；店里提供工具。每天2单。' }),
-  table: act('table', '整理商户数据', 'recycle', 16, { who: 'xuan', cash: 28, mind: -2, work: true, complex: true, equip: ['computer'], indoor: true, limit: 1, note: '收入28、精神-2，使用唯一电脑；精神低于20不可接。每天1单。' }),
-  shoot: act('shoot', '商户宣传拍摄', 'market', 16, { who: 'fan', cash: 30, cost: { battery: 1 }, mind: -1, work: true, equip: ['camera'], limit: 1, note: '收入30，电量-1，使用相机。每天1单。' }),
+  repair: act('repair', '基础维修', 'recycle', 18, { who: 'xuan', cash: 13, cost: { parts: 1 }, mind: -1, work: true, indoor: true, limit: 2, note: '收入13，零件-1、精神-1；店里提供工具。每天2单。' }),
+  table: act('table', '整理商户数据', 'recycle', 16, { who: 'xuan', cash: 14, mind: -2, work: true, complex: true, equip: ['computer'], indoor: true, limit: 1, note: '收入14、精神-2，使用唯一电脑；精神低于20不可接。每天1单。' }),
+  shoot: act('shoot', '商户宣传拍摄', 'market', 16, { who: 'fan', cash: 15, cost: { battery: 1 }, mind: -1, work: true, equip: ['camera'], limit: 1, note: '收入15，电量-1，使用相机。每天1单。' }),
   interview: act('interview', '许可采访', 'cinema', 12, { who: 'fan', mind: 4, footage: 1, equip: ['camera'], cost: { battery: 1 }, limit: 1, note: '精神+4、许可素材+1，不直接挣钱。' }),
-  edit: act('edit', '剪辑小委托', 'cinema', 16, { who: 'fan', cash: 26, mind: -2, complex: true, work: true, equip: ['computer'], indoor: true, limit: 1, note: '收入26、精神-2；占唯一电脑。' }),
-  run: act('run', '街头跑腿', 'station', 18, { who: 'ma', cash: 19, mind: -1, work: true, limit: 3, skill: 'run', note: '收入19、精神-1。稳定劳动也能养活马哥。每天最多3次。' }),
-  carry: act('carry', '搬运短工', 'market', 24, { cash: 22, mind: -2, work: true, dirty: true, limit: 2, note: '收入22、精神-2；所有常规行动统一消耗20体力。每天2个岗位。' }),
-  coop: act('coop', '轩凡联合商户单', 'market', 20, { fixed: ['xuan', 'fan'], cash: 66, mind: -1, cost: { parts: 1, battery: 1 }, equip: ['computer', 'camera'], work: true, limit: 1, note: '轩哥+凡哥；团队收入66只算一次，零件1、电量1。' }),
-  trio: act('trio', '三人布场委托', 'cinema', 16, { min: 3, cash: 88, mind: -1, cost: { cash: 4 }, work: true, limit: 1, note: '三人同槽，返还收入88、支出4。' }),
-  danger: act('danger', '危棚翻找【危险】', 'recycle', 20, { cash: 24, mind: -2, gain: { wood: 2 }, risky: true, work: true, dirty: true, injury: [16, 32], wound: true, limit: 1, note: '确定受到16—32事故伤害并留下伤口，可能濒死！马哥事故减伤25%。' }),
+  edit: act('edit', '剪辑小委托', 'cinema', 16, { who: 'fan', cash: 13, mind: -2, complex: true, work: true, equip: ['computer'], indoor: true, limit: 1, note: '收入13、精神-2；占唯一电脑。' }),
+  run: act('run', '街头跑腿', 'station', 18, { who: 'ma', cash: 9, mind: -1, work: true, limit: 2, skill: 'run', note: '收入9、精神-1。稳定劳动也能养活马哥。每天最多2次。' }),
+  carry: act('carry', '搬运短工', 'market', 24, { cash: 11, mind: -2, work: true, dirty: true, limit: 2, note: '收入11、精神-2；所有常规行动统一消耗20体力。每天2个岗位。' }),
+  coop: act('coop', '轩凡联合商户单', 'market', 20, { fixed: ['xuan', 'fan'], cash: 33, mind: -1, cost: { parts: 1, battery: 1 }, equip: ['computer', 'camera'], work: true, limit: 1, note: '轩哥+凡哥；团队收入33只算一次，零件1、电量1。' }),
+  trio: act('trio', '三人布场委托', 'cinema', 16, { min: 3, cash: 44, mind: -1, cost: { cash: 4 }, work: true, limit: 1, note: '三人同槽，返还收入44、支出4。' }),
+  danger: act('danger', '危棚翻找【危险】', 'recycle', 20, { cash: 12, mind: -2, gain: { wood: 2 }, risky: true, work: true, dirty: true, injury: [16, 32], wound: true, limit: 1, note: '确定受到16—32事故伤害并留下伤口，可能濒死！马哥事故减伤25%。' }),
   // 生活维护
   rest: act('rest', '回营休息', 'camp', 0, { energyGain: 20, mind: 3, warm: 6, heal: 4, rest: true, note: '体力+20、精神+3、保暖+6、健康+4；不是濒死抢救。' }),
   sleep: act('sleep', '睡眠', 'camp', 0, { energyGain: 20, rest: true, note: '睡眠1小时，体力+20。' }),
@@ -47,14 +47,14 @@ export const ACTIONS = {
   aid: act('aid', '联系救助', 'service', 0, { downedOnly: true, aid: true, note: '濒死者可自行预约：首张救助券免费，之后每次20。' }),
   wait: act('wait', '濒死等待', 'camp', 0, { downedOnly: true, note: '不施救会继续消耗救援窗口；到期永久死亡。' }),
   // 卖艺与手艺（各有冷却，防刷）
-  phonestall: act('phonestall', '摆摊修手机', 'market', 12, { who: 'xuan', busking: 'phone', mind: 1, limit: 1, cooldownDays: 2, note: '市场口支个小摊帮人清后台、换贴膜：收入8—15随机，隔天一次。' }),
-  shellgame: act('shellgame', '猜球小摊', 'station', 10, { who: 'ma', busking: 'shell', limit: 1, cooldownDays: 2, note: '站口摆三只杯子猜球：收入6—20随机，20%被城管赶走（精神-3，当次白干）。隔天一次。' }),
+  phonestall: act('phonestall', '摆摊修手机', 'market', 12, { who: 'xuan', busking: 'phone', mind: 1, limit: 1, cooldownDays: 2, note: '市场口支个小摊帮人清后台、换贴膜：收入4—7随机，隔天一次。' }),
+  shellgame: act('shellgame', '猜球小摊', 'station', 10, { who: 'ma', busking: 'shell', limit: 1, cooldownDays: 2, note: '站口摆三只杯子猜球：收入3—10随机，20%被城管赶走（精神-3，当次白干）。隔天一次。' }),
   repair_item: act('repair_item', '修旧电器', 'pick', 10, { who: 'xuan', repairing: true, mind: 2, note: '修一件坏手机/坏收音机/坏耳机（各1零件），坏电视要营地修理桌+2零件。修好后决定卖、留、送。' }),
   facility: act('facility', '营地施工', 'camp', 10, { building: true, note: '给营地装一个功能位（修理桌/作品展架/晾晒架），占一格；材料见营地面板。' }),
   // 事件专用（由热点预约，不出现在普通列表）
   cards: act('cards', '付费牌局', 'station', 8, { cost: { cash: 10 }, gamble: true, leisure: true, eventOnly: true, wishExact: 'ma_cards', note: '入场10；马哥55%胜、15%平、30%负；返还20/10/0（含本金）。全队每日付费博彩2次。' }),
   observe: act('observe', '围观牌局', 'station', 4, { mind: 3, eventOnly: true, wishPartial: 'ma_cards', note: '不下注，看两把、聊两句。' }),
-  oddjob: act('oddjob', '临时短工', 'pick', 16, { cash: 26, mind: -1, work: true, eventOnly: true, note: '路人或告示给的一次性活。' }),
+  oddjob: act('oddjob', '临时短工', 'pick', 16, { cash: 13, mind: -1, work: true, eventOnly: true, note: '路人或告示给的一次性活。' }),
 };
 
 export const OUT_ZONES = ['market', 'recycle', 'station', 'cinema', 'service', 'cafe', 'furniture'];

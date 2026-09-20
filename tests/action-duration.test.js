@@ -15,16 +15,16 @@ function ready() {
   return state;
 }
 
-test('连续三小时回收每小时取得收入与消耗体力，不进入一次性 busy', () => {
+test('连续两小时回收每小时取得收入与消耗体力，不进入一次性 busy', () => {
   const input = ready();
-  let result = engine.assign(input, 'xuan', 6, 'scavenge', { duration: 3 });
+  let result = engine.assign(input, 'xuan', 6, 'scavenge', { duration: 2 });
   assert.equal(result.error, undefined);
-  for (let hour = 0; hour < 3; hour++) {
+  for (let hour = 0; hour < 2; hour++) {
     assert.equal(result.state.plan.xuan[hour]?.id, 'scavenge');
     assert.equal(result.state.plan.xuan[hour]?.hours, 1);
     result = settle(result.state);
     assert.equal(result.error, undefined);
-    assert.equal(result.state.cash, 72 + 10 * (hour + 1));
+    assert.equal(result.state.cash, 72 + 5 * (hour + 1));
     assert.equal(result.state.actors.xuan.energy, 100 - 20 * (hour + 1));
     assert.equal(result.state.busy.xuan, null);
   }
@@ -125,7 +125,7 @@ test('行动预估运行真实逐小时结算，保留精神延迟并计算个�
   state.flags.trialPassed = true;
   const work = engine.actionEstimate(state, 'xuan', 'repair', 2);
   assert.equal(work.error, undefined);
-  assert.equal(work.cash, 60);
+  assert.equal(work.cash, 30);
   assert.equal(work.energy, -40);
   assert.equal(work.mind, 0);
   assert.equal(work.pendingMind, -2);

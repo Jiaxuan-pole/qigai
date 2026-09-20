@@ -110,7 +110,7 @@ async function handleApi(req, res, urlPath) {
     if (urlPath === '/api/autoplan') {
       const err = checkAutoPlanContext(body);
       if (err) return json(res, 400, { ok: false, reason: err });
-      const { text, ms } = await complete(AUTOPLAN_SYSTEM, JSON.stringify(body), { timeoutMs: 20000 });
+      const { text, ms } = await complete(AUTOPLAN_SYSTEM, JSON.stringify(body), { timeoutMs: 35000 });
       const payload = extractJson(text);
       if (!validateAutoPlanPayload(payload, body)) return json(res, 200, { ok: false, reason: 'AI 排程输出无效，请重试。', ms });
       return json(res, 200, { ok: true, payload, ms });

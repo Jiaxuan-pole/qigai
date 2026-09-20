@@ -5,6 +5,7 @@ import { actionEstimate, available, reserve, SLOTS, NAMES, IDS, alive, active, w
 import { wishSummary, activeWishes } from '../game/wishes.js';
 import { diseaseLabel } from '../game/health.js';
 import { forecast, chapterOf, dayNode, weatherOf } from '../game/story.js';
+import { windowLabel } from '../game/headlines.js';
 import { shopClosedReason, shopDef } from '../game/shop.js';
 import { morningLine } from '../game/text.js';
 import { portrait, moodOf } from './pixel.js';
@@ -12,6 +13,7 @@ import { updateOverlay, setMapState } from './map.js';
 import { DAY_END_HOUR, currentTask, planIndex, slotOfHour } from '../game/clock.js';
 import { fishingGear } from '../game/fishing.js';
 import { setPlannerWindowOpen } from './planner-window.js';
+import { renderHotbar } from './hotbar.js';
 
 const COLORS = { xuan: 'var(--x)', fan: 'var(--f)', ma: 'var(--m)' };
 const ROLES = { xuan: '程序员 / 爱玩烂梗', fan: '电影导演 / 爱涂鸦', ma: '跑腿短工 / 好赌命硬' };
@@ -31,6 +33,7 @@ export function renderAll() {
   UI.sel.hour = s.hour;
   renderTop(s);
   renderCharacters(s);
+  renderHotbar(s, UI.sel.actor);
   renderMap(s);
   renderDrawer(s);
   renderSchedule(s);
@@ -53,7 +56,8 @@ function renderTop(s) {
   $('tCareChip').classList.toggle('hidden', care === 0);
   const ch = chapterOf(displayDay);
   const node = dayNode(displayDay);
-  $('chapterLine').innerHTML = `<span class="dot"></span>第${ch.number}章 · ${esc(ch.title)} <span class="muted">｜ D${displayDay} ${esc(node?.title || '')} ｜ ${esc(node?.worldNote || '')}</span> <span class="muted">｜ 预报：${forecast(s.seed, displayDay).map((f) => 'D' + f.day + f.label).join(' ')}</span>`;
+  const headline = s.flags.headline?.day === displayDay ? `<span class="headline-today">今日事：${esc(s.flags.headline.title)}</span> ` : '';
+  $('chapterLine').innerHTML = `<span class="dot"></span>第${ch.number}章 · ${esc(ch.title)} ${headline}<span class="muted">｜ D${displayDay} ${esc(node?.title || '')} ｜ ${esc(node?.worldNote || '')}</span> <span class="muted">｜ 预报：${forecast(s.seed, displayDay).map((f) => 'D' + f.day + f.label).join(' ')}</span>`;
 }
 
 function card(s, id) {
@@ -115,7 +119,7 @@ function renderMap(s) {
   if (!UI.night) $('mapTitle').textContent = `雾城 · ${UI.data.districts.length}个街区`;
   const shops = UI.data.shops.map((sh) => ({ id: sh.id, name: sh.name, district: sh.district, unlockDay: sh.unlockDay, closed: shopClosedReason(s, sh.id, s.slot) }));
   const districts = UI.data.districts.map((d) => ({ id: d.id, name: d.name }));
-  const evs = s.events.filter((e) => e.status === 'open' || e.status === 'reserved').map((e, i) => ({ uid: e.uid, title: e.title + (e.status === 'reserved' ? '（已预约）' : ''), district: e.district, left: e.expiresTurn - s.turn, i }));
+  const evs = s.events.filter((e) => e.status === 'open' || e.status === 'reserved').map((e, i) => ({ uid: e.uid, title: e.title + (e.status === 'reserved' ? '（已预约）' : ''), district: e.district, left: windowLabel(e, s), i }));
   updateOverlay(s, UI.sel, shops, districts, evs);
   $('eventCount').textContent = String(evs.length);
   const speakerId = UI.sel.actor && s.actors[UI.sel.actor].life === 'active' ? UI.sel.actor : active(s)[0];

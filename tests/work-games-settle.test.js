@@ -22,10 +22,10 @@ function schedule(s, id, action, options = {}) {
 
 test('固定工资十一种行动只给受控者一局且基础工资照发', () => {
   const cases = [
-    ['scavenge', 'xuan', 10], ['kitchen', 'fan', 12], ['repair', 'xuan', 26],
-    ['table', 'xuan', 28], ['shoot', 'fan', 30], ['edit', 'fan', 26],
-    ['run', 'ma', 19], ['carry', 'ma', 22], ['coop', 'xuan', 66],
-    ['trio', 'xuan', 88], ['danger', 'ma', 24],
+    ['scavenge', 'xuan', 5], ['kitchen', 'fan', 6], ['repair', 'xuan', 13],
+    ['table', 'xuan', 14], ['shoot', 'fan', 15], ['edit', 'fan', 13],
+    ['run', 'ma', 9], ['carry', 'ma', 11], ['coop', 'xuan', 33],
+    ['trio', 'xuan', 44], ['danger', 'ma', 12],
   ];
   for (const [action, actor, pay] of cases) {
     let s = setup(802);
@@ -44,7 +44,7 @@ test('固定工资十一种行动只给受控者一局且基础工资照发', ()
 });
 
 test('团队只弹一局并保留原工资', () => {
-  for (const [action, pay] of [['coop', 66], ['trio', 88]]) {
+  for (const [action, pay] of [['coop', 33], ['trio', 44]]) {
     let s = setup(803);
     s = schedule(s, 'xuan', action, action === 'trio' ? { participants: ['xuan', 'fan', 'ma'] } : {});
     const r = settle(s, { controlledActorId: 'fan' });
@@ -71,8 +71,8 @@ test('非受控劳动不阻塞且可推进', () => {
 
 test('实际合同加成进入基础工资，瓶罐收集只锁零基价', () => {
   for (const [action, actor, flag, base] of [
-    ['repair', 'xuan', 'trialPassed', 30], ['shoot', 'fan', 'xuContract', 38],
-    ['run', 'ma', 'chenFixedRun', 22],
+    ['repair', 'xuan', 'trialPassed', 15], ['shoot', 'fan', 'xuContract', 19],
+    ['run', 'ma', 'chenFixedRun', 11],
   ]) {
     let s = setup(805); s.flags[flag] = true; s = schedule(s, actor, action);
     const r = settle(s, { controlledActorId: actor });
@@ -81,7 +81,7 @@ test('实际合同加成进入基础工资，瓶罐收集只锁零基价', () =>
   let cart = setup(809);
   makeItem(cart, 'cart', 'ma');
   cart = schedule(cart, 'ma', 'carry');
-  assert.equal(settle(cart, { controlledActorId: 'ma' }).state.pending.workGames[0].basePay, 28);
+  assert.equal(settle(cart, { controlledActorId: 'ma' }).state.pending.workGames[0].basePay, 14);
   let s = setup(806);
   s = schedule(s, 'xuan', 'bottles', { zone: 'market' });
   const r = settle(s, { controlledActorId: 'xuan' });
@@ -99,7 +99,7 @@ test('自动单人收入与零收入行动逐项进入日报', () => {
   assert.equal(r.error, undefined);
   const items = r.state.daily.report.activities;
   assert.equal(items.length, 2);
-  assert.equal(items.find(item => item.actorId === 'fan').income, 10);
+  assert.equal(items.find(item => item.actorId === 'fan').income, 5);
   assert.equal(items.find(item => item.actorId === 'fan').label, '分类回收');
   assert.equal(items.find(item => item.actorId === 'xuan'), undefined);
   assert.equal(items.find(item => item.actorId === 'ma').income, 0);
@@ -115,12 +115,13 @@ test('夜间日报只结算一次并在新日建立新快照', () => {
   assert.equal(r.state.lastDayReport.activities.length, 2);
   const shared = r.state.lastDayReport.activities.find(item => item.sourceUid.endsWith(':coop'));
   assert.deepEqual(shared.participants, ['xuan', 'fan']);
-  assert.equal(shared.income, 66);
-  assert.equal(r.state.lastDayReport.totalAutoIncome, 66);
+  assert.equal(shared.income, 33);
+  assert.equal(r.state.lastDayReport.totalAutoIncome, 33);
   assert.equal(r.state.day, 6);
   assert.equal(r.state.daily.report.day, 6);
   assert.equal(r.state.daily.report.partial, false);
   assert.equal(r.state.daily.report.activities.length, 0);
   assert.equal(r.state.pending.workGames.length, 1);
-  assert.match(settle(r.state, { controlledActorId: 'xuan' }).error, /工作挑战/);
+  // 新一天清晨会先弹今日事；这里只验工作挑战本身会挡住推进，所以先把晨间节点清掉。
+  assert.match(settle({ ...r.state, pendingMorning: null }, { controlledActorId: 'xuan' }).error, /工作挑战/);
 });

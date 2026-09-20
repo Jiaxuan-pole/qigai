@@ -8,7 +8,7 @@ import { makeItem, itemsIn, consumeUse, eatOne, discardExpired, hasDevice, FOOD_
 import { restockMorning, validateCart, executeCart, shopClosedReason, shopDef } from './shop.js';
 import { generateMorningWishes, tickWishes, fulfillWish } from './wishes.js';
 import { fulfillItemWish, fulfillReachedItemWishes } from './item-wishes.js';
-import { addDisease, progressDiseases, mentalTick, nightExposure } from './health.js';
+import { addDisease, progressDiseases, mentalTick, nightExposure, DISEASES } from './health.js';
 import { begAt, digBins, collectBottles, passersby, relation } from './npcs.js';
 import { beginSession, autoResolve as begAuto } from './beg.js';
 import { noteAction, tickFavors } from './favors.js';
@@ -22,6 +22,7 @@ import { binsAvailable } from './npcs.js';
 import { forecast } from './story.js';
 import { directorTick, settleReserved, misfortuneLine } from './events.js';
 import { weatherOf, morningNode, nightScripted, computeEnding } from './story.js';
+import { expireTimedEvents } from './headlines.js';
 import { generateFace } from './tickets.js';
 import { fish, fishingGear, autoResolveFishingQte } from './fishing.js';
 import { planIndex, slotOfHour } from './clock.js';
@@ -34,6 +35,8 @@ import { sleepSurfaceFor } from './furniture.js';
 import { awardTableMeal } from './furniture-effects.js';
 
 const R = () => getData().rules;
+// 烟酒不设次数上限；过量的代价是夜里按可复现随机判定生病。概率是虚构参数，策划文件未定。
+export const HABIT_RISK = { smokeSafePerDay: 15, smokeSickChance: 0.35, hangoverSickChance: 0.3 };
 
 export function units(s) {
   const result = [], seen = new Set();
@@ -83,12 +86,13 @@ export function preflight(s) {
     if ((t.hours ?? a?.hours ?? 1) > 22 - s.hour) return { error: '任务时长超过今天剩余小时。', ...where };
     if (!a) return { error: '行动不存在。', ...where };
     if (a.allowed && !a.allowed.includes(s.slot)) return { error: a.name + '不在当前时段开放。', ...where };
+    if (t.id === 'kitchen' && s.flags.liuClosedDay === s.day) return { error: '刘姐今天没开摊。', ...where };
     if (a.risky && s.turn < 3) return { error: '教学阶段不开放危险作业。', ...where };
     if (a.fixed && a.fixed.slice().sort().join() !== t.participants.slice().sort().join()) return { error: '职业合作参与者不正确。', ...where };
     if (a.min && t.participants.length !== a.min) return { error: a.name + '需要' + a.min + '人。', ...where };
     if (!a.min && !a.fixed && (t.participants.length !== 1 || t.participants[0] !== id)) return { error: '单人行动的参与者错误。', ...where };
     if (a.rescue && (!t.target || !t.participants.includes(t.target) || s.actors[t.target].life !== 'downed')) return { error: '救援目标已变化，请重排。', ...where };
-    if (a.eventOnly) { const ev = s.events.find((e) => e.uid === t.eventUid); if (!ev || ev.status !== 'reserved' || s.turn >= ev.expiresTurn) return { error: '「' + a.name + '」对应的机会已经过期，请重排这一格。', ...where }; }
+    if (a.eventOnly) { const ev = s.events.find((e) => e.uid === t.eventUid); if (!ev || ev.status !== 'reserved' || s.turn >= ev.expiresTurn || (ev.window && (s.hour < ev.window.from || s.hour >= ev.window.to))) return { error: '「' + a.name + '」对应的机会已经过期，请重排这一格。', ...where }; }
     if (a.casinoVisit) {
       if (t.zone !== 'cardhall') return { error: '去棋牌馆必须在棋牌馆街区。', ...where };
       if (s.hour > a.latestStartHour) return { error: '棋牌馆最晚20点入馆，避免跨夜移位。', ...where };
@@ -277,7 +281,7 @@ export function settle(input, { controlledActorId = null } = {}) {
     const repairNow = completing.some((j) => j.task.id === 'repair' && j.task.participants.includes('xuan'));
     if (repairNow && prior.xuan?.id === 'repair' && prior.xuan.hour === hour - 1 && !s.flags.trialPassed) {
       s.flags.trialPassed = true;
-      events.push('轩哥连续两小时试工通过：老周给了固定维修位，之后每单维修多4。');
+      events.push('轩哥连续两小时试工通过：老周给了固定维修位，之后每单维修多2。');
     }
     const interviewNow = completing.some((j) => j.task.id === 'interview' && j.task.participants.includes('fan'));
     if (interviewNow && s.actors.ma.life === 'active' && (s.actors.ma.location === 'cinema' || completing.some((j) => j.task.participants.includes('ma') && j.task.zone === 'cinema')) && !s.flags.interviewDone) {
@@ -308,12 +312,12 @@ export function settle(input, { controlledActorId = null } = {}) {
     if (a.rescue) recover(s, t.target, events);
     let pay = t.pay ?? a.cash ?? 0;
     // D45 试工通过后，回收巷的老周给轩哥固定维修位：每单多 4。
-    if (t.id === 'repair' && s.flags.trialPassed) pay += 4;
+    if (t.id === 'repair' && s.flags.trialPassed) pay += 2;
     // 熟人委托解锁的加成。
-    if (t.id === 'run' && s.flags.chenFixedRun) pay += 3;
-    if (t.id === 'shoot' && s.flags.xuContract) pay += 8;
-    if (t.id === 'oddjob' && id === 'ma' && t.zone === 'station' && s.flags.chenNightWatch) pay += 10;
-    if (t.id === 'carry' && s.items.some((x) => x.itemId === 'cart' && x.container === id)) pay += 6;
+    if (t.id === 'run' && s.flags.chenFixedRun) pay += 2;
+    if (t.id === 'shoot' && s.flags.xuContract) pay += 4;
+    if (t.id === 'oddjob' && id === 'ma' && t.zone === 'station' && s.flags.chenNightWatch) pay += 5;
+    if (t.id === 'carry' && s.items.some((x) => x.itemId === 'cart' && x.container === id)) pay += 3;
     if (pay) { s.cash += pay; income += pay; taskIncome += pay; }
     for (const [k, v] of Object.entries(a.gain || {})) s[k] += v;
     if (a.foodGain) { const n = a.foodGain + (t.id === 'kitchen' && s.flags.liuBonusMeal ? 1 : 0); for (let i = 0; i < n; i++) makeItem(s, 'meal', 'camp'); }
@@ -336,9 +340,9 @@ export function settle(input, { controlledActorId = null } = {}) {
       s.flags.cooldown = s.flags.cooldown || {};
       s.flags.cooldown[t.id] = s.day + a.cooldownDays;
       const r = rng(s.seed, `busk:${T}:${id}`);
-      if (a.busking === 'phone') { const cash = 8 + Math.floor(r * 8); s.cash += cash; income += cash; taskIncome += cash; events.push(`轩哥的修手机小摊今天来了${2 + Math.floor(r * 4)}个人，收入${cash}。`); }
+      if (a.busking === 'phone') { const cash = 4 + Math.floor(r * 4); s.cash += cash; income += cash; taskIncome += cash; events.push(`轩哥的修手机小摊今天来了${2 + Math.floor(r * 4)}个人，收入${cash}。`); }
       else if (r < 0.2) { const p = s.actors[id]; p.mind = clamp(p.mind - 3); events.push('马哥的杯子刚摆好就被城管赶了，白忙一场，精神-3。'); }
-      else { const cash = 6 + Math.floor(r * 15); s.cash += cash; income += cash; taskIncome += cash; s.flags.gambles = (s.flags.gambles || 0); events.push(`马哥的猜球小摊收了${cash}块，有个大爷连猜三次都没中。`); }
+      else { const cash = 3 + Math.floor(r * 8); s.cash += cash; income += cash; taskIncome += cash; s.flags.gambles = (s.flags.gambles || 0); events.push(`马哥的猜球小摊收了${cash}块，有个大爷连猜三次都没中。`); }
     }
     if (a.bins) {
       const avail = binsAvailable(s, t.zone).filter((b) => !b.used).slice(0, 2);
@@ -367,7 +371,7 @@ export function settle(input, { controlledActorId = null } = {}) {
     if (a.wash) { const p = s.actors[id]; let gain = a.hygiene; const soap = itemsIn(s, id, 'soap')[0]; if (soap) { consumeUse(s, soap.uid); gain = 25; } if (itemsIn(s, id, 'towel')[0]) gain += 5; p.hygiene = clamp(p.hygiene + gain); events.push(`${NAMES[id]}在水点洗漱，卫生+${gain}${soap ? '（用了肥皂）' : ''}。`); }
     if (a.laundry) { const p = s.actors[id]; if (a.needs) { const det = s.items.find((x) => x.itemId === 'detergent' && (x.container === id || x.container === 'camp')); if (det) consumeUse(s, det.uid); } p.clothes = { dirty: false, wet: true, dirtyDays: 0 }; fulfillWish(s, id, 'clean_clothes_wish', 'partial', events); if (a.hygiene >= 55) { p.hygiene = clamp(p.hygiene + a.hygiene); events.push(`${NAMES[id]}洗了澡也洗了衣服：卫生+${a.hygiene}，衣服今晚是湿的。`); } else events.push(`${NAMES[id]}洗了衣服，晾着，今晚是湿的。`); }
     if (a.campClean) { let n = a.campClean; const bag = s.items.find((x) => x.itemId === 'trash_bag' && x.container === 'camp'); if (bag) { consumeUse(s, bag.uid); n += 20; } s.camp.dirt = clamp(s.camp.dirt - n); events.push(`营地整理：脏污-${n}，现在${s.camp.dirt}。`); }
-    if (a.clinic) { const p = s.actors[id]; if (s.flags.wangHalfClinic && (a.cost?.cash || 0) > 0 && t.costOverride === null && s.flags.freePlanDay !== s.day) { s.cash += 9; expense -= 9; events.push('王叔打过招呼：诊所评估半价。'); } if (s.flags.freePlanDay === s.day && (a.cost?.cash || 0) > 0 && t.costOverride === null) { s.cash += a.cost.cash; expense -= a.cost.cash; events.push('第57天复查日：诊所评估免费。'); } const d = p.diseases.find((x) => !x.known) || p.diseases.find((x) => !x.plan); if (d) { d.known = true; d.plan = true; events.push(`诊所评估：${NAMES[id]}确诊${d.kind === 'gut' ? '肠胃不适' : d.kind === 'skin' ? '皮肤感染' : d.kind === 'wound' ? '伤口感染' : '受寒虚弱'}，已建立治疗计划，计划用品可生效。`); } else events.push(`诊所评估：${NAMES[id]}没有需要建立计划的病情。`); }
+    if (a.clinic) { const p = s.actors[id]; if (s.flags.wangHalfClinic && (a.cost?.cash || 0) > 0 && t.costOverride === null && s.flags.freePlanDay !== s.day) { s.cash += 9; expense -= 9; events.push('王叔打过招呼：诊所评估半价。'); } if (s.flags.freePlanDay === s.day && (a.cost?.cash || 0) > 0 && t.costOverride === null) { s.cash += a.cost.cash; expense -= a.cost.cash; events.push('第57天复查日：诊所评估免费。'); } const d = p.diseases.find((x) => !x.known) || p.diseases.find((x) => !x.plan); if (d) { d.known = true; d.plan = true; events.push(`诊所评估：${NAMES[id]}确诊${DISEASES[d.kind]?.name || d.kind}，已建立治疗计划，计划用品可生效。`); } else events.push(`诊所评估：${NAMES[id]}没有需要建立计划的病情。`); }
     if (a.needs === 'paint') { const paint = s.items.find((x) => x.itemId === 'paint' && x.container === id); if (paint) consumeUse(s, paint.uid); s.flags.wallPermit = false; }
     if (a.wishExact) for (const m of t.participants) fulfillWish(s, m, a.wishExact, 'exact', events);
     if (a.wishPartial) for (const m of t.participants) fulfillWish(s, m, a.wishPartial, 'partial', events);
@@ -427,7 +431,8 @@ export function settle(input, { controlledActorId = null } = {}) {
     if (s.actors[id].life === 'active') fulfillReachedItemWishes(s, id, events);
     if (before !== s.actors[id].location) moves.push({ actorId: id, from: before, to: s.actors[id].location });
   }
-  settleReserved(s, zones, events);
+  settleReserved(s, zones, events, new Set(completedJobs.map((j) => j.task.eventUid).filter(Boolean)));
+  expireTimedEvents(s, day, hour + 1, events);
   s.daily.orders = check.counts;
   s.hourTick += 1;
   const casinoVisit = completedJobs.find((job) => job.action.casinoVisit);
@@ -546,7 +551,8 @@ function settleNight(s, day, wx, events) {
     if (p.life === 'active') {
       const dryBed = sleepSurfaces[id]?.kind === 'bed' || sleepSurfaces[id]?.kind === 'shelter';
       const blanket = blanketOf[id];
-      if (p.intox >= 2) p.hangoverDay = day + 1;
+      if (p.intox >= 2) { p.hangoverDay = day + 1; if (!(p.immune.gut > day) && rng(s.seed, `hangover:${day}:${id}`) < HABIT_RISK.hangoverSickChance) addDisease(s, id, 'gut', 15, '醉酒', events); }
+      if (p.smokes > HABIT_RISK.smokeSafePerDay && !(p.immune.cough > day) && rng(s.seed, `smoke:${day}:${id}`) < HABIT_RISK.smokeSickChance && addDisease(s, id, 'cough', 15, '抽烟过量', events)) events.push(`${NAMES[id]}今天抽了${p.smokes}次烟，夜里咳得停不下来。`);
       p.energy = p.hangoverDay === day + 1 ? 80 : 100;
       p.mind = clamp(p.mind + (dryBed ? 3 : 1) - (shelter ? 1 : 0));
       if (shelter) p.warmth = clamp(p.warmth + 10);
@@ -569,7 +575,7 @@ function settleNight(s, day, wx, events) {
       p.location = shelter ? 'service' : spot === 'station' ? 'station' : 'camp';
       if (p.life === 'active') fulfillReachedItemWishes(s, id, events);
     }
-    p.intox = 0; p.smokes = 0; p.jokeUsed = false; p.coffeeNight = false; p.grief = Math.max(0, p.grief - 1);
+    p.intox = 0; p.smokes = 0; p.drinks = 0; p.jokeUsed = false; p.coffeeNight = false; p.grief = Math.max(0, p.grief - 1);
   }
   // 篝火：营地过夜时烧燃料取暖（纸板优先）；晾晒架让湿东西一晚必干。
   let fire = false;

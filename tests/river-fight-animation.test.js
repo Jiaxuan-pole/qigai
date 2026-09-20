@@ -65,10 +65,19 @@ test('河岸、水面、鱼、人物和入水水花在相应帧都有可见像�
   drawRiverFightScene(swimA, { choreo: riverFightChoreo(10800, 8), tick: 8 });
   drawRiverFightScene(swimB, { choreo: riverFightChoreo(11600, 9), tick: 9 });
 
-  for (const color of ['#397c93', '#c9ad74', '#d7b46b', '#252b2e', '#626b70', '#d8d6cf']) {
+  // 河水、钓台木板、河堤石面、鱼、马哥的衣裤鞋：旧桥河岸首帧必须同时出现
+  for (const color of ['#587c83', '#9d835c', '#31474b', '#d7b46b', '#252b2e', '#626b70', '#d8d6cf']) {
     assert.ok(empty.pixels.some((pixel) => pixel.color === color), `河岸首帧缺少 ${color}`);
   }
-  assert.ok(splash.pixels.some((pixel) => pixel.color === '#b9e9ed'), '入水帧必须有大水花');
+  for (const frame of [empty, splash, swimA, swimB]) {
+    for (const sand of ['#c9ad74', '#dec98c', '#8b754c']) {
+      assert.ok(!frame.pixels.some((pixel) => pixel.color === sand), `旧桥河岸不该再出现沙滩色 ${sand}`);
+    }
+  }
+  assert.ok(splash.pixels.some((pixel) => pixel.color === '#d8e6e2'), '入水帧必须有大水花');
+  const shirtAt = swimA.pixels.findIndex((pixel) => pixel.color === '#252b2e');
+  assert.ok(shirtAt >= 0, '游泳帧要画出马哥');
+  assert.ok(swimA.pixels.slice(shirtAt).some((pixel) => pixel.color === '#587c83' && pixel.y >= 130), '游泳时河水要盖在身体上，只露出脑袋');
   const fishA = swimA.pixels.find((pixel) => pixel.color === '#d7b46b' && pixel.y > 130);
   const fishB = swimB.pixels.find((pixel) => pixel.color === '#d7b46b' && pixel.y > 130);
   assert.notDeepEqual([fishA?.x, fishA?.y], [fishB?.x, fishB?.y], '鱼躲窜时位置应改变');

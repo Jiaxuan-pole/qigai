@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { neighbors, walkStep, StreetJourney } from '../public/ui/street.js';
 import { drawStreet, STREET_NAMES } from '../public/ui/street-art.js';
-import { initMap, setMapState, setActorPose, setMapMode, viewStreet } from '../public/ui/map.js';
+import { initMap, setMapState, setActorPose, setMapMode, viewStreet, edgeNeighbor } from '../public/ui/map.js';
 
 test('ten districts have reciprocal exits including the river bank, cafe and furniture city', () => {
   assert.equal(Object.keys(neighbors).length, 10);
@@ -11,6 +11,29 @@ test('ten districts have reciprocal exits including the river bank, cafe and fur
   for (const [from, exits] of Object.entries(neighbors)) {
     for (const to of exits) assert.ok(neighbors[to].includes(from), `${from} -> ${to}`);
   }
+});
+
+test('walking off a street edge picks the most horizontal neighbor on that side, or none', () => {
+  assert.equal(edgeNeighbor('camp', 'right'), 'market');
+  assert.equal(edgeNeighbor('camp', 'left'), null);
+  assert.equal(edgeNeighbor('market', 'left'), 'camp');
+  assert.equal(edgeNeighbor('market', 'right'), 'station');
+  assert.equal(edgeNeighbor('station', 'left'), 'market');
+  assert.equal(edgeNeighbor('station', 'right'), null);
+  assert.equal(edgeNeighbor('recycle', 'right'), 'furniture');
+  assert.equal(edgeNeighbor('furniture', 'right'), 'service');
+  assert.equal(edgeNeighbor('service', 'left'), 'furniture');
+  assert.equal(edgeNeighbor('cinema', 'left'), 'cafe');
+  assert.equal(edgeNeighbor('cinema', 'right'), 'cardhall');
+  assert.equal(edgeNeighbor('cardhall', 'left'), 'cinema');
+  assert.equal(edgeNeighbor('river', 'left'), 'camp');
+  assert.equal(edgeNeighbor('river', 'right'), 'market');
+  assert.equal(edgeNeighbor('cafe', 'right'), 'cinema');
+  for (const [from, edge] of Object.entries(neighbors).flatMap(([d]) => [[d, 'left'], [d, 'right']])) {
+    const to = edgeNeighbor(from, edge);
+    if (to) assert.ok(neighbors[from].includes(to), `${from} ${edge} -> ${to} must be adjacent`);
+  }
+  assert.equal(edgeNeighbor('market', null), null);
 });
 
 test('direct walking stays within the street and only exposes exits at an edge', () => {
